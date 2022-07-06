@@ -5,19 +5,35 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>Map test</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Map Web</title>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="external_libs/bootstrap/css/bootstrap.min.css"/>
+    <script src="external_libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Leaflet -->
     <link rel="stylesheet" href="external_libs/leaflet/leaflet.css"/>
     <script src="external_libs/leaflet/leaflet.js"></script>
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-    <h1>Map test</h1>
-    <div id="map"></div>
+    
+    <div class="container">
+        <div class="row">
+            <h1>Map Web</h1>
+            <div id="map"></div>
+        </div>
+        <div class="row">
+            <h2>Aktivní vrstvy</h2>
+            <div class="list-group" id="layersList"></div>
+        </div>
+    </div>
+
     <div id="layers">
-        <h2>Aktivní vrstvy</h2>
-        <ul id="layersList">
-        </ul>
+        
     </div>
     <script src="index.js"></script>
 </body>
