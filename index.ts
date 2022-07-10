@@ -73,39 +73,81 @@ class MapRoad implements MapEntity {
     }
 }
 
+class MapArea implements MapEntity {
+    private points: L.LatLng[];
+    private popupMsg: string;
+    // private color: string;
+    // private opacity: number;
+
+    public constructor(points: L.LatLng[],
+        popupMsg: string
+        // color: string = "red",
+        // opacity: number = 0.5,
+        ) {
+        this.points = points;
+        this.popupMsg = popupMsg;
+        // this.color = color;
+        // this.opacity = opacity;
+    }
+
+    public GetMapEntity(): L.Polygon {
+        var polygon = L.polygon(this.points);
+        polygon.bindPopup(this.popupMsg);
+        return polygon;
+    }
+}
+
 class MapLayer {
     private layerMarkers: MapMarker[];
     private layerRoads: MapRoad[];
-    public layerGroup: L.LayerGroup;
+    private layerAreas: MapArea[];
+    private layerGroup: L.LayerGroup;
+    public activeLayerGroup: L.LayerGroup;
     public layerName: string;
     private isActive: boolean = false;
 
-    public constructor(markers: MapMarker[], roads: MapRoad[], name: string) {
+    public constructor(markers: MapMarker[], roads: MapRoad[], areas: MapArea[], name: string) {
         this.layerMarkers = markers;
         this.layerRoads = roads;
+        this.layerAreas = areas;
         this.layerName = name;
-        this.CreateLayerGroup()
+        this.CreateLayerGroup();
     }
 
     public AddMapMarker(marker: MapMarker) {
         this.layerMarkers.push(marker);
+        this.CreateLayerGroup()
     }
 
     public AddMapRoad(road: MapRoad) {
         this.layerRoads.push(road);
+        this.CreateLayerGroup()
+    }
+
+    public AddMapArea(area: MapArea) {
+        this.layerAreas.push(area);
+        this.CreateLayerGroup()
     }
 
     public GetAndToggleActiveState() {
         this.isActive = !this.isActive;
         return !this.isActive;
-    } 
+    }
 
-    private CreateLayerGroup() {
-        var mapEntities: (L.Marker | L.Polyline)[] = [];
+    public GetLayerGroup() {
+        this.activeLayerGroup = this.layerGroup;
+        return this.activeLayerGroup;
+    }
+
+    public CreateLayerGroup() {
+        var mapEntities: (L.Marker | L.Polyline | L.Polygon)[] = [];
         this.layerMarkers.forEach(m => {
             mapEntities.push(m.GetMapEntity());
         });
         this.layerRoads.forEach(r => {
+            mapEntities.push(r.GetMapEntity());
+        });
+        this.layerAreas.forEach(r => {
             mapEntities.push(r.GetMapEntity());
         });
 
@@ -123,7 +165,7 @@ class GhostMapLayer {
     }
 
     public Download(): MapLayer {
-        return new MapLayer([], [], this.layerName);
+        return new MapLayer([], [], [], this.layerName);
     }
 }
 
@@ -250,9 +292,9 @@ class MapWindow {
 
     RenderMapLayer(mapLayer: MapLayer, render: boolean = true) {
         if (render)
-            mapLayer.layerGroup.addTo(this.map);
+            mapLayer.GetLayerGroup().addTo(this.map);
         else
-            this.map.removeLayer(mapLayer.layerGroup);
+            this.map.removeLayer(mapLayer.activeLayerGroup);
     }
 }
 
@@ -263,7 +305,7 @@ let myPoints = new MapLayer([
     new MapMarker(new L.LatLng(49.86, 15.512), "This is a popup #2"),
     new MapMarker(new L.LatLng(49.86, 15.513), "This is a popup #3"),
     new MapMarker(new L.LatLng(49.86, 15.514), "This is a popup #4")
-], [], "Moje body #1");
+], [], [], "Moje body #1");
 
 app.AddMapLayer(myPoints);
 
@@ -280,7 +322,7 @@ let myRoads = new MapLayer([], [
         new L.LatLng(49.858, 15.513),
         new L.LatLng(49.859, 15.514)
     ], "This is a road popup #2!")
-], "Moje cesty #1");
+], [], "Moje cesty #1");
 
 app.AddMapLayer(myRoads);
 
@@ -289,4 +331,17 @@ let apiLayer2 = new GhostMapLayer("Moje cesty z externího API 2", "http://api.c
 app.AddGhostMapLayer(apiLayer);
 app.AddGhostMapLayer(apiLayer2);
 
-ApiComms.GetRequestAsync("https://catfact.ninja/fact", console.log);
+// ApiComms.GetRequestAsync("https://catfact.ninja/fact", console.log);
+
+let myAreas = new MapLayer([], [], [], "Prostory");
+
+let mySquare = new MapArea([
+    new L.LatLng(48.531615, 12.060621),
+    new L.LatLng(48.531615, 12.101603),
+    new L.LatLng(48.558746, 12.101603),
+    new L.LatLng(48.558746, 12.060621),
+], "something");
+
+app.AddMapLayer(myAreas);
+myAreas.AddMapArea(mySquare);
+
