@@ -1,3 +1,14 @@
+import 'bootstrap/dist/css/bootstrap.min.css';
+
+import * as L from "leaflet";
+import 'leaflet/dist/leaflet.css';
+delete L.Icon.Default.prototype['_getIconUrl' as any as keyof L.Icon.Default];
+L.Icon.Default.mergeOptions({
+    iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png').default,
+    iconUrl: require('leaflet/dist/images/marker-icon.png').default,
+    shadowUrl: require('leaflet/dist/images/marker-shadow.png').default
+});
+
 // JS Requests: https://stackoverflow.com/questions/247483/http-get-request-in-javascript
 class ApiComms {
     static GetRequest(url: string) {
@@ -201,36 +212,6 @@ class App {
         this.RenderLayerList();
     }
 
-    private RenderLayerList() {
-        const layersList = document.getElementById("layersList");
-        layersList.innerHTML = "";
-
-        for (let i = 0; i < this.mapLayers.length; i++) {
-            const l = this.mapLayers[i];
-            var listItem = document.createElement("a");
-            listItem.innerHTML = l.layerName;
-            listItem.setAttribute("class", "list-group-item");
-            listItem.setAttribute("href", `javascript:App.Instance.ActivateMapLayer(${i})`);
-            layersList.appendChild(listItem);
-        }
-
-        // Non-existent (ghost) layers (Note: external sources)
-        for (let i = 0; i < this.ghostMapLayers.length; i++) {
-            const g = this.ghostMapLayers[i];
-            var listItem = document.createElement("a");
-            listItem.innerHTML = g.layerName;
-            listItem.setAttribute("class", "list-group-item list-group-item-danger d-flex justify-content-between align-items-center");
-            listItem.setAttribute("href", `javascript:App.Instance.DownloadGhostLayer(${i})`);
-            
-            var badge = document.createElement("span");
-            badge.innerHTML = "Ke stažení";
-            badge.setAttribute("class", "badge bg-primary rounded-pill");
-            
-            listItem.appendChild(badge);
-            layersList.appendChild(listItem);
-        }
-    }
-
     private SetActiveInLayerList(index: number, state: boolean) {
         const layers = document.getElementById("layersList").children;
 
@@ -259,6 +240,44 @@ class App {
         this.SetDownloadingInLayerList(index);
         // this.mapLayers.push(ghostLayer.Download());
         // this.RemoveGhostMapLayer(index);
+    }
+
+    private RenderLayerList() {
+        const layersList = document.getElementById("layersList");
+        layersList.innerHTML = "";
+
+        for (let i = 0; i < this.mapLayers.length; i++) {
+            const l = this.mapLayers[i];
+            var listItem = document.createElement("a");
+            listItem.innerHTML = l.layerName;
+            listItem.setAttribute("class", "list-group-item");
+            listItem.onclick = function() {
+                App.Instance.ActivateMapLayer(i);
+            };
+            listItem.setAttribute("href", "#");
+            // listItem.setAttribute("href", `javascript:App.Instance.ActivateMapLayer(${i})`);
+            layersList.appendChild(listItem);
+        }
+
+        // Non-existent (ghost) layers (Note: external sources)
+        for (let i = 0; i < this.ghostMapLayers.length; i++) {
+            const g = this.ghostMapLayers[i];
+            var listItem = document.createElement("a");
+            listItem.innerHTML = g.layerName;
+            listItem.setAttribute("class", "list-group-item list-group-item-danger d-flex justify-content-between align-items-center");
+            listItem.onclick = function() {
+                App.Instance.DownloadGhostLayer(i);
+            };
+            listItem.setAttribute("href", "#");
+            // listItem.setAttribute("href", `javascript:App.Instance.DownloadGhostLayer(${i})`);
+            
+            var badge = document.createElement("span");
+            badge.innerHTML = "Ke stažení";
+            badge.setAttribute("class", "badge bg-primary rounded-pill");
+            
+            listItem.appendChild(badge);
+            layersList.appendChild(listItem);
+        }
     }
 }
 
