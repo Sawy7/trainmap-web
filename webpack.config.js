@@ -17,10 +17,20 @@ module.exports = {
                 ]
             },
             {
-                test: /\.(png|jpg|gif|svg|eot|ttf|woff|woff2)$/,
+                test: /\.(png|jpg|gif|svg)$/,
                 loader: "file-loader",
                 options: {
                     outputPath: "assets",
+                }
+            },
+            {
+                test: /\.(woff|woff2|eot|ttf|otf)$/i,
+                type: "asset/inline",
+            },
+            {
+                test: /\.m?js/,
+                resolve: {
+                  fullySpecified: false
                 }
             }
         ]
@@ -32,6 +42,6 @@ module.exports = {
     },
     mode: "production",
     optimization: {
-        minimize: false
+        minimize: true
     }
 }

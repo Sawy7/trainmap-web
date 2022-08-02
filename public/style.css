@@ -1,1 +1,16 @@
-#map { height: 500px; }
+:root {
+    --navbar-height: 56px;
+}
+
+body { 
+    padding-top: var(--navbar-height); 
+}
+
+#map {
+    height: calc(100vh - var(--navbar-height));
+}
+
+#offcanvasElevation {
+    width: 30%;
+    height: 25%;
+}

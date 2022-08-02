@@ -1,4 +1,7 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import 'bootstrap-icons/font/bootstrap-icons.css';
+import 'font-awesome/css/font-awesome.min.css';
 
 import * as L from "leaflet";
 import 'leaflet/dist/leaflet.css';
@@ -8,6 +11,10 @@ L.Icon.Default.mergeOptions({
     iconUrl: require('leaflet/dist/images/marker-icon.png').default,
     shadowUrl: require('leaflet/dist/images/marker-shadow.png').default
 });
+
+import Chart from 'chart.js/auto';
+import { getRelativePosition } from 'chart.js/helpers';
+import { Toast } from "bootstrap";
 
 // JS Requests: https://stackoverflow.com/questions/247483/http-get-request-in-javascript
 class ApiComms {
@@ -36,6 +43,7 @@ interface MapEntity {
 class MapMarker implements MapEntity {
     public point: L.LatLng;
     public popupMsg: string;
+    public activeMarker: L.Marker;
 
     public constructor(point: L.LatLng, popupMsg: string) {
         this.point = point;
@@ -43,9 +51,16 @@ class MapMarker implements MapEntity {
     }
 
     public GetMapEntity(): L.Marker {
-        var marker = L.marker([this.point.lat, this.point.lng]);
-        marker.bindPopup(this.popupMsg);
-        return marker;
+        if (this.activeMarker === undefined)
+        {
+            this.activeMarker = L.marker([this.point.lat, this.point.lng]);
+            this.activeMarker.bindPopup(this.popupMsg);
+        }
+        return this.activeMarker;
+    }
+
+    public ChangeCoordinates(point: L.LatLng) {
+        this.activeMarker.setLatLng(point);
     }
 }
 
@@ -79,8 +94,20 @@ class MapRoad implements MapEntity {
             opacity: this.opacity,
             smoothFactor: this.smoothFactor
         });
-        polyline.bindPopup(this.popupMsg);
+        // polyline.bindPopup(this.popupMsg); // TODO: Remove properly
+        this.SetupInteractivity(polyline);
         return polyline;
+    }
+
+    private SetupInteractivity(polyline: L.Polyline) {
+        polyline.on("mouseover", function (event) {
+            let mouseMarker = new MapMarker(event["latlng"], "This is a popup #1");
+            App.Instance.RenderRogueMarker(mouseMarker);
+        });
+
+        polyline.on("mouseout", function (event) {
+            console.log("out");
+        });
     }
 }
 
@@ -140,6 +167,10 @@ class MapLayer {
         this.CreateLayerGroup()
     }
 
+    public GetActiveState() {
+        return this.isActive;
+    }
+
     public GetAndToggleActiveState() {
         this.isActive = !this.isActive;
         return !this.isActive;
@@ -185,6 +216,7 @@ class App {
     private mapWindow: MapWindow;
     private mapLayers: MapLayer[] = [];
     private ghostMapLayers: GhostMapLayer[] = [];
+    private activeRogueMarker: MapMarker;
     private static _instance: App;
 
     private constructor(){};
@@ -195,6 +227,7 @@ class App {
 
     public Init(centerLat: number, centerLong: number, zoom: number) {
         this.mapWindow = new MapWindow(centerLat, centerLong, zoom);
+        this.CheckElevationButtonVisibility();
     }
 
     public AddMapLayer(mapLayer: MapLayer) {
@@ -216,9 +249,9 @@ class App {
         const layers = document.getElementById("layersList").children;
 
         if (state)
-            layers[index].setAttribute("class", "list-group-item active");
+            layers[index].setAttribute("class", "list-group-item list-group-item-dark active");
         else
-            layers[index].setAttribute("class", "list-group-item");
+            layers[index].setAttribute("class", "list-group-item list-group-item-dark");
     }
 
     public ActivateMapLayer(index: number) {
@@ -226,6 +259,19 @@ class App {
         const mapLayerNewState = !mapLayer.GetAndToggleActiveState();
         this.SetActiveInLayerList(index, mapLayerNewState);
         this.mapWindow.RenderMapLayer(this.mapLayers[index], mapLayerNewState);
+        this.CheckElevationButtonVisibility();
+    }
+
+    private CheckElevationButtonVisibility() {
+        let someActiveLayers = this.mapLayers.some(layer => {
+            return layer.GetActiveState();
+        });
+        if (someActiveLayers)
+        {
+            document.getElementById("elevationButton").style.display = "";
+        }
+        else
+            document.getElementById("elevationButton").style.display = "none";
     }
 
     private SetDownloadingInLayerList(index: number) {
@@ -250,7 +296,7 @@ class App {
             const l = this.mapLayers[i];
             var listItem = document.createElement("a");
             listItem.innerHTML = l.layerName;
-            listItem.setAttribute("class", "list-group-item");
+            listItem.setAttribute("class", "list-group-item list-group-item-dark");
             listItem.onclick = function() {
                 App.Instance.ActivateMapLayer(i);
             };
@@ -279,11 +325,20 @@ class App {
             layersList.appendChild(listItem);
         }
     }
+
+    public RenderRogueMarker(marker: MapMarker) {
+        if (this.activeRogueMarker !== undefined) {
+            this.mapWindow.RenderRogueMarker(this.activeRogueMarker, false);
+            // TODO: Only change coords, should be snappier
+        }
+        this.activeRogueMarker = marker;
+        this.mapWindow.RenderRogueMarker(this.activeRogueMarker);
+    }
 }
 
 class MapWindow {
     private map: L.Map;
-    private layerControl: L.Control.Layers;
+    // private layerControl: L.Control.Layers;
     
     public constructor(centerLat: number, centerLong: number, zoom: number) {
         var baseMapLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -298,6 +353,32 @@ class MapWindow {
         });
 
         this.CreateInitialLayers(baseMapLayer, "OpenStreetMap");
+
+    //     // @ts-ignore
+    //     var el = L.control.elevation({
+    //         position: "topright",
+    //         theme: "steelblue-theme", //default: lime-theme
+    //         width: 600,
+    //         height: 125,
+    //         margins: {
+    //             top: 10,
+    //             right: 20,
+    //             bottom: 30,
+    //             left: 50
+    //         },
+    //         useHeightIndicator: true, //if false a marker is drawn at map position
+    //         interpolation: d3.curveLinear, //see https://github.com/d3/d3-shape/blob/master/README.md#area_curve
+    //         hoverNumber: {
+    //             decimalsX: 3, //decimals on distance (always in km)
+    //             decimalsY: 0, //deciamls on hehttps://www.npmjs.com/package/leaflet.coordinatesight (always in m)
+    //             formatter: undefined //custom formatter function may be injected
+    //         },
+    //         xTicks: undefined, //number of ticks in x axis, calculated by default according to width
+    //         yTicks: undefined, //number of ticks on y axis, calculated by default according to height
+    //         collapsed: false,  //collapsed mode, show chart on click or mouseover
+    //         imperial: false    //display imperial units instead of metric
+    //   });
+    //   el.addTo(this.map);
     }
 
     private CreateInitialLayers(baseMapLayer: L.TileLayer, baseMapName: string) {
@@ -306,14 +387,22 @@ class MapWindow {
         };
         var overlayMapsControl = {};
 
-        this.layerControl = L.control.layers(baseMapsControl, overlayMapsControl).addTo(this.map);
+        // NOTE: This adds a button to switch map provider
+        // this.layerControl = L.control.layers(baseMapsControl, overlayMapsControl).addTo(this.map);
     }
 
-    RenderMapLayer(mapLayer: MapLayer, render: boolean = true) {
+    public RenderMapLayer(mapLayer: MapLayer, render: boolean = true) {
         if (render)
             mapLayer.GetLayerGroup().addTo(this.map);
         else
             this.map.removeLayer(mapLayer.activeLayerGroup);
+    }
+
+    public RenderRogueMarker(marker: MapMarker, render: boolean = true) {
+        if (render)
+            marker.GetMapEntity().addTo(this.map);
+        else
+            this.map.removeLayer(marker.activeMarker);
     }
 }
 
@@ -364,3 +453,102 @@ let mySquare = new MapArea([
 app.AddMapLayer(myAreas);
 myAreas.AddMapArea(mySquare);
 
+function CreateChart() {
+    const ctx = <HTMLCanvasElement> document.getElementById("elevationChart");
+
+    let data = {
+        labels: [
+            500,
+            50,
+            2424,
+            14040,
+        ],
+        datasets: [{
+            label: "Výška", // Name the series
+            data: [
+                500,
+                50,
+                2424,
+                14040,
+            ], // Specify the data values array
+            coords: [
+                [49.86, 15.511],
+                [49.861, 15.512],
+                [49.86, 15.513],
+                [49.86, 15.514]
+            ],
+            fill: true,
+            borderColor: "#2196f3", // Add custom color border (Line)
+            backgroundColor: "#2196f3", // Add custom color background (Points and Fill)
+            borderWidth: 1 // Specify bar border width
+        }]
+    }
+
+    var chart = new Chart(ctx, {
+        type: "line",
+        data: data,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                tooltip: {
+                    enabled: false
+                },
+                legend: {
+                    display: false
+                }
+            },
+            interaction: {
+                intersect: false,
+                mode: "index"
+            },
+            onHover: (e) => {
+                const canvasPosition = getRelativePosition(e, chart);
+                
+                const index = chart.scales.x.getValueForPixel(canvasPosition.x);
+
+                // console.log(data["datasets"][0]["data"][index]);
+                let coords = data["datasets"][0]["coords"][index];
+
+                let chartMarker = new MapMarker(new L.LatLng(coords[0], coords[1]), "This is a popup #1");
+                App.Instance.RenderRogueMarker(chartMarker);
+            }
+        },
+        plugins: [{
+            id: "tooltipLine",
+            afterDraw: (chart: { tooltip?: any; scales?: any; ctx?: any }) => {
+                /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call */
+                if (chart.tooltip.opacity === 1) {
+                  const { ctx } = chart;
+                  const { caretX } = chart.tooltip;
+                  const topY = chart.scales.y.top;
+                  const bottomY = chart.scales.y.bottom;
+        
+                  ctx.save();
+                  ctx.setLineDash([3, 3]);
+                  ctx.beginPath();
+                  ctx.moveTo(caretX, topY - 5);
+                  ctx.lineTo(caretX, bottomY);
+                  ctx.lineWidth = 1;
+                //   ctx.strokeStyle = getRgba(colors.white, 0.5);
+                  ctx.stroke();
+                  ctx.restore();
+                }
+                /* eslint-enable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call */
+            }
+        }]
+    });
+}
+
+CreateChart();
+
+const toastTrigger = document.getElementById('notificationButton')
+const toastLiveExample = document.getElementById('liveToast')
+if (toastTrigger) {
+  toastTrigger.addEventListener('click', () => {
+    console.log("bonk");
+    const toast = new Toast(toastLiveExample)
+
+    toast.show()
+  })
+}
