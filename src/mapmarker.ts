@@ -11,22 +11,14 @@ export class MapMarker implements MapEntity {
         this.point = point;
         this.popupMsg = popupMsg;
         if (useCustomIcon)
-        {
-            console.log("using custom");
             this.CreateCustomIcon();
-        }
     }
 
     private CreateCustomIcon() {
         this.customIcon = L.icon({
             iconUrl: "custom-assets/elevation-pointer.png",
-            // shadowUrl: "custom-assets/leaf-shadow.png",
-
-            iconSize:     [14, 14], // size of the icon
-            // shadowSize:   [50, 64], // size of the shadow
-            iconAnchor:   [7, 7], // point of the icon which will correspond to marker's location
-            // shadowAnchor: [4, 62],  // the same for the shadow
-            // popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
+            iconSize: [14, 14],
+            iconAnchor: [7, 7]
         });
     }
 

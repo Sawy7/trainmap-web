@@ -6,6 +6,7 @@ import * as L from "leaflet";
 
 export class ElevationChart {
     private static ctx: HTMLCanvasElement = <HTMLCanvasElement> document.getElementById("elevationChart");
+    private static elevationChartElement = document.getElementById("offcanvasElevation");
     private static offcanvas: Offcanvas = new Offcanvas(document.getElementById("offcanvasElevation"));
     private points: L.LatLng[];
     private elevation: number[];
@@ -43,7 +44,7 @@ export class ElevationChart {
                 maintainAspectRatio: false,
                 plugins: {
                     tooltip: {
-                        enabled: false
+                        enabled: true
                     },
                     legend: {
                         display: false
@@ -64,20 +65,21 @@ export class ElevationChart {
                 id: "tooltipLine",
                 afterDraw: (chart: { tooltip?: any; scales?: any; ctx?: any }) => {
                     if (chart.tooltip.opacity === 1) {
-                      const { ctx } = chart;
-                      const { caretX } = chart.tooltip;
-                      const topY = chart.scales.y.top;
-                      const bottomY = chart.scales.y.bottom;
-            
-                      ctx.save();
-                      ctx.setLineDash([3, 3]);
-                      ctx.beginPath();
-                      ctx.moveTo(caretX, topY - 5);
-                      ctx.lineTo(caretX, bottomY);
-                      ctx.lineWidth = 1;
-                      ctx.strokeStyle = "#FFFFFF";
-                      ctx.stroke();
-                      ctx.restore();
+                        console.log("yooo");
+                        const { ctx } = chart;
+                        const { caretX } = chart.tooltip;
+                        const topY = chart.scales.y.top;
+                        const bottomY = chart.scales.y.bottom;
+                
+                        ctx.save();
+                        ctx.setLineDash([3, 3]);
+                        ctx.beginPath();
+                        ctx.moveTo(caretX, topY - 5);
+                        ctx.lineTo(caretX, bottomY);
+                        ctx.lineWidth = 1;
+                        ctx.strokeStyle = "#FFFFFF";
+                        ctx.stroke();
+                        ctx.restore();
                     }
                 }
             }]
@@ -90,14 +92,12 @@ export class ElevationChart {
     }
 
     private RegisterChartClosing() {
-        let elevationChartElement = document.getElementById("offcanvasElevation");
-        elevationChartElement.addEventListener("hidden.bs.offcanvas", () => {
+        ElevationChart.elevationChartElement.addEventListener("hidden.bs.offcanvas", () => {
             this.markerCallback();
-        });
+        }, { once: true });
     }
 
     public DestroyChart() {
-        ElevationChart.offcanvas.hide();
         this.chart.destroy();
     }
 }
