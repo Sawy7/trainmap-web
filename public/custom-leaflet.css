@@ -8,3 +8,12 @@
 	background-image: url(assets/8f2c4d11474275fbc1614b9098334eae.png);
 	background-size: 26px 26px;
 }
+
+.leaflet-control-zoom-in, .leaflet-control-zoom-out {
+	background-color: var(--bs-body-color) !important;
+	color: rgba(255,255,255,.55) !important;
+}
+
+.leaflet-control-zoom {
+	border: none !important;
+}

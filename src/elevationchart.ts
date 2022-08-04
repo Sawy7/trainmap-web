@@ -7,38 +7,27 @@ import * as L from "leaflet";
 export class ElevationChart {
     private static ctx: HTMLCanvasElement = <HTMLCanvasElement> document.getElementById("elevationChart");
     private static offcanvas: Offcanvas = new Offcanvas(document.getElementById("offcanvasElevation"));
+    private points: L.LatLng[];
+    private elevation: number[];
     private data;
     private chart: Chart;
     private markerCallback: Function;
 
-    public constructor(markerCallback: Function) {
+    public constructor(points: L.LatLng[], elevation: number[], markerCallback: Function) {
+        this.points = points;
+        this.elevation = elevation;
         this.markerCallback = markerCallback;
         this.RenderChart();
         this.ShowChart();
+        this.RegisterChartClosing();
     }
 
     private RenderChart() {
         this.data = {
-            labels: [
-                500,
-                50,
-                2424,
-                14040,
-            ],
+            labels: this.elevation,
             datasets: [{
                 label: "Výška", // Name the series
-                data: [
-                    500,
-                    50,
-                    2424,
-                    14040,
-                ], // Specify the data values array
-                coords: [
-                    [49.86, 15.511],
-                    [49.861, 15.512],
-                    [49.86, 15.513],
-                    [49.86, 15.514]
-                ],
+                data: this.elevation, // Specify the data values array
                 fill: true,
                 borderColor: "#2196f3", // Add custom color border (Line)
                 backgroundColor: "#2196f3", // Add custom color background (Points and Fill)
@@ -67,8 +56,7 @@ export class ElevationChart {
                 onHover: (e) => {
                     const canvasPosition = getRelativePosition(e, this.chart);
                     const index = this.chart.scales.x.getValueForPixel(canvasPosition.x);
-                    let coords = this.data["datasets"][0]["coords"][index];
-                    let elevationMarkerPos = new L.LatLng(coords[0], coords[1]);
+                    let elevationMarkerPos = this.points[index];
                     this.markerCallback(elevationMarkerPos);
                 }
             },
@@ -97,12 +85,19 @@ export class ElevationChart {
     }
 
     private ShowChart() {
-        console.log("showing");
+        this.markerCallback();
         ElevationChart.offcanvas.show();
     }
 
+    private RegisterChartClosing() {
+        let elevationChartElement = document.getElementById("offcanvasElevation");
+        elevationChartElement.addEventListener("hidden.bs.offcanvas", () => {
+            this.markerCallback();
+        });
+    }
+
     public DestroyChart() {
+        ElevationChart.offcanvas.hide();
         this.chart.destroy();
-        console.log("cleared");
     }
 }

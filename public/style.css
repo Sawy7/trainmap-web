@@ -2,8 +2,8 @@
     --navbar-height: 56px;
 }
 
-body { 
-    padding-top: var(--navbar-height); 
+body {
+    padding-top: var(--navbar-height);
 }
 
 #map {
@@ -11,6 +11,13 @@ body {
 }
 
 #offcanvasElevation {
-    width: 30%;
+    width: 40%;
     height: 25%;
+}
+
+#enetLogo {
+    width: 90%;
+    text-align: center;
+    position: absolute;
+    bottom: 10px;
 }

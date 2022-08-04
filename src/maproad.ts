@@ -5,21 +5,21 @@ import { App } from "./app";
 
 export class MapRoad implements MapEntity {
     private points: L.LatLng[];
-    // private popupMsg: string;
+    private elevation: number[];
     private color: string;
     private weight: number;
     private opacity: number;
     private smoothFactor: number;
 
     public constructor(points: L.LatLng[],
-                // popupMsg: string,
+                elevation: number[],
                 color: string = "red",
                 weight: number = 5,
                 opacity: number = 0.5,
                 smoothFactor: number = 1
                 ) {
         this.points = points;
-        // this.popupMsg = popupMsg;
+        this.elevation = elevation;
         this.color = color;
         this.weight = weight;
         this.opacity = opacity;
@@ -48,8 +48,8 @@ export class MapRoad implements MapEntity {
         //     console.log("out");
         // });
 
-        polyline.on("click", function (event) {
-            App.Instance.SetElevationChart();
+        polyline.on("click", (event) => {
+            App.Instance.SetElevationChart(this.points, this.elevation);
         });
     }
 }

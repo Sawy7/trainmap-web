@@ -46,12 +46,22 @@ myRoads.AddMapRoad(new MapRoad([
     new L.LatLng(49.861, 15.512),
     new L.LatLng(49.86, 15.513),
     new L.LatLng(49.86, 15.514)
-]));
+], [
+    500,
+    100,
+    500,
+    100
+], "blue"));
 myRoads.AddMapRoad(new MapRoad([
     new L.LatLng(49.859, 15.511),
     new L.LatLng(49.859, 15.512),
     new L.LatLng(49.858, 15.513),
     new L.LatLng(49.859, 15.514)
+], [
+    500,
+    400,
+    500,
+    100
 ]));
 
 app.AddMapLayer(myRoads);

@@ -39,13 +39,22 @@ export class MapWindow {
             this.map.removeLayer(mapLayer.activeLayerGroup);
     }
 
-    public RenderElevationMarker(point: L.LatLng) {
+    public RenderElevationMarker(point?: L.LatLng) {
+        if (point === undefined) {
+            if (this.activeElevationMarker === undefined)
+                return;
+            this.map.removeLayer(this.activeElevationMarker.GetMapEntity());
+            this.activeElevationMarker = undefined;
+            return;
+        }
+
         if (this.activeElevationMarker === undefined) {
-            this.activeElevationMarker = new MapMarker(point, "");
+            this.activeElevationMarker = new MapMarker(point, "", true);
             this.activeElevationMarker.GetMapEntity().addTo(this.map);
         }
-        else
-            this.activeElevationMarker.ChangeCoordinates(point)
+        else {
+            this.activeElevationMarker.ChangeCoordinates(point);
+        }
         // if (render)
         //     marker.GetMapEntity().addTo(this.map);
         // else

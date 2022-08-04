@@ -12,7 +12,6 @@ export class App {
     private ghostMapLayers: GhostMapLayer[] = [];
     private activeElevationChart: ElevationChart;
     private sidebarOffcanvas: Offcanvas = new Offcanvas(document.getElementById("offcanvasNavbar"));
-    // private activeElevationMarker: MapMarker;
     private static _instance: App;
 
     private constructor(){};
@@ -30,7 +29,6 @@ export class App {
     public Init(centerLat: number, centerLong: number, zoom: number) {
         this.mapWindow = new MapWindow(centerLat, centerLong, zoom);
         this.SetupButtons();        
-        this.CheckElevationButtonVisibility();
     }
 
     public AddMapLayer(mapLayer: MapLayer) {
@@ -62,26 +60,12 @@ export class App {
         const mapLayerNewState = !mapLayer.GetAndToggleActiveState();
         this.SetActiveInLayerList(index, mapLayerNewState);
         this.mapWindow.RenderMapLayer(this.mapLayers[index], mapLayerNewState);
-        this.CheckElevationButtonVisibility();
     }
 
-    public SetElevationChart() {
-        console.log("Setting elevation chart");
+    public SetElevationChart(points: L.LatLng[], elevation: number[]) {
         if (this.activeElevationChart !== undefined)
             this.activeElevationChart.DestroyChart();
-        this.activeElevationChart = new ElevationChart(this.RenderElevationMarker);
-    }
-
-    private CheckElevationButtonVisibility() {
-        let someActiveLayers = this.mapLayers.some(layer => {
-            return layer.GetActiveState();
-        });
-        if (someActiveLayers)
-        {
-            document.getElementById("elevationButton").style.display = "";
-        }
-        else
-            document.getElementById("elevationButton").style.display = "none";
+        this.activeElevationChart = new ElevationChart(points, elevation, this.RenderElevationMarker);
     }
 
     private SetDownloadingInLayerList(index: number) {
@@ -111,7 +95,6 @@ export class App {
                 App.Instance.ActivateMapLayer(i);
             };
             listItem.setAttribute("href", "#");
-            // listItem.setAttribute("href", `javascript:App.Instance.ActivateMapLayer(${i})`);
             layersList.appendChild(listItem);
         }
 
@@ -125,7 +108,6 @@ export class App {
                 App.Instance.DownloadGhostLayer(i);
             };
             listItem.setAttribute("href", "#");
-            // listItem.setAttribute("href", `javascript:App.Instance.DownloadGhostLayer(${i})`);
             
             var badge = document.createElement("span");
             badge.innerHTML = "Ke stažení";
@@ -136,7 +118,7 @@ export class App {
         }
     }
 
-    private RenderElevationMarker(point: L.LatLng) {
+    private RenderElevationMarker(point?: L.LatLng) {
         App.Instance.mapWindow.RenderElevationMarker(point);
     }
 
