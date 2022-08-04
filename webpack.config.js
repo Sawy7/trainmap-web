@@ -2,6 +2,9 @@ const path = require("path")
 
 module.exports = {
     entry: "./src/index.ts",
+    resolve: {
+        extensions: [".ts", ".js"]
+    },
     module: {
         rules: [
             {
@@ -43,5 +46,10 @@ module.exports = {
     mode: "production",
     optimization: {
         minimize: true
+    },
+    performance: {
+        hints: false,
+        maxEntrypointSize: 512000,
+        maxAssetSize: 512000
     }
 }
