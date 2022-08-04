@@ -4,6 +4,7 @@ import { MapMarker } from "./mapmarker";
 
 export class MapWindow {
     private map: L.Map;
+    private activeElevationMarker: MapMarker;
     // private layerControl: L.Control.Layers;
     
     public constructor(centerLat: number, centerLong: number, zoom: number) {
@@ -38,10 +39,16 @@ export class MapWindow {
             this.map.removeLayer(mapLayer.activeLayerGroup);
     }
 
-    public RenderRogueMarker(marker: MapMarker, render: boolean = true) {
-        if (render)
-            marker.GetMapEntity().addTo(this.map);
+    public RenderElevationMarker(point: L.LatLng) {
+        if (this.activeElevationMarker === undefined) {
+            this.activeElevationMarker = new MapMarker(point, "");
+            this.activeElevationMarker.GetMapEntity().addTo(this.map);
+        }
         else
-            this.map.removeLayer(marker.activeMarker);
+            this.activeElevationMarker.ChangeCoordinates(point)
+        // if (render)
+        //     marker.GetMapEntity().addTo(this.map);
+        // else
+        //     this.map.removeLayer(marker.activeMarker);
     }
 }

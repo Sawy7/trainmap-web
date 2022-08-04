@@ -39,13 +39,17 @@ export class MapRoad implements MapEntity {
     }
 
     private SetupInteractivity(polyline: L.Polyline) {
-        polyline.on("mouseover", function (event) {
-            let mouseMarker = new MapMarker(event["latlng"], "This is a popup #1");
-            App.Instance.RenderRogueMarker(mouseMarker);
-        });
+        // polyline.on("mouseover", function (event) {
+        //     let mouseMarker = new MapMarker(event["latlng"], "This is a popup #1");
+        //     App.Instance.RenderRogueMarker(mouseMarker);
+        // });
 
-        polyline.on("mouseout", function (event) {
-            console.log("out");
+        // polyline.on("mouseout", function (event) {
+        //     console.log("out");
+        // });
+
+        polyline.on("click", function (event) {
+            App.Instance.SetElevationChart();
         });
     }
 }

@@ -5,15 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>Map Web</title>
-
-    <!-- Bootstrap -->
-    <!-- <link rel="stylesheet" href="external_libs/bootstrap/css/bootstrap.min.css"/> -->
-    <!-- <script src="external_libs/bootstrap/js/bootstrap.bundle.min.js"></script> -->
-    
-    <!-- Leaflet -->
-    <!-- <link rel="stylesheet" href="external_libs/leaflet/leaflet.css"/> -->
-    <!-- <script src="external_libs/leaflet/leaflet.js"></script> -->
+    <title>Mapster</title>
     
     <!-- Custom Styles -->
     <link rel="stylesheet" href="style.css">
@@ -29,7 +21,7 @@
                 <button class="navbar-toggler" type="button" id="notificationButton"><i class="bi bi-bell-fill"></i></button>
                 <!-- <button class="navbar-toggler" type="button"><i class="bi-3-square"></i></button> -->
             </div>
-            <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar">
+            <button class="navbar-toggler" type="button" id="offcanvasNavbarButton">
                 <i class="bi-layers-fill"></i>
             </button>
             <div class="offcanvas offcanvas-end text-bg-dark bg-dark text-light" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
@@ -56,7 +48,7 @@
     </div>
 
     <!-- Notification -->
-    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <!-- <div class="toast-container position-fixed bottom-0 end-0 p-3">
         <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="toast-header">
                 <img src="..." class="rounded me-2" alt="...">
@@ -68,16 +60,12 @@
                 Hello, world! This is a toast message.
             </div>
         </div>
-    </div>
+    </div> -->
     
     <div class="container-fluid">
         <div class="row">
             <div id="map"></div>
         </div>
-        <!-- <div class="row">
-            <h2>Aktivní vrstvy</h2>
-            <div class="list-group" id="layersList"></div>
-        </div> -->
     </div>
     
     <script src="index.js"></script>

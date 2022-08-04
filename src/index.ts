@@ -74,89 +74,89 @@ app.AddGhostMapLayer(apiLayer2);
 // app.AddMapLayer(myAreas);
 // myAreas.AddMapArea(mySquare);
 
-function CreateChart() {
-    const ctx = <HTMLCanvasElement> document.getElementById("elevationChart");
+// function CreateChart() {
+//     const ctx = <HTMLCanvasElement> document.getElementById("elevationChart");
 
-    let data = {
-        labels: [
-            500,
-            50,
-            2424,
-            14040,
-        ],
-        datasets: [{
-            label: "Výška", // Name the series
-            data: [
-                500,
-                50,
-                2424,
-                14040,
-            ], // Specify the data values array
-            coords: [
-                [49.86, 15.511],
-                [49.861, 15.512],
-                [49.86, 15.513],
-                [49.86, 15.514]
-            ],
-            fill: true,
-            borderColor: "#2196f3", // Add custom color border (Line)
-            backgroundColor: "#2196f3", // Add custom color background (Points and Fill)
-            borderWidth: 1 // Specify bar border width
-        }]
-    }
+//     let data = {
+//         labels: [
+//             500,
+//             50,
+//             2424,
+//             14040,
+//         ],
+//         datasets: [{
+//             label: "Výška", // Name the series
+//             data: [
+//                 500,
+//                 50,
+//                 2424,
+//                 14040,
+//             ], // Specify the data values array
+//             coords: [
+//                 [49.86, 15.511],
+//                 [49.861, 15.512],
+//                 [49.86, 15.513],
+//                 [49.86, 15.514]
+//             ],
+//             fill: true,
+//             borderColor: "#2196f3", // Add custom color border (Line)
+//             backgroundColor: "#2196f3", // Add custom color background (Points and Fill)
+//             borderWidth: 1 // Specify bar border width
+//         }]
+//     }
 
-    var chart = new Chart(ctx, {
-        type: "line",
-        data: data,
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                tooltip: {
-                    enabled: false
-                },
-                legend: {
-                    display: false
-                }
-            },
-            interaction: {
-                intersect: false,
-                mode: "index"
-            },
-            onHover: (e) => {
-                const canvasPosition = getRelativePosition(e, chart);
+//     var chart = new Chart(ctx, {
+//         type: "line",
+//         data: data,
+//         options: {
+//             responsive: true,
+//             maintainAspectRatio: false,
+//             plugins: {
+//                 tooltip: {
+//                     enabled: false
+//                 },
+//                 legend: {
+//                     display: false
+//                 }
+//             },
+//             interaction: {
+//                 intersect: false,
+//                 mode: "index"
+//             },
+//             onHover: (e) => {
+//                 const canvasPosition = getRelativePosition(e, chart);
                 
-                const index = chart.scales.x.getValueForPixel(canvasPosition.x);
+//                 const index = chart.scales.x.getValueForPixel(canvasPosition.x);
 
-                // console.log(data["datasets"][0]["data"][index]);
-                let coords = data["datasets"][0]["coords"][index];
+//                 // console.log(data["datasets"][0]["data"][index]);
+//                 let coords = data["datasets"][0]["coords"][index];
 
-                let chartMarker = new MapMarker(new L.LatLng(coords[0], coords[1]), "This is a popup #1");
-                App.Instance.RenderRogueMarker(chartMarker);
-            }
-        },
-        plugins: [{
-            id: "tooltipLine",
-            afterDraw: (chart: { tooltip?: any; scales?: any; ctx?: any }) => {
-                if (chart.tooltip.opacity === 1) {
-                  const { ctx } = chart;
-                  const { caretX } = chart.tooltip;
-                  const topY = chart.scales.y.top;
-                  const bottomY = chart.scales.y.bottom;
+//                 let chartMarker = new MapMarker(new L.LatLng(coords[0], coords[1]), "This is a popup #1");
+//                 App.Instance.RenderRogueMarker(chartMarker);
+//             }
+//         },
+//         plugins: [{
+//             id: "tooltipLine",
+//             afterDraw: (chart: { tooltip?: any; scales?: any; ctx?: any }) => {
+//                 if (chart.tooltip.opacity === 1) {
+//                   const { ctx } = chart;
+//                   const { caretX } = chart.tooltip;
+//                   const topY = chart.scales.y.top;
+//                   const bottomY = chart.scales.y.bottom;
         
-                  ctx.save();
-                  ctx.setLineDash([3, 3]);
-                  ctx.beginPath();
-                  ctx.moveTo(caretX, topY - 5);
-                  ctx.lineTo(caretX, bottomY);
-                  ctx.lineWidth = 1;
-                  ctx.strokeStyle = "#FFFFFF";
-                  ctx.stroke();
-                  ctx.restore();
-                }
-            }
-        }]
-    });
-}
+//                   ctx.save();
+//                   ctx.setLineDash([3, 3]);
+//                   ctx.beginPath();
+//                   ctx.moveTo(caretX, topY - 5);
+//                   ctx.lineTo(caretX, bottomY);
+//                   ctx.lineWidth = 1;
+//                   ctx.strokeStyle = "#FFFFFF";
+//                   ctx.stroke();
+//                   ctx.restore();
+//                 }
+//             }
+//         }]
+//     });
+// }
 
-CreateChart();
+// CreateChart();

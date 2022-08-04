@@ -2,13 +2,17 @@ import { MapWindow } from "./mapwindow";
 import { MapLayer } from "./maplayer";
 import { GhostMapLayer } from "./ghostmaplayer";
 import { MapMarker } from "./mapmarker";
+import { ElevationChart } from "./elevationchart";
+import { Offcanvas } from "bootstrap";
 
 // TS Singleton: https://stackoverflow.com/questions/30174078/how-to-define-singleton-in-typescript
 export class App {
     private mapWindow: MapWindow;
     private mapLayers: MapLayer[] = [];
     private ghostMapLayers: GhostMapLayer[] = [];
-    private activeRogueMarker: MapMarker;
+    private activeElevationChart: ElevationChart;
+    private sidebarOffcanvas: Offcanvas = new Offcanvas(document.getElementById("offcanvasNavbar"));
+    // private activeElevationMarker: MapMarker;
     private static _instance: App;
 
     private constructor(){};
@@ -17,8 +21,15 @@ export class App {
         return this._instance || (this._instance = new this());
     }
 
+    public SetupButtons() {
+        document.getElementById("offcanvasNavbarButton").onclick = () => {
+            this.sidebarOffcanvas.toggle();
+        };
+    }
+
     public Init(centerLat: number, centerLong: number, zoom: number) {
         this.mapWindow = new MapWindow(centerLat, centerLong, zoom);
+        this.SetupButtons();        
         this.CheckElevationButtonVisibility();
     }
 
@@ -52,6 +63,13 @@ export class App {
         this.SetActiveInLayerList(index, mapLayerNewState);
         this.mapWindow.RenderMapLayer(this.mapLayers[index], mapLayerNewState);
         this.CheckElevationButtonVisibility();
+    }
+
+    public SetElevationChart() {
+        console.log("Setting elevation chart");
+        if (this.activeElevationChart !== undefined)
+            this.activeElevationChart.DestroyChart();
+        this.activeElevationChart = new ElevationChart(this.RenderElevationMarker);
     }
 
     private CheckElevationButtonVisibility() {
@@ -118,12 +136,11 @@ export class App {
         }
     }
 
-    public RenderRogueMarker(marker: MapMarker) {
-        if (this.activeRogueMarker !== undefined) {
-            this.mapWindow.RenderRogueMarker(this.activeRogueMarker, false);
-            // TODO: Only change coords, should be snappier
-        }
-        this.activeRogueMarker = marker;
-        this.mapWindow.RenderRogueMarker(this.activeRogueMarker);
+    private RenderElevationMarker(point: L.LatLng) {
+        App.Instance.mapWindow.RenderElevationMarker(point);
+    }
+
+    public PrepareElevationChart() {
+
     }
 }
