@@ -4,6 +4,7 @@ import { GhostMapLayer } from "./ghostmaplayer";
 import { MapMarker } from "./mapmarker";
 import { ElevationChart } from "./elevationchart";
 import { Offcanvas } from "bootstrap";
+import * as L from "leaflet";
 
 // TS Singleton: https://stackoverflow.com/questions/30174078/how-to-define-singleton-in-typescript
 export class App {
@@ -28,7 +29,8 @@ export class App {
 
     public Init(centerLat: number, centerLong: number, zoom: number) {
         this.mapWindow = new MapWindow(centerLat, centerLong, zoom);
-        this.SetupButtons();        
+        this.SetupButtons();
+        this.SetupGPXLoader();      
     }
 
     public AddMapLayer(mapLayer: MapLayer) {
@@ -115,6 +117,44 @@ export class App {
             
             listItem.appendChild(badge);
             layersList.appendChild(listItem);
+        }
+    }
+
+    // https://stackoverflow.com/questions/3582671/how-to-open-a-local-disk-file-with-javascript
+    private SetupGPXLoader() {
+        let fileInput = document.getElementById("gpxFileInput");
+        fileInput.onchange = function(e: Event) {
+            const target = e.target as HTMLInputElement;
+            let file = target.files[0];
+            if (!file)
+            return;
+            
+            let reader = new FileReader();
+            reader.onload = function(e: Event) {
+                const target = e.target as FileReader;
+                let contents = target.result as string;
+                let xmlParser = new DOMParser();
+                let xmlDoc = xmlParser.parseFromString(contents, "text/xml");
+
+                let rootNode = xmlDoc.getElementsByTagName("trkseg")[0];
+                let pointCount = rootNode.childElementCount;
+                
+                let gpxLayer = new MapLayer("Nová GPX vrstva");
+                let pointsArr: L.LatLng[] = [];
+                let elevArr: number[] = [];
+                // Note: GPX ze Seznamu obsahuje duplicity
+                for (let i = 0; i < pointCount; i++) {
+                    let pointLat = rootNode.children[i].getAttribute("lat");
+                    let pointLong = rootNode.children[i].getAttribute("lon");
+                    pointsArr.push(new L.LatLng(+pointLat, +pointLong));
+                    let pointElev = rootNode.children[i].children[0].innerHTML;
+                    elevArr.push(+pointElev);
+                    // console.log(pointLat, pointLong, pointElev);
+                }
+                console.log(pointsArr);
+                console.log(elevArr);
+            };
+            reader.readAsText(file);
         }
     }
 
