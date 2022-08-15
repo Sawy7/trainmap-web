@@ -3,3 +3,4 @@ node_modules/
 index.js
 public/assets
 index.js.LICENSE.txt
+venv/
