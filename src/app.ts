@@ -4,7 +4,7 @@ import { GhostMapLayer } from "./ghostmaplayer";
 import { SingleMapRoad } from "./singleroad";
 import { MultiMapRoad } from "./multiroad";
 import { ElevationChart } from "./elevationchart";
-import { Offcanvas } from "bootstrap";
+import { Offcanvas, Collapse } from "bootstrap";
 import * as L from "leaflet";
 import * as shapefile from "shapefile";
 import proj4 from "proj4";
@@ -60,21 +60,36 @@ export class App {
         this.RenderLayerList();
     }
 
-    private SetActiveInLayerList(index: number, state: boolean) {
-        const layers = document.getElementById("layersList").children;
+    private PopulateLayerEntitesList(index: number, mapLayer: MapLayer) {
+        // const layers = document.getElementById("layersList").children;
+        // console.log(index)
 
-        if (state)
-            layers[index].setAttribute("class", "list-group-item list-group-item-dark active");
-        else
-            layers[index].setAttribute("class", "list-group-item list-group-item-dark");
+        // if (state)
+        //     layers[index].setAttribute("class", "list-group-item list-group-item-dark active");
+        // else
+        //     layers[index].setAttribute("class", "list-group-item list-group-item-dark");
+        
+        let entitiesList = document.getElementById("layer_"+index).children[0].children[1];
+        if (entitiesList.innerHTML !== "")
+            return;
+        let mapEntities = mapLayer.ListMapEntities();
+        mapEntities.forEach(ma => {
+            var entityLink = document.createElement("a");
+            entityLink.setAttribute("class", "list-group-item list-group-item-dark");
+            entityLink.setAttribute("href", "#");
+            entityLink.innerHTML = ma;
+            entityLink.onclick = () => {
+                console.log("locate "+ma);
+            };
+            entitiesList.appendChild(entityLink);
+        });
     }
 
     public ActivateMapLayer(index: number) {
         let mapLayer = this.mapLayers[index];
         const mapLayerNewState = !mapLayer.GetAndToggleActiveState();
-        this.SetActiveInLayerList(index, mapLayerNewState);
         this.mapWindow.RenderMapLayer(this.mapLayers[index], mapLayerNewState);
-        mapLayer.ListMapEntities();
+        // this.SetActiveInLayerList(index, mapLayer, mapLayerNewState);
     }
 
     public SetElevationChart(points: L.LatLng[], elevation: number[]) {
@@ -97,20 +112,45 @@ export class App {
         // this.RemoveGhostMapLayer(index);
     }
 
+    // TODO: This potentially runs too many times
     private RenderLayerList() {
         const layersList = document.getElementById("layersList");
         layersList.innerHTML = "";
 
         for (let i = 0; i < this.mapLayers.length; i++) {
             const l = this.mapLayers[i];
-            var listItem = document.createElement("a");
-            listItem.innerHTML = l.layerName;
-            listItem.setAttribute("class", "list-group-item list-group-item-dark");
-            listItem.onclick = function() {
-                App.Instance.ActivateMapLayer(i);
+
+            // Accordions
+            var accordion = document.createElement("a");
+            accordion.setAttribute("class", "list-group-item list-group-item-dark");
+            accordion.setAttribute("href", "#");
+            accordion.innerHTML = l.layerName;
+
+            var accordionCollapse = document.createElement("div");
+            accordionCollapse.setAttribute("class", "accordion-collapse collapse bg-secondary");
+            accordionCollapse.setAttribute("id", "layer_"+i);
+            // accordion.appendChild(accordionCollapse);
+            accordion.onclick = () => {
+                new Collapse(document.getElementById("layer_"+i)).toggle();
+                this.ActivateMapLayer(i);
             };
-            listItem.setAttribute("href", "#");
-            layersList.appendChild(listItem);
+
+            var accordionBody = document.createElement("div");
+            accordionBody.setAttribute("class", "accordion-body");
+
+            var routesHeader = document.createElement("h7");
+            routesHeader.innerHTML = "Elementy vrstvy";
+            accordionBody.appendChild(routesHeader);
+
+            var entityList = document.createElement("div");
+            accordionBody.appendChild(entityList);
+
+            accordionCollapse.appendChild(accordionBody);
+
+            layersList.appendChild(accordion);
+            layersList.appendChild(accordionCollapse);
+
+            this.PopulateLayerEntitesList(i, this.mapLayers[i])
         }
 
         // Non-existent (ghost) layers (Note: external sources)
@@ -119,9 +159,10 @@ export class App {
             var listItem = document.createElement("a");
             listItem.innerHTML = g.layerName;
             listItem.setAttribute("class", "list-group-item list-group-item-danger d-flex justify-content-between align-items-center");
-            listItem.onclick = function() {
-                App.Instance.DownloadGhostLayer(i);
-            };
+            // TODO: disabled for now
+            // listItem.onclick = function() {
+            //     App.Instance.DownloadGhostLayer(i);
+            // };
             listItem.setAttribute("href", "#");
             
             var badge = document.createElement("span");

@@ -34,6 +34,10 @@ export abstract class MapRoad implements MapEntity {
         return this.polyLine;
     }
 
+    public GetListInfo(): string {
+        return "Cesta";
+    }
+
     public GetBounds(): L.LatLngBounds {
         if (this.polyLine === undefined)
             return;

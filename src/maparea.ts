@@ -23,4 +23,8 @@ export class MapArea implements MapEntity {
         polygon.bindPopup(this.popupMsg);
         return polygon;
     }
+
+    public GetListInfo(): string {
+        return "Plocha";
+    }
 }

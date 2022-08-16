@@ -1,0 +1,4 @@
+TODO + bugs
+- Adding new GPX (and shapefile) will reset and break the list
+- Elements don't work yet
+- 'Rogue' point as public/private entity within 'App' class

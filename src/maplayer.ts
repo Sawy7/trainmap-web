@@ -59,16 +59,30 @@ export class MapLayer {
         this.multiRoads.forEach(r => {
             this.activeMapEntities.push(r.GetMapEntity());
         });
-        this.layerAreas.forEach(r => {
-            this.activeMapEntities.push(r.GetMapEntity());
+        this.layerAreas.forEach(a => {
+            this.activeMapEntities.push(a.GetMapEntity());
         });
 
         return L.layerGroup(this.activeMapEntities);
     }
 
-    public ListMapEntities() {
-        this.activeMapEntities.forEach(e => {
-            console.log(e);
+    public ListMapEntities(): string[] {
+        let listInfo: string[] = [];
+        // let listActionInfo: [string[], Function][];
+
+        this.layerMarkers.forEach(m => {
+            listInfo.push(m.GetListInfo());
         });
+        this.layerRoads.forEach(r => {
+            listInfo.push(r.GetListInfo());
+        });
+        this.multiRoads.forEach(r => {
+            listInfo.push(r.GetListInfo());
+        });
+        this.layerAreas.forEach(a => {
+            listInfo.push(a.GetListInfo());
+        });
+
+        return listInfo;
     }
 }
