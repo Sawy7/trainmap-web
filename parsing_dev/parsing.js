@@ -8,19 +8,28 @@ const proj4 = require("proj4");
 proj4.defs("EPSG:4326","+proj=longlat +datum=WGS84 +no_defs");
 proj4.defs("EPSG:5514","+proj=krovak +lat_0=49.5 +lon_0=24.83333333333333 +alpha=30.28813972222222 +k=0.9999 +x_0=0 +y_0=0 +ellps=bessel +towgs84=589,76,480,0,0,0,0 +units=m +no_defs");
 
+let points = []
+
+function ListPoints() {
+    points.forEach(element => {
+        console.log(element);
+    });
+}
+
 shapefile.open("Olc_Krn_Ova.shp")
 .then(source => source.read()
     .then(function log(result) {
-        if (result.done) return;
+        if (result.done) {
+            ListPoints();
+            return;
+        }
 
         // Parse coords to GPS (WSG84)
-        // result.value["geometry"]["coordinates"].forEach(coord => {
-        //     console.log(proj4("EPSG:5514","EPSG:4326",coord));
-        // });
+        result.value["geometry"]["coordinates"].forEach(coord => {
+            gpsPoint = proj4("EPSG:5514","EPSG:4326",coord);
+            points.push([gpsPoint[1], gpsPoint[0]]);
+        });
 
-        console.log(result.value.geometry);
-        return;
-        
         // console.log(result.value["geometry"]["coordinates"]);
         return source.read().then(log);
 }))
