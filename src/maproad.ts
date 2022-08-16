@@ -1,25 +1,22 @@
 import * as L from "leaflet";
 import { MapEntity } from "./mapentity";
-import { MapMarker } from "./mapmarker";
 import { App } from "./app";
 
-export class MapRoad implements MapEntity {
-    private points: L.LatLng[];
-    private elevation: number[];
+export abstract class MapRoad implements MapEntity {
+    protected points: any;
+    protected elevation: any;
     private color: string;
     private weight: number;
     private opacity: number;
     private smoothFactor: number;
+    private polyLine: L.Polyline;
 
-    public constructor(points: L.LatLng[],
-                elevation: number[],
+    protected constructor(
                 color: string = "red",
                 weight: number = 5,
                 opacity: number = 0.5,
                 smoothFactor: number = 1
                 ) {
-        this.points = points;
-        this.elevation = elevation;
         this.color = color;
         this.weight = weight;
         this.opacity = opacity;
@@ -27,28 +24,34 @@ export class MapRoad implements MapEntity {
     }
 
     public GetMapEntity(): L.Polyline {
-        var polyline = new L.Polyline(this.points, {
+        this.polyLine = new L.Polyline(this.points, {
             color: this.color,
             weight: this.weight,
             opacity: this.opacity,
             smoothFactor: this.smoothFactor
         });
-        // polyline.bindPopup(this.popupMsg); // TODO: Remove properly
-        this.SetupInteractivity(polyline);
-        return polyline;
+        this.SetupInteractivity();
+        return this.polyLine;
     }
 
-    private SetupInteractivity(polyline: L.Polyline) {
-        // polyline.on("mouseover", function (event) {
+    public GetBounds(): L.LatLngBounds {
+        if (this.polyLine === undefined)
+            return;
+
+        return this.polyLine.getBounds();
+    }
+
+    private SetupInteractivity() {
+        // this.polyLine.on("mouseover", function (event) {
         //     let mouseMarker = new MapMarker(event["latlng"], "This is a popup #1");
-        //     App.Instance.RenderRogueMarker(mouseMarker);
+        //     App.Instance.RenderElevationMarker(new L.LatLng(event["latlng"]["lat"], event["latlng"]["lng"]));
         // });
 
-        // polyline.on("mouseout", function (event) {
+        // this.polyLine.on("mouseout", function (event) {
         //     console.log("out");
         // });
 
-        polyline.on("click", (event) => {
+        this.polyLine.on("click", (event) => {
             App.Instance.SetElevationChart(this.points, this.elevation);
         });
     }

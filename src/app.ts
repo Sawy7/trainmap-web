@@ -1,7 +1,8 @@
 import { MapWindow } from "./mapwindow";
 import { MapLayer } from "./maplayer";
 import { GhostMapLayer } from "./ghostmaplayer";
-import { MapRoad } from "./maproad";
+import { SingleMapRoad } from "./singleroad";
+import { MultiMapRoad } from "./multiroad";
 import { ElevationChart } from "./elevationchart";
 import { Offcanvas } from "bootstrap";
 import * as L from "leaflet";
@@ -41,7 +42,7 @@ export class App {
         this.SetupGPXLoader();
         this.SetupShapefileLoader();
         // TODO: Dev - remove
-        // this.sidebarOffcanvas.toggle();   
+        this.sidebarOffcanvas.toggle();   
     }
 
     public AddMapLayer(mapLayer: MapLayer) {
@@ -73,6 +74,7 @@ export class App {
         const mapLayerNewState = !mapLayer.GetAndToggleActiveState();
         this.SetActiveInLayerList(index, mapLayerNewState);
         this.mapWindow.RenderMapLayer(this.mapLayers[index], mapLayerNewState);
+        mapLayer.ListMapEntities();
     }
 
     public SetElevationChart(points: L.LatLng[], elevation: number[]) {
@@ -164,7 +166,7 @@ export class App {
                 }
                 
                 let gpxLayer = new MapLayer("Nová GPX vrstva");
-                gpxLayer.AddMapRoad(new MapRoad(pointsArr, elevArr, "purple"));
+                gpxLayer.AddMapRoad(new SingleMapRoad(pointsArr, elevArr, "purple"));
                 this.AddMapLayer(gpxLayer);
             };
             reader.readAsText(file);
@@ -182,27 +184,42 @@ export class App {
             let reader = new FileReader();
             reader.onload = (e: Event) => {
                 const target = e.target as FileReader;               
-                let gpxLayer = new MapLayer("Nová shapefile vrstva");
-
+                let shapefileLayer = new MapLayer("Nová shapefile vrstva");
+                let multiPointsArr: L.LatLng[][] = [];
+                let multiElevArr: number[][] = [];
+                
                 shapefile.open(reader.result)
                 .then(source => source.read()
-                    .then(function log(result) {
-                        if (result.done) {
-                            App.Instance.AddMapLayer(gpxLayer);
-                            return;
-                        }
+                .then(function log(result) {
+                    if (result.done) {
+                        // pointsArr.sort((a, b) => {
+                        //     if (a.lat > b.lat) {
+                        //         return 1;
+                        //     } else if (a.lat < b.lat) {
+                        //         return -1;
+                        //     } else {
+                        //         return 0;
+                        //     }
+                        // });
 
-                        // Parse coords to GPS (WSG84)
-                        let pointsArr: L.LatLng[] = [];
-                        let elevArr: number[] = [];
-                        result.value["geometry"]["coordinates"].forEach(coord => {
-                            let gpsPoint = proj4("EPSG:5514","EPSG:4326",coord);
-                            pointsArr.push(new L.LatLng(gpsPoint[1], gpsPoint[0]));
-                        });
-                        // let randomColor = "#" + Math.floor(Math.random()*16777215).toString(16);
-                        gpxLayer.AddMapRoad(new MapRoad(pointsArr, elevArr, "blue"));
+                        shapefileLayer.AddMultiRoad(new MultiMapRoad(multiPointsArr, multiElevArr, "blue"));
+                        App.Instance.AddMapLayer(shapefileLayer);
+                        return;
+                    }
+                    
+                    // Parse coords to GPS (WSG84)
+                    let pointsArr: L.LatLng[] = [];
+                    let elevArr: number[] = [];
+                    result.value["geometry"]["coordinates"].forEach(coord => {
+                        let gpsPoint = proj4("EPSG:5514","EPSG:4326",coord);
+                        pointsArr.push(new L.LatLng(gpsPoint[1], gpsPoint[0]));
+                        elevArr.push(100); // TODO: Hardcoded; missing data
+                    });
+                    multiPointsArr.push(pointsArr);
+                    multiElevArr.push(elevArr);
+                    // let randomColor = "#" + Math.floor(Math.random()*16777215).toString(16);
 
-                        return source.read().then(log);
+                    return source.read().then(log);
                 }))
                 .catch(error => console.error(error.stack));
             };
@@ -210,7 +227,8 @@ export class App {
         }
     }
 
-    private RenderElevationMarker(point?: L.LatLng) {
+    // TODO: Used to be private - make unified
+    public RenderElevationMarker(point?: L.LatLng) {
         App.Instance.mapWindow.RenderElevationMarker(point);
     }
 

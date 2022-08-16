@@ -1,38 +1,37 @@
 import * as L from "leaflet";
 import { MapMarker } from "./mapmarker";
-import { MapRoad } from "./maproad";
+import { SingleMapRoad } from "./singleroad";
+import { MultiMapRoad } from "./multiroad";
 import { MapArea } from "./maparea";
 
 export class MapLayer {
     private layerMarkers: MapMarker[] = [];
-    private layerRoads: MapRoad[] = [];
+    private layerRoads: SingleMapRoad[] = [];
+    private multiRoads: MultiMapRoad[] = [];
     private layerAreas: MapArea[] = [];
-    // private layerGroup: L.LayerGroup;
     public activeLayerGroup: L.LayerGroup;
+    private activeMapEntities: (L.Marker | L.Polyline | L.Polygon)[];
     public layerName: string;
     private isActive: boolean = false;
 
     public constructor(name: string) {
         this.layerName = name;
-        // this.layerMarkers = markers;
-        // this.layerRoads = roads;
-        // this.layerAreas = areas;
-        // this.CreateLayerGroup();
     }
 
     public AddMapMarker(marker: MapMarker) {
         this.layerMarkers.push(marker);
-        // this.CreateLayerGroup()
     }
 
-    public AddMapRoad(road: MapRoad) {
+    public AddMapRoad(road: SingleMapRoad) {
         this.layerRoads.push(road);
-        // this.CreateLayerGroup()
+    }
+
+    public AddMultiRoad(road: MultiMapRoad) {
+        this.multiRoads.push(road);
     }
 
     public AddMapArea(area: MapArea) {
         this.layerAreas.push(area);
-        // this.CreateLayerGroup()
     }
 
     public GetActiveState() {
@@ -50,17 +49,26 @@ export class MapLayer {
     }
 
     public CreateLayerGroup() {
-        var mapEntities: (L.Marker | L.Polyline | L.Polygon)[] = [];
+        this.activeMapEntities = [];
         this.layerMarkers.forEach(m => {
-            mapEntities.push(m.GetMapEntity());
+            this.activeMapEntities.push(m.GetMapEntity());
         });
         this.layerRoads.forEach(r => {
-            mapEntities.push(r.GetMapEntity());
+            this.activeMapEntities.push(r.GetMapEntity());
+        });
+        this.multiRoads.forEach(r => {
+            this.activeMapEntities.push(r.GetMapEntity());
         });
         this.layerAreas.forEach(r => {
-            mapEntities.push(r.GetMapEntity());
+            this.activeMapEntities.push(r.GetMapEntity());
         });
 
-        return L.layerGroup(mapEntities);
+        return L.layerGroup(this.activeMapEntities);
+    }
+
+    public ListMapEntities() {
+        this.activeMapEntities.forEach(e => {
+            console.log(e);
+        });
     }
 }

@@ -20,7 +20,7 @@ import { getRelativePosition } from 'chart.js/helpers';
 // Internal imports
 import { App } from "./app";
 import { MapMarker } from "./mapmarker";
-import { MapRoad } from "./maproad";
+import { SingleMapRoad } from "./singleroad";
 import { MapLayer } from "./maplayer"
 import { GhostMapLayer } from "./ghostmaplayer"
 import { MapArea } from "./maparea"
@@ -41,7 +41,7 @@ app.AddMapLayer(myPoints);
 // Second test layer (CESTY)
 let myRoads = new MapLayer("Moje cesty #1");
 
-myRoads.AddMapRoad(new MapRoad([
+myRoads.AddMapRoad(new SingleMapRoad([
     new L.LatLng(49.86, 15.511),
     new L.LatLng(49.861, 15.512),
     new L.LatLng(49.86, 15.513),
@@ -52,7 +52,7 @@ myRoads.AddMapRoad(new MapRoad([
     500,
     100
 ], "blue"));
-myRoads.AddMapRoad(new MapRoad([
+myRoads.AddMapRoad(new SingleMapRoad([
     new L.LatLng(49.859, 15.511),
     new L.LatLng(49.859, 15.512),
     new L.LatLng(49.858, 15.513),

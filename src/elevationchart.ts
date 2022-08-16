@@ -65,7 +65,6 @@ export class ElevationChart {
                 id: "tooltipLine",
                 afterDraw: (chart: { tooltip?: any; scales?: any; ctx?: any }) => {
                     if (chart.tooltip.opacity === 1) {
-                        console.log("yooo");
                         const { ctx } = chart;
                         const { caretX } = chart.tooltip;
                         const topY = chart.scales.y.top;

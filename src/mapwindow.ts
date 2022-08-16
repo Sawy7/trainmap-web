@@ -60,4 +60,8 @@ export class MapWindow {
         // else
         //     this.map.removeLayer(marker.activeMarker);
     }
+
+    public WarpToPoint(point: L.LatLng) {
+        this.map.setView(point);
+    }
 }
