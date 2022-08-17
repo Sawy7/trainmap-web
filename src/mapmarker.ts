@@ -39,6 +39,10 @@ export class MapMarker implements MapEntity {
         return "Bod";
     }
 
+    public GetSignificantPoint(): L.LatLng {
+        return this.point;
+    }
+
     public ChangeCoordinates(point: L.LatLng) {
         this.activeMarker.setLatLng(point);
     }

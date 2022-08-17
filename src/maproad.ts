@@ -38,6 +38,8 @@ export abstract class MapRoad implements MapEntity {
         return "Cesta";
     }
 
+    abstract GetSignificantPoint(): L.LatLng;
+
     public GetBounds(): L.LatLngBounds {
         if (this.polyLine === undefined)
             return;

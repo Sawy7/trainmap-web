@@ -16,4 +16,8 @@ export class SingleMapRoad extends MapRoad {
         this.points = points;
         this.elevation = elevation;
     }
+
+    public GetSignificantPoint(): L.LatLng {
+        return this.points[0];
+    }
 }

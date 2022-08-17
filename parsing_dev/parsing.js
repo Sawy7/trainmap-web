@@ -1,4 +1,5 @@
-var shapefile = require("shapefile");
+var shapefile  = require( 'shapefile' ),
+    reader = shapefile.reader( 'polygons' );
 const proj4 = require("proj4");
 
 // Sauce:
@@ -16,7 +17,7 @@ function ListPoints() {
     });
 }
 
-shapefile.open("Olc_Krn_Ova.shp")
+shapefile.open("Olc_Krn_Ova_Z.shp", "Olc_Krn_Ova_Z.dbf")
 .then(source => source.read()
     .then(function log(result) {
         if (result.done) {
@@ -26,8 +27,9 @@ shapefile.open("Olc_Krn_Ova.shp")
 
         // Parse coords to GPS (WSG84)
         result.value["geometry"]["coordinates"].forEach(coord => {
-            gpsPoint = proj4("EPSG:5514","EPSG:4326",coord);
-            points.push([gpsPoint[1], gpsPoint[0]]);
+            // gpsPoint = proj4("EPSG:5514","EPSG:4326",coord);
+            // points.push([gpsPoint[1], gpsPoint[0]]);
+            points.push(coord);
         });
 
         // console.log(result.value["geometry"]["coordinates"]);

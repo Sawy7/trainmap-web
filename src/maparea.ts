@@ -27,4 +27,8 @@ export class MapArea implements MapEntity {
     public GetListInfo(): string {
         return "Plocha";
     }
+
+    public GetSignificantPoint(): L.LatLng {
+        return this.points[0];
+    }
 }

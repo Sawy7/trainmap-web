@@ -62,6 +62,6 @@ export class MapWindow {
     }
 
     public WarpToPoint(point: L.LatLng) {
-        this.map.setView(point);
+        this.map.setView(point, 15);
     }
 }

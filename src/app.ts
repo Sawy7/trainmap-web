@@ -4,6 +4,7 @@ import { GhostMapLayer } from "./ghostmaplayer";
 import { SingleMapRoad } from "./singleroad";
 import { MultiMapRoad } from "./multiroad";
 import { ElevationChart } from "./elevationchart";
+import { FileLoader } from "./fileloader";
 import { Offcanvas, Collapse } from "bootstrap";
 import * as L from "leaflet";
 import * as shapefile from "shapefile";
@@ -19,9 +20,10 @@ proj4.defs("EPSG:5514","+proj=krovak +lat_0=49.5 +lon_0=24.83333333333333 +alpha
 export class App {
     private mapWindow: MapWindow;
     private mapLayers: MapLayer[] = [];
-    private ghostMapLayers: GhostMapLayer[] = [];
+    // private ghostMapLayers: GhostMapLayer[] = [];
     private activeElevationChart: ElevationChart;
     private sidebarOffcanvas: Offcanvas = new Offcanvas(document.getElementById("offcanvasNavbar"));
+    private fileLoader: FileLoader = new FileLoader();
     private static _instance: App;
 
     private constructor(){};
@@ -47,18 +49,19 @@ export class App {
 
     public AddMapLayer(mapLayer: MapLayer) {
         this.mapLayers.push(mapLayer);
-        this.RenderLayerList();
+        // this.RenderLayerList();
+        this.AddToLayerList();
     }
 
-    public AddGhostMapLayer(ghostMapLayer: GhostMapLayer) {
-        this.ghostMapLayers.push(ghostMapLayer);
-        this.RenderLayerList();
-    }
+    // public AddGhostMapLayer(ghostMapLayer: GhostMapLayer) {
+    //     this.ghostMapLayers.push(ghostMapLayer);
+    //     this.RenderLayerList();
+    // }
 
-    private RemoveGhostMapLayer(index: number) {
-        this.ghostMapLayers.splice(index, 1);
-        this.RenderLayerList();
-    }
+    // private RemoveGhostMapLayer(index: number) {
+    //     this.ghostMapLayers.splice(index, 1);
+    //     this.RenderLayerList();
+    // }
 
     private PopulateLayerEntitesList(index: number, mapLayer: MapLayer) {
         // const layers = document.getElementById("layersList").children;
@@ -72,20 +75,31 @@ export class App {
         let entitiesList = document.getElementById("layer_"+index).children[0].children[1];
         if (entitiesList.innerHTML !== "")
             return;
-        let mapEntities = mapLayer.ListMapEntities();
+        let mapEntities = mapLayer.GetLayerEntities();
         mapEntities.forEach(ma => {
             var entityLink = document.createElement("a");
-            entityLink.setAttribute("class", "list-group-item list-group-item-dark");
+            entityLink.setAttribute("class", "list-group-item list-group-item-dark d-flex justify-content-between align-items-center");
             entityLink.setAttribute("href", "#");
-            entityLink.innerHTML = ma;
+            let significantPoint = ma.GetSignificantPoint();
+            entityLink.innerHTML = `${ma.GetListInfo()} (${significantPoint.lat}, ${significantPoint.lng})`;
             entityLink.onclick = () => {
-                console.log("locate "+ma);
+                this.mapWindow.WarpToPoint(significantPoint);
             };
+            var badge = document.createElement("span");
+            var locateIcon = document.createElement("i");
+            locateIcon.setAttribute("class", "bi-pin-map-fill")
+            badge.appendChild(locateIcon);
+            badge.setAttribute("class", "badge bg-primary rounded-pill");
+            entityLink.appendChild(badge);
             entitiesList.appendChild(entityLink);
         });
     }
 
-    public ActivateMapLayer(index: number) {
+    public ActivateMapLayer(index: number, soft: boolean = false) {
+        new Collapse(document.getElementById("layer_"+index)).toggle();
+        if (soft)
+            return;
+        
         let mapLayer = this.mapLayers[index];
         const mapLayerNewState = !mapLayer.GetAndToggleActiveState();
         this.mapWindow.RenderMapLayer(this.mapLayers[index], mapLayerNewState);
@@ -98,80 +112,164 @@ export class App {
         this.activeElevationChart = new ElevationChart(points, elevation, this.RenderElevationMarker);
     }
 
-    private SetDownloadingInLayerList(index: number) {
-        const layers = document.getElementById("layersList").children;
-        index += this.mapLayers.length;
-        layers[index].setAttribute("class", "list-group-item list-group-item-warning d-flex justify-content-between align-items-center");
-        layers[index].children[0].innerHTML = "Stahování...";
-    }
+    // private SetDownloadingInLayerList(index: number) {
+    //     const layers = document.getElementById("layersList").children;
+    //     index += this.mapLayers.length;
+    //     layers[index].setAttribute("class", "list-group-item list-group-item-warning d-flex justify-content-between align-items-center");
+    //     layers[index].children[0].innerHTML = "Stahování...";
+    // }
 
-    public DownloadGhostLayer(index: number) {
-        let ghostLayer = this.ghostMapLayers[index];
-        this.SetDownloadingInLayerList(index);
-        // this.mapLayers.push(ghostLayer.Download());
-        // this.RemoveGhostMapLayer(index);
-    }
+    // public DownloadGhostLayer(index: number) {
+    //     let ghostLayer = this.ghostMapLayers[index];
+    //     this.SetDownloadingInLayerList(index);
+    //     // this.mapLayers.push(ghostLayer.Download());
+    //     // this.RemoveGhostMapLayer(index);
+    // }
 
-    // TODO: This potentially runs too many times
-    private RenderLayerList() {
+    // // TODO: This potentially runs too many times
+    // private RenderLayerList() {
+    //     const layersList = document.getElementById("layersList");
+    //     layersList.innerHTML = "";
+
+    //     for (let i = 0; i < this.mapLayers.length; i++) {
+    //         const l = this.mapLayers[i];
+
+    //         // Accordions
+    //         var accordion = document.createElement("a");
+    //         accordion.setAttribute("class", "list-group-item list-group-item-dark d-flex justify-content-between align-items-center");
+    //         accordion.setAttribute("href", "#");
+    //         accordion.innerHTML = l.layerName;
+
+    //         var accordionCollapse = document.createElement("div");
+    //         accordionCollapse.setAttribute("class", "accordion-collapse collapse bg-secondary");
+    //         accordionCollapse.setAttribute("id", "layer_"+i);
+    //         accordion.onclick = () => {
+    //             this.ActivateMapLayer(i);
+    //         };
+
+    //         var accordionBody = document.createElement("div");
+    //         accordionBody.setAttribute("class", "accordion-body");
+
+    //         var routesHeader = document.createElement("h7");
+    //         routesHeader.innerHTML = "Elementy vrstvy";
+    //         accordionBody.appendChild(routesHeader);
+
+    //         var entityList = document.createElement("div");
+    //         accordionBody.appendChild(entityList);
+
+    //         accordionCollapse.appendChild(accordionBody);
+
+    //         var badge = document.createElement("span");
+    //         badge.innerHTML = "XY";
+    //         badge.setAttribute("class", "badge bg-primary rounded-pill");
+    //         accordion.appendChild(badge);
+
+    //         layersList.appendChild(accordion);
+    //         layersList.appendChild(accordionCollapse);
+
+    //         this.PopulateLayerEntitesList(i, this.mapLayers[i]);
+    //         if (l.GetActiveState())
+    //             this.ActivateMapLayer(i, true);
+    //     }
+
+    //     // Non-existent (ghost) layers (Note: external sources)
+    //     for (let i = 0; i < this.ghostMapLayers.length; i++) {
+    //         const g = this.ghostMapLayers[i];
+    //         var listItem = document.createElement("a");
+    //         listItem.innerHTML = g.layerName;
+    //         listItem.setAttribute("class", "list-group-item list-group-item-danger d-flex justify-content-between align-items-center");
+    //         // TODO: disabled for now
+    //         // listItem.onclick = function() {
+    //         //     App.Instance.DownloadGhostLayer(i);
+    //         // };
+    //         listItem.setAttribute("href", "#");
+            
+    //         var badge = document.createElement("span");
+    //         badge.innerHTML = "Ke stažení";
+    //         badge.setAttribute("class", "badge bg-primary rounded-pill");
+            
+    //         listItem.appendChild(badge);
+    //         layersList.appendChild(listItem);
+    //     }
+    // }
+
+    private FlushLayerList() {
         const layersList = document.getElementById("layersList");
         layersList.innerHTML = "";
+    }
+    
+    private AddToLayerList(index: number = undefined) {
+        const layersList = document.getElementById("layersList");
 
-        for (let i = 0; i < this.mapLayers.length; i++) {
-            const l = this.mapLayers[i];
+        if (index === undefined)
+            index = this.mapLayers.length - 1
+        let l = this.mapLayers[index];
 
-            // Accordions
-            var accordion = document.createElement("a");
-            accordion.setAttribute("class", "list-group-item list-group-item-dark");
-            accordion.setAttribute("href", "#");
-            accordion.innerHTML = l.layerName;
+        // Accordions
+        var accordion = document.createElement("a");
+        accordion.setAttribute("class", "list-group-item list-group-item-dark");
+        accordion.setAttribute("href", "#");
+        accordion.innerHTML = l.layerName;
 
-            var accordionCollapse = document.createElement("div");
-            accordionCollapse.setAttribute("class", "accordion-collapse collapse bg-secondary");
-            accordionCollapse.setAttribute("id", "layer_"+i);
-            // accordion.appendChild(accordionCollapse);
-            accordion.onclick = () => {
-                new Collapse(document.getElementById("layer_"+i)).toggle();
-                this.ActivateMapLayer(i);
-            };
+        var accordionCollapse = document.createElement("div");
+        accordionCollapse.setAttribute("class", "accordion-collapse collapse bg-secondary");
+        accordionCollapse.setAttribute("id", "layer_"+index);
+        accordion.onclick = () => {
+            this.ActivateMapLayer(index);
+        };
 
-            var accordionBody = document.createElement("div");
-            accordionBody.setAttribute("class", "accordion-body");
+        var accordionBody = document.createElement("div");
+        accordionBody.setAttribute("class", "accordion-body");
 
-            var routesHeader = document.createElement("h7");
-            routesHeader.innerHTML = "Elementy vrstvy";
-            accordionBody.appendChild(routesHeader);
+        var routesHeader = document.createElement("h7");
+        routesHeader.innerHTML = "Elementy vrstvy";
+        accordionBody.appendChild(routesHeader);
 
-            var entityList = document.createElement("div");
-            accordionBody.appendChild(entityList);
+        var entityList = document.createElement("div");
+        accordionBody.appendChild(entityList);
 
-            accordionCollapse.appendChild(accordionBody);
+        accordionCollapse.appendChild(accordionBody);
 
-            layersList.appendChild(accordion);
-            layersList.appendChild(accordionCollapse);
+        
+        layersList.appendChild(accordion);
+        layersList.appendChild(accordionCollapse);
 
-            this.PopulateLayerEntitesList(i, this.mapLayers[i])
-        }
+        this.PopulateLayerEntitesList(index, this.mapLayers[index]);
 
-        // Non-existent (ghost) layers (Note: external sources)
-        for (let i = 0; i < this.ghostMapLayers.length; i++) {
-            const g = this.ghostMapLayers[i];
-            var listItem = document.createElement("a");
-            listItem.innerHTML = g.layerName;
-            listItem.setAttribute("class", "list-group-item list-group-item-danger d-flex justify-content-between align-items-center");
-            // TODO: disabled for now
-            // listItem.onclick = function() {
-            //     App.Instance.DownloadGhostLayer(i);
-            // };
-            listItem.setAttribute("href", "#");
+        // // Non-existent (ghost) layers (Note: external sources)
+        // for (let i = 0; i < this.ghostMapLayers.length; i++) {
+        //     const g = this.ghostMapLayers[i];
+        //     var listItem = document.createElement("a");
+        //     listItem.innerHTML = g.layerName;
+        //     listItem.setAttribute("class", "list-group-item list-group-item-danger d-flex justify-content-between align-items-center");
+        //     // TODO: disabled for now
+        //     // listItem.onclick = function() {
+        //     //     App.Instance.DownloadGhostLayer(i);
+        //     // };
+        //     listItem.setAttribute("href", "#");
             
-            var badge = document.createElement("span");
-            badge.innerHTML = "Ke stažení";
-            badge.setAttribute("class", "badge bg-primary rounded-pill");
+        //     var badge = document.createElement("span");
+        //     badge.innerHTML = "Ke stažení";
+        //     badge.setAttribute("class", "badge bg-primary rounded-pill");
             
-            listItem.appendChild(badge);
-            layersList.appendChild(listItem);
-        }
+        //     listItem.appendChild(badge);
+        //     layersList.appendChild(listItem);
+        // }
+    }
+
+    private SaveLayersToLocalStorage() {
+        // localStorage.setItem("savedLayers", JSON.stringify(this.mapLayers));
+    }
+
+    public LoadLayersFromLocalStorage() {
+        // let storageLayers = localStorage.getItem("savedLayers");
+        // if (storageLayers === null)
+        //     return
+        // this.mapLayers = JSON.parse(storageLayers);
+        // this.FlushLayerList();
+        // for (let i = 0; i < this.mapLayers.length; i++) {
+        //     this.AddToLayerList(i);
+        // }
     }
 
     // https://stackoverflow.com/questions/3582671/how-to-open-a-local-disk-file-with-javascript
@@ -179,9 +277,9 @@ export class App {
         let fileInput = document.getElementById("gpxFileInput");
         fileInput.onchange = (e: Event) => {
             const target = e.target as HTMLInputElement;
+            if (!target.files)
+                return;
             let file = target.files[0];
-            if (!file)
-            return;
             
             let reader = new FileReader();
             reader.onload = (e: Event) => {
@@ -203,12 +301,16 @@ export class App {
                     pointsArr.push(new L.LatLng(+pointLat, +pointLong));
                     let pointElev = rootNode.children[i].children[0].innerHTML;
                     elevArr.push(+pointElev);
-                    // console.log(pointLat, pointLong, pointElev);
                 }
                 
-                let gpxLayer = new MapLayer("Nová GPX vrstva");
-                gpxLayer.AddMapRoad(new SingleMapRoad(pointsArr, elevArr, "purple"));
-                this.AddMapLayer(gpxLayer);
+                let addFunction = (name: string) => {
+                    let gpxLayer = new MapLayer(name);
+                    gpxLayer.AddMapRoad(new SingleMapRoad(pointsArr, elevArr, "purple"));
+                    this.AddMapLayer(gpxLayer);
+                    this.SaveLayersToLocalStorage();
+                }
+                this.fileLoader.SpawnNameInput("gpxFileInputContainer", addFunction);
+                
             };
             reader.readAsText(file);
         }
@@ -218,14 +320,13 @@ export class App {
         let fileInput = document.getElementById("shapefileInput");
         fileInput.onchange = (e: Event) => {
             const target = e.target as HTMLInputElement;
+            if (!target.files)
+                return;
             let file = target.files[0];
-            if (!file)
-            return;
             
             let reader = new FileReader();
             reader.onload = (e: Event) => {
                 const target = e.target as FileReader;               
-                let shapefileLayer = new MapLayer("Nová shapefile vrstva");
                 let multiPointsArr: L.LatLng[][] = [];
                 let multiElevArr: number[][] = [];
                 
@@ -233,24 +334,21 @@ export class App {
                 .then(source => source.read()
                 .then(function log(result) {
                     if (result.done) {
-                        // pointsArr.sort((a, b) => {
-                        //     if (a.lat > b.lat) {
-                        //         return 1;
-                        //     } else if (a.lat < b.lat) {
-                        //         return -1;
-                        //     } else {
-                        //         return 0;
-                        //     }
-                        // });
-
-                        shapefileLayer.AddMultiRoad(new MultiMapRoad(multiPointsArr, multiElevArr, "blue"));
-                        App.Instance.AddMapLayer(shapefileLayer);
+                        let addFunction = (name: string) => {
+                            let shapefileLayer = new MapLayer(name);
+                            shapefileLayer.AddMultiRoad(new MultiMapRoad(multiPointsArr, multiElevArr, "blue"));
+                            App.Instance.AddMapLayer(shapefileLayer);
+                            this.SaveLayersToLocalStorage();
+                        }
+                        App.Instance.fileLoader.SpawnNameInput("shapefileInputContainer", addFunction);
                         return;
                     }
                     
                     // Parse coords to GPS (WSG84)
                     let pointsArr: L.LatLng[] = [];
                     let elevArr: number[] = [];
+                    console.log(result.value);
+                    return;
                     result.value["geometry"]["coordinates"].forEach(coord => {
                         let gpsPoint = proj4("EPSG:5514","EPSG:4326",coord);
                         pointsArr.push(new L.LatLng(gpsPoint[1], gpsPoint[0]));

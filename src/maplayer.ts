@@ -3,6 +3,7 @@ import { MapMarker } from "./mapmarker";
 import { SingleMapRoad } from "./singleroad";
 import { MultiMapRoad } from "./multiroad";
 import { MapArea } from "./maparea";
+import { MapEntity } from "./mapentity";
 
 export class MapLayer {
     private layerMarkers: MapMarker[] = [];
@@ -32,6 +33,11 @@ export class MapLayer {
 
     public AddMapArea(area: MapArea) {
         this.layerAreas.push(area);
+    }
+
+    public Activate(state: boolean): boolean {
+        this.isActive = state;
+        return state;
     }
 
     public GetActiveState() {
@@ -66,23 +72,23 @@ export class MapLayer {
         return L.layerGroup(this.activeMapEntities);
     }
 
-    public ListMapEntities(): string[] {
-        let listInfo: string[] = [];
+    public GetLayerEntities(): MapEntity[] {
+        let entitiesList: MapEntity[] = [];
         // let listActionInfo: [string[], Function][];
 
         this.layerMarkers.forEach(m => {
-            listInfo.push(m.GetListInfo());
+            entitiesList.push(m);
         });
         this.layerRoads.forEach(r => {
-            listInfo.push(r.GetListInfo());
+            entitiesList.push(r);
         });
         this.multiRoads.forEach(r => {
-            listInfo.push(r.GetListInfo());
+            entitiesList.push(r);
         });
         this.layerAreas.forEach(a => {
-            listInfo.push(a.GetListInfo());
+            entitiesList.push(a);
         });
 
-        return listInfo;
+        return entitiesList;
     }
 }
