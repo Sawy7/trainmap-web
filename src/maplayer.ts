@@ -11,7 +11,6 @@ export class MapLayer {
     private multiRoads: MultiMapRoad[] = [];
     private layerAreas: MapArea[] = [];
     public activeLayerGroup: L.LayerGroup;
-    private activeMapEntities: (L.Marker | L.Polyline | L.Polygon)[];
     public layerName: string;
     private isActive: boolean = false;
     readonly className: string = "MapLayer";
@@ -56,21 +55,23 @@ export class MapLayer {
     }
 
     public CreateLayerGroup() {
-        this.activeMapEntities = [];
+        let activeMapEntities: (L.Marker | L.Polyline | L.Polygon)[] = [];
         this.layerMarkers.forEach(m => {
-            this.activeMapEntities.push(m.GetMapEntity());
+            activeMapEntities.push(m.GetMapEntity());
         });
         this.layerRoads.forEach(r => {
-            this.activeMapEntities.push(r.GetMapEntity());
+            activeMapEntities.push(r.GetMapEntity());
+            r.SetupInteractivity(this.layerName);
         });
         this.multiRoads.forEach(r => {
-            this.activeMapEntities.push(r.GetMapEntity());
+            activeMapEntities.push(r.GetMapEntity());
+            r.SetupInteractivity(this.layerName);
         });
         this.layerAreas.forEach(a => {
-            this.activeMapEntities.push(a.GetMapEntity());
+            activeMapEntities.push(a.GetMapEntity());
         });
 
-        return L.layerGroup(this.activeMapEntities);
+        return L.layerGroup(activeMapEntities);
     }
 
     public GetLayerEntities(): MapEntity[] {

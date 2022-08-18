@@ -12,6 +12,10 @@ export class MapMarker extends MapEntity {
         super();
         this.point = point;
         this.popupMsg = popupMsg;
+        this.dontSerializeList = [
+            "customIcon",
+            "activeMarker"
+        ]
         if (useCustomIcon)
             this.CreateCustomIcon();
     }
@@ -48,4 +52,10 @@ export class MapMarker extends MapEntity {
     public ChangeCoordinates(point: L.LatLng) {
         this.activeMarker.setLatLng(point);
     }
+
+    // public override Serialize(): Object {
+    //     let object = this;
+    //     delete object.polyLine;
+    //     return object;
+    // }
 }

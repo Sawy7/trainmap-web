@@ -2,6 +2,7 @@ import Chart from 'chart.js/auto';
 import { getRelativePosition } from 'chart.js/helpers';
 import { Offcanvas } from 'bootstrap';
 import * as L from "leaflet";
+import { App } from './app';
 // import { App } from './app';
 
 export class ElevationChart {
@@ -12,12 +13,12 @@ export class ElevationChart {
     private elevation: number[];
     private data;
     private chart: Chart;
-    private markerCallback: Function;
+    readonly layerName: string;
 
-    public constructor(points: L.LatLng[], elevation: number[], markerCallback: Function) {
+    public constructor(points: L.LatLng[], elevation: number[], layerName: string) {
         this.points = points;
         this.elevation = elevation;
-        this.markerCallback = markerCallback;
+        this.layerName = layerName;
         this.RenderChart();
         this.ShowChart();
         this.RegisterChartClosing();
@@ -58,7 +59,7 @@ export class ElevationChart {
                     const canvasPosition = getRelativePosition(e, this.chart);
                     const index = this.chart.scales.x.getValueForPixel(canvasPosition.x);
                     let elevationMarkerPos = this.points[index];
-                    this.markerCallback(elevationMarkerPos);
+                    App.Instance.RenderElevationMarker(elevationMarkerPos);
                 }
             },
             plugins: [{
@@ -86,16 +87,20 @@ export class ElevationChart {
     }
 
     private ShowChart() {
-        this.markerCallback();
+        App.Instance.RenderElevationMarker();
         ElevationChart.offcanvas.show();
     }
 
+    public HideChart() {
+        ElevationChart.offcanvas.hide();
+    }
+    
     private RegisterChartClosing() {
         ElevationChart.elevationChartElement.addEventListener("hidden.bs.offcanvas", () => {
-            this.markerCallback();
+            App.Instance.RenderElevationMarker();
         }, { once: true });
     }
-
+    
     public DestroyChart() {
         this.chart.destroy();
     }

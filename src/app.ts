@@ -104,12 +104,15 @@ export class App {
         const mapLayerNewState = !mapLayer.GetAndToggleActiveState();
         this.mapWindow.RenderMapLayer(this.mapLayers[index], mapLayerNewState);
         // this.SetActiveInLayerList(index, mapLayer, mapLayerNewState);
+
+        if (this.activeElevationChart !== undefined && !mapLayerNewState && this.activeElevationChart.layerName == mapLayer.layerName)
+            this.activeElevationChart.HideChart();
     }
 
-    public SetElevationChart(points: L.LatLng[], elevation: number[]) {
+    public SetElevationChart(points: L.LatLng[], elevation: number[], layerName: string) {
         if (this.activeElevationChart !== undefined)
             this.activeElevationChart.DestroyChart();
-        this.activeElevationChart = new ElevationChart(points, elevation, this.RenderElevationMarker);
+        this.activeElevationChart = new ElevationChart(points, elevation, layerName);
     }
 
     // private SetDownloadingInLayerList(index: number) {
@@ -193,9 +196,10 @@ export class App {
     //     }
     // }
 
-    private FlushLayerList() {
+    private FlushLayers() {
         const layersList = document.getElementById("layersList");
         layersList.innerHTML = "";
+        this.mapLayers = [];
     }
 
     private AddToLayerList(index: number = undefined) {
@@ -270,7 +274,7 @@ export class App {
         if (storageLayers === null)
             return;
         let storageLayersParsed = JSON.parse(storageLayers);
-        this.FlushLayerList();
+        this.FlushLayers();
         storageLayersParsed.forEach(storageLayer => {
             let deserializedLayer = MapLayer.Deserialize(storageLayer);
             this.AddMapLayer(deserializedLayer);
@@ -360,12 +364,7 @@ export class App {
         }
     }
 
-    // TODO: Used to be private - make unified
     public RenderElevationMarker(point?: L.LatLng) {
         App.Instance.mapWindow.RenderElevationMarker(point);
-    }
-
-    public PrepareElevationChart() {
-
     }
 }

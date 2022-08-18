@@ -23,6 +23,9 @@ export abstract class MapRoad extends MapEntity {
         this.weight = weight;
         this.opacity = opacity;
         this.smoothFactor = smoothFactor;
+        this.dontSerializeList = [
+            "polyLine"
+        ]
     }
 
     public GetMapEntity(): L.Polyline {
@@ -32,7 +35,7 @@ export abstract class MapRoad extends MapEntity {
             opacity: this.opacity,
             smoothFactor: this.smoothFactor
         });
-        this.SetupInteractivity();
+        // this.SetupInteractivity();
         return this.polyLine;
     }
 
@@ -42,14 +45,7 @@ export abstract class MapRoad extends MapEntity {
 
     public abstract GetSignificantPoint(): L.LatLng;
 
-    public GetBounds(): L.LatLngBounds {
-        if (this.polyLine === undefined)
-            return;
-
-        return this.polyLine.getBounds();
-    }
-
-    private SetupInteractivity() {
+    public SetupInteractivity(layerName: string) {
         // this.polyLine.on("mouseover", function (event) {
         //     let mouseMarker = new MapMarker(event["latlng"], "This is a popup #1");
         //     App.Instance.RenderElevationMarker(new L.LatLng(event["latlng"]["lat"], event["latlng"]["lng"]));
@@ -60,7 +56,7 @@ export abstract class MapRoad extends MapEntity {
         // });
 
         this.polyLine.on("click", (event) => {
-            App.Instance.SetElevationChart(this.points, this.elevation);
+            App.Instance.SetElevationChart(this.points, this.elevation, layerName);
         });
     }
 }
