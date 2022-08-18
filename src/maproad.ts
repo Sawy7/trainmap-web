@@ -2,7 +2,7 @@ import * as L from "leaflet";
 import { MapEntity } from "./mapentity";
 import { App } from "./app";
 
-export abstract class MapRoad implements MapEntity {
+export abstract class MapRoad extends MapEntity {
     protected points: any;
     protected elevation: any;
     private color: string;
@@ -10,6 +10,7 @@ export abstract class MapRoad implements MapEntity {
     private opacity: number;
     private smoothFactor: number;
     private polyLine: L.Polyline;
+    readonly className: string = "MapRoad";
 
     protected constructor(
                 color: string = "red",
@@ -17,6 +18,7 @@ export abstract class MapRoad implements MapEntity {
                 opacity: number = 0.5,
                 smoothFactor: number = 1
                 ) {
+        super();
         this.color = color;
         this.weight = weight;
         this.opacity = opacity;
@@ -38,7 +40,7 @@ export abstract class MapRoad implements MapEntity {
         return "Cesta";
     }
 
-    abstract GetSignificantPoint(): L.LatLng;
+    public abstract GetSignificantPoint(): L.LatLng;
 
     public GetBounds(): L.LatLngBounds {
         if (this.polyLine === undefined)

@@ -14,6 +14,7 @@ export class MapLayer {
     private activeMapEntities: (L.Marker | L.Polyline | L.Polygon)[];
     public layerName: string;
     private isActive: boolean = false;
+    readonly className: string = "MapLayer";
 
     public constructor(name: string) {
         this.layerName = name;
@@ -90,5 +91,54 @@ export class MapLayer {
         });
 
         return entitiesList;
+    }
+
+    public Serialize(): Object {
+        let entitiesList: any[] = [];
+
+        this.layerMarkers.forEach(m => {
+            entitiesList.push(m.Serialize());
+        });
+        this.layerRoads.forEach(r => {
+            entitiesList.push(r.Serialize());
+        });
+        this.multiRoads.forEach(r => {
+            entitiesList.push(r.Serialize());
+        });
+        this.layerAreas.forEach(a => {
+            entitiesList.push(a.Serialize());
+        });
+
+        return {
+            "entityName": this.className,
+            "name": this.layerName,
+            "subEntities": entitiesList
+        };
+    }
+
+    public static Deserialize(serializedLayer: Object) {
+        let deserializedLayer = new MapLayer(serializedLayer["name"]);
+        serializedLayer["subEntities"].forEach(entity => {
+            if (entity["className"] == "SingleMapRoad") {
+                deserializedLayer.AddMapRoad(
+                    new SingleMapRoad(entity["points"], entity["elevation"], entity["color"],
+                    entity["weight"], entity["opacity"], entity["smoothFactor"])
+                );
+            } else if (entity["className"] == "MultiMapRoad") {
+                deserializedLayer.AddMultiRoad(
+                    new MultiMapRoad(entity["points"], entity["elevation"], entity["color"],
+                    entity["weight"], entity["opacity"], entity["smoothFactor"])
+                );
+            } else if (entity["className"] == "MapMarker") {
+                deserializedLayer.AddMapMarker(
+                    new MapMarker(entity["point"], entity["popupMsg"])
+                );
+            } else if (entity["className"] == "MapArea") {
+                deserializedLayer.AddMapArea(
+                    new MapArea(entity["points"], entity["popupMsg"])
+                );
+            }
+        });
+        return deserializedLayer;
     }
 }

@@ -1,9 +1,13 @@
 const path = require("path")
+var webpack = require('webpack');
 
 module.exports = {
     entry: "./src/index.ts",
     resolve: {
-        extensions: [".ts", ".js"]
+        extensions: [".ts", ".js"],
+        fallback: {
+            buffer: require.resolve('buffer/'),
+        }
     },
     module: {
         rules: [
@@ -51,5 +55,10 @@ module.exports = {
         hints: false,
         maxEntrypointSize: 512000,
         maxAssetSize: 512000
-    }
+    },
+    plugins: [
+        new webpack.ProvidePlugin({
+            Buffer: ['buffer', 'Buffer'],
+        }),
+    ]
 }

@@ -1,9 +1,10 @@
 import * as L from "leaflet";
 import { MapEntity } from "./mapentity";
 
-export class MapArea implements MapEntity {
+export class MapArea extends MapEntity {
     private points: L.LatLng[];
     private popupMsg: string;
+    readonly className: string = "MapArea";
     // private color: string;
     // private opacity: number;
 
@@ -12,6 +13,7 @@ export class MapArea implements MapEntity {
         // color: string = "red",
         // opacity: number = 0.5,
         ) {
+        super();
         this.points = points;
         this.popupMsg = popupMsg;
         // this.color = color;

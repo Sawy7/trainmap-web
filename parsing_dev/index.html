@@ -1,0 +1,6 @@
+<script src='https://unpkg.com/shpjs@latest/dist/shp.js'> </script>
+<script>
+	shp('http://127.0.0.1:5500/parsing_dev/3d.zip').then(function(data){
+		console.log(data["features"][0]["geometry"]["coordinates"][0]);
+	});
+</script>

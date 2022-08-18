@@ -7,14 +7,14 @@ import { ElevationChart } from "./elevationchart";
 import { FileLoader } from "./fileloader";
 import { Offcanvas, Collapse } from "bootstrap";
 import * as L from "leaflet";
-import * as shapefile from "shapefile";
-import proj4 from "proj4";
+import * as shp from "shpjs";
+// import proj4 from "proj4";
 
 // http://lepsi-nez-zivot.blogspot.com/2017/08/konverze-s-jtsk-krovak-do-wsg84-gsm-api.html
 // https://github.com/proj4js/proj4js
 // https://training.gismentors.eu/open-source-gis/knihovny/proj4.html
-proj4.defs("EPSG:4326","+proj=longlat +datum=WGS84 +no_defs");
-proj4.defs("EPSG:5514","+proj=krovak +lat_0=49.5 +lon_0=24.83333333333333 +alpha=30.28813972222222 +k=0.9999 +x_0=0 +y_0=0 +ellps=bessel +pm=greenwich +units=m +no_defs +towgs84=570.8,85.7,462.8,4.998,1.587,5.261,3.56");
+// proj4.defs("EPSG:4326","+proj=longlat +datum=WGS84 +no_defs");
+// proj4.defs("EPSG:5514","+proj=krovak +lat_0=49.5 +lon_0=24.83333333333333 +alpha=30.28813972222222 +k=0.9999 +x_0=0 +y_0=0 +ellps=bessel +pm=greenwich +units=m +no_defs +towgs84=570.8,85.7,462.8,4.998,1.587,5.261,3.56");
 
 // TS Singleton: https://stackoverflow.com/questions/30174078/how-to-define-singleton-in-typescript
 export class App {
@@ -44,7 +44,7 @@ export class App {
         this.SetupGPXLoader();
         this.SetupShapefileLoader();
         // TODO: Dev - remove
-        this.sidebarOffcanvas.toggle();   
+        this.sidebarOffcanvas.toggle();
     }
 
     public AddMapLayer(mapLayer: MapLayer) {
@@ -71,7 +71,7 @@ export class App {
         //     layers[index].setAttribute("class", "list-group-item list-group-item-dark active");
         // else
         //     layers[index].setAttribute("class", "list-group-item list-group-item-dark");
-        
+
         let entitiesList = document.getElementById("layer_"+index).children[0].children[1];
         if (entitiesList.innerHTML !== "")
             return;
@@ -99,7 +99,7 @@ export class App {
         new Collapse(document.getElementById("layer_"+index)).toggle();
         if (soft)
             return;
-        
+
         let mapLayer = this.mapLayers[index];
         const mapLayerNewState = !mapLayer.GetAndToggleActiveState();
         this.mapWindow.RenderMapLayer(this.mapLayers[index], mapLayerNewState);
@@ -183,11 +183,11 @@ export class App {
     //         //     App.Instance.DownloadGhostLayer(i);
     //         // };
     //         listItem.setAttribute("href", "#");
-            
+
     //         var badge = document.createElement("span");
     //         badge.innerHTML = "Ke stažení";
     //         badge.setAttribute("class", "badge bg-primary rounded-pill");
-            
+
     //         listItem.appendChild(badge);
     //         layersList.appendChild(listItem);
     //     }
@@ -197,7 +197,7 @@ export class App {
         const layersList = document.getElementById("layersList");
         layersList.innerHTML = "";
     }
-    
+
     private AddToLayerList(index: number = undefined) {
         const layersList = document.getElementById("layersList");
 
@@ -230,7 +230,7 @@ export class App {
 
         accordionCollapse.appendChild(accordionBody);
 
-        
+
         layersList.appendChild(accordion);
         layersList.appendChild(accordionCollapse);
 
@@ -247,29 +247,34 @@ export class App {
         //     //     App.Instance.DownloadGhostLayer(i);
         //     // };
         //     listItem.setAttribute("href", "#");
-            
+
         //     var badge = document.createElement("span");
         //     badge.innerHTML = "Ke stažení";
         //     badge.setAttribute("class", "badge bg-primary rounded-pill");
-            
+
         //     listItem.appendChild(badge);
         //     layersList.appendChild(listItem);
         // }
     }
 
     private SaveLayersToLocalStorage() {
-        // localStorage.setItem("savedLayers", JSON.stringify(this.mapLayers));
+        let layersToSave: Object[] = [];
+        this.mapLayers.forEach(mapLayer => {
+            layersToSave.push(mapLayer.Serialize());
+        });
+        localStorage.setItem("savedLayers", JSON.stringify(layersToSave));
     }
 
     public LoadLayersFromLocalStorage() {
-        // let storageLayers = localStorage.getItem("savedLayers");
-        // if (storageLayers === null)
-        //     return
-        // this.mapLayers = JSON.parse(storageLayers);
-        // this.FlushLayerList();
-        // for (let i = 0; i < this.mapLayers.length; i++) {
-        //     this.AddToLayerList(i);
-        // }
+        let storageLayers = localStorage.getItem("savedLayers");
+        if (storageLayers === null)
+            return;
+        let storageLayersParsed = JSON.parse(storageLayers);
+        this.FlushLayerList();
+        storageLayersParsed.forEach(storageLayer => {
+            let deserializedLayer = MapLayer.Deserialize(storageLayer);
+            this.AddMapLayer(deserializedLayer);
+        });
     }
 
     // https://stackoverflow.com/questions/3582671/how-to-open-a-local-disk-file-with-javascript
@@ -280,7 +285,7 @@ export class App {
             if (!target.files)
                 return;
             let file = target.files[0];
-            
+
             let reader = new FileReader();
             reader.onload = (e: Event) => {
                 const target = e.target as FileReader;
@@ -290,10 +295,10 @@ export class App {
 
                 let rootNode = xmlDoc.getElementsByTagName("trkseg")[0];
                 let pointCount = rootNode.childElementCount;
-                
+
                 let pointsArr: L.LatLng[] = [];
                 let elevArr: number[] = [];
-                
+
                 // Note: GPX ze Seznamu obsahuje duplicity
                 for (let i = 0; i < pointCount; i++) {
                     let pointLat = rootNode.children[i].getAttribute("lat");
@@ -302,7 +307,7 @@ export class App {
                     let pointElev = rootNode.children[i].children[0].innerHTML;
                     elevArr.push(+pointElev);
                 }
-                
+
                 let addFunction = (name: string) => {
                     let gpxLayer = new MapLayer(name);
                     gpxLayer.AddMapRoad(new SingleMapRoad(pointsArr, elevArr, "purple"));
@@ -310,7 +315,7 @@ export class App {
                     this.SaveLayersToLocalStorage();
                 }
                 this.fileLoader.SpawnNameInput("gpxFileInputContainer", addFunction);
-                
+
             };
             reader.readAsText(file);
         }
@@ -323,43 +328,32 @@ export class App {
             if (!target.files)
                 return;
             let file = target.files[0];
-            
             let reader = new FileReader();
             reader.onload = (e: Event) => {
-                const target = e.target as FileReader;               
-                let multiPointsArr: L.LatLng[][] = [];
-                let multiElevArr: number[][] = [];
-                
-                shapefile.open(reader.result)
-                .then(source => source.read()
-                .then(function log(result) {
-                    if (result.done) {
-                        let addFunction = (name: string) => {
-                            let shapefileLayer = new MapLayer(name);
-                            shapefileLayer.AddMultiRoad(new MultiMapRoad(multiPointsArr, multiElevArr, "blue"));
-                            App.Instance.AddMapLayer(shapefileLayer);
-                            this.SaveLayersToLocalStorage();
-                        }
-                        App.Instance.fileLoader.SpawnNameInput("shapefileInputContainer", addFunction);
-                        return;
-                    }
-                    
-                    // Parse coords to GPS (WSG84)
-                    let pointsArr: L.LatLng[] = [];
-                    let elevArr: number[] = [];
-                    console.log(result.value);
-                    return;
-                    result.value["geometry"]["coordinates"].forEach(coord => {
-                        let gpsPoint = proj4("EPSG:5514","EPSG:4326",coord);
-                        pointsArr.push(new L.LatLng(gpsPoint[1], gpsPoint[0]));
-                        elevArr.push(100); // TODO: Hardcoded; missing data
+                shp(reader.result)
+                .then((geojson) => {
+                    let multiPointsArr: L.LatLng[][] = [];
+                    let multiElevArr: number[][] = [];
+                    geojson["features"].forEach(feature => {
+                        let pointsArr: L.LatLng[] = [];
+                        let elevArr: number[] = [];
+                        feature["geometry"]["coordinates"].forEach(coords => {
+                            // let gpsPoint = proj4("EPSG:5514", "EPSG:4326", coords); // NOTE: .prj file must have correct projection spec
+                            pointsArr.push(new L.LatLng(coords[1], coords[0]));
+                            elevArr.push(coords[2]);
+                        });
+                        multiPointsArr.push(pointsArr);
+                        multiElevArr.push(elevArr);
                     });
-                    multiPointsArr.push(pointsArr);
-                    multiElevArr.push(elevArr);
-                    // let randomColor = "#" + Math.floor(Math.random()*16777215).toString(16);
 
-                    return source.read().then(log);
-                }))
+                    let addFunction = (name: string) => {
+                        let shapefileLayer = new MapLayer(name);
+                        shapefileLayer.AddMultiRoad(new MultiMapRoad(multiPointsArr, multiElevArr, "blue"));
+                        App.Instance.AddMapLayer(shapefileLayer);
+                        this.SaveLayersToLocalStorage();
+                    }
+                    App.Instance.fileLoader.SpawnNameInput("shapefileInputContainer", addFunction);
+                })
                 .catch(error => console.error(error.stack));
             };
             reader.readAsArrayBuffer(file);

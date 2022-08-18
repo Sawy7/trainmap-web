@@ -4,6 +4,7 @@ import { MapRoad } from "./maproad";
 export class SingleMapRoad extends MapRoad {
     protected points: L.LatLng[];
     protected elevation: number[];
+    readonly className: string = "SingleMapRoad";
 
     public constructor(points: L.LatLng[],
                 elevation: number[],

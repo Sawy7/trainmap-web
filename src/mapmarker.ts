@@ -1,13 +1,15 @@
 import * as L from "leaflet";
 import {MapEntity} from "./mapentity";
 
-export class MapMarker implements MapEntity {
+export class MapMarker extends MapEntity {
     private point: L.LatLng;
     private popupMsg: string;
     private customIcon: L.Icon;
     public activeMarker: L.Marker;
+    readonly className: string = "MapMarker";
 
     public constructor(point: L.LatLng, popupMsg: string, useCustomIcon: boolean = false) {
+        super();
         this.point = point;
         this.popupMsg = popupMsg;
         if (useCustomIcon)
