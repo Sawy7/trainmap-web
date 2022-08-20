@@ -1,11 +1,11 @@
 import { MapWindow } from "./mapwindow";
 import { MapLayer } from "./maplayer";
-import { GhostMapLayer } from "./ghostmaplayer";
+// import { GhostMapLayer } from "./ghostmaplayer";
 import { SingleMapRoad } from "./singleroad";
 import { MultiMapRoad } from "./multiroad";
 import { ElevationChart } from "./elevationchart";
 import { FileLoader } from "./fileloader";
-import { Offcanvas, Collapse } from "bootstrap";
+import { Offcanvas, Collapse, Modal } from "bootstrap";
 import * as L from "leaflet";
 import * as shp from "shpjs";
 // import proj4 from "proj4";
@@ -36,6 +36,10 @@ export class App {
         document.getElementById("offcanvasNavbarButton").onclick = () => {
             this.sidebarOffcanvas.toggle();
         };
+
+        document.getElementById("logModalSaveButton").onclick = () => {
+            this.SaveLogToDisk();
+        };
     }
 
     public Init(centerLat: number, centerLong: number, zoom: number) {
@@ -43,6 +47,7 @@ export class App {
         this.SetupButtons();
         this.SetupGPXLoader();
         this.SetupShapefileLoader();
+        this.AddKeyListener();
         // TODO: Dev - remove
         this.sidebarOffcanvas.toggle();
     }
@@ -345,9 +350,11 @@ export class App {
                             // let gpsPoint = proj4("EPSG:5514", "EPSG:4326", coords); // NOTE: .prj file must have correct projection spec
                             pointsArr.push(new L.LatLng(coords[1], coords[0]));
                             elevArr.push(coords[2]);
+                            this.PushToLog(coords);
                         });
                         multiPointsArr.push(pointsArr);
                         multiElevArr.push(elevArr);
+                        this.PushToLog(" ");
                     });
 
                     let addFunction = (name: string) => {
@@ -366,5 +373,55 @@ export class App {
 
     public RenderElevationMarker(point?: L.LatLng) {
         App.Instance.mapWindow.RenderElevationMarker(point);
+    }
+
+    private AddKeyListener() {
+        document.addEventListener("keydown", (event) => {
+            // var name = event.key;
+            if (event.code == "Backquote")
+                this.ToggleLog();
+          }, false);
+    }
+
+    public ToggleLog() {
+        let logModalElement = document.getElementById("logModal");
+        if (!logModalElement.classList.contains("show")) {
+            let logModal = new Modal(logModalElement);
+            logModal.show();
+        }
+    }
+
+    private PushToLog(text: string) {
+        let logBody = document.getElementById("logModalBody");
+        let line = document.createElement("p");
+        line.innerHTML = text;
+        logBody.appendChild(line);
+    }
+
+    // https://stackoverflow.com/questions/8178825/create-text-file-in-javascript
+    private SaveLogToDisk() {
+        let logLines = document.getElementById("logModalBody").children;
+        let text: string = "";
+        
+        for (let i = 0; i < logLines.length; i++) {
+            const line = logLines[i].innerHTML;
+            text += line + "\n";
+        }
+
+        console.log([text]);
+        let data = new Blob([text], {type: "text/plain"});
+        let link = window.URL.createObjectURL(data);
+        this.DownloadLink(link);
+        window.URL.revokeObjectURL(link);
+    }
+
+    // https://stackoverflow.com/questions/11620698/how-to-trigger-a-file-download-when-clicking-an-html-button-or-javascript
+    private DownloadLink(link: string) {
+        const a = document.createElement("a");
+        a.href = link;
+        a.download = link.split("/").pop();
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
     }
 }
