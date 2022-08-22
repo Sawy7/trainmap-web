@@ -126,10 +126,13 @@ export class MapLayer {
                     entity["weight"], entity["opacity"], entity["smoothFactor"])
                 );
             } else if (entity["className"] == "MultiMapRoad") {
-                deserializedLayer.AddMultiRoad(
-                    new MultiMapRoad(entity["points"], entity["elevation"], entity["color"],
-                    entity["weight"], entity["opacity"], entity["smoothFactor"])
-                );
+                let multiRoad = new MultiMapRoad(entity["points"], entity["elevation"], entity["color"],
+                entity["weight"], entity["opacity"], entity["smoothFactor"]);
+                deserializedLayer.AddMultiRoad(multiRoad);
+
+                multiRoad.lineator.constructedRoads.forEach(cr => {
+                    deserializedLayer.AddMapRoad(cr);
+                });
             } else if (entity["className"] == "MapMarker") {
                 deserializedLayer.AddMapMarker(
                     new MapMarker(entity["point"], entity["popupMsg"])

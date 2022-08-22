@@ -28,11 +28,11 @@ class Group:
     def add_intersect(self, index):
         self.intersects.append(index)
     
-    def join_intersects(self, double_up = False, previously_visited = [], coord_count = 0, deep = 0):
+    def join_intersects(self, layer_name, double_up = False, previously_visited = [], coord_count = 0, deep = 0):
         # print(f"\n{deep} deep", double_up)
         previously_visited.append(self.id)
         if not double_up:
-            print('let py = new MapLayer("Python DUMP");')
+            print(f'let py = new MapLayer("{layer_name}");')
             print('py.AddMapRoad(new SingleMapRoad([')
         for i, coord in enumerate(self.coords_array):
             child_found = False
@@ -42,7 +42,7 @@ class Group:
                 elif i == child[0]:
                     child_found = True
                     previously_visited.append(child[2])
-                    coord_count = child[1].join_intersects(True, previously_visited, coord_count, deep+1)
+                    coord_count = child[1].join_intersects(layer_name, True, previously_visited, coord_count, deep+1)
             if not child_found:
                 print(f"    new L.LatLng({coord[0]}, {coord[1]}),")
             coord_count += 1
@@ -238,8 +238,8 @@ if __name__ == "__main__":
 
     # GUD
     no_parent = [x for x in groups if len(x.prev) == 0 and len(x.next) > 0]
-    for np in no_parent:
-        coord_count = np.join_intersects()
+    for i,np in enumerate(no_parent):
+        coord_count = np.join_intersects(f"Python {i}")
         print(coord_count, file=sys.stderr)
         print("")
 

@@ -239,6 +239,13 @@ export class App {
 
         accordionCollapse.appendChild(accordionBody);
 
+        // var lineatorLink = document.createElement("a");
+        // lineatorLink.innerHTML = "LINEAR";
+        // lineatorLink.href = "#";
+        // lineatorLink.onclick = () => {
+        //     this.mapLayers[index]
+        // };
+        // accordionBody.appendChild(lineatorLink);
 
         layersList.appendChild(accordion);
         layersList.appendChild(accordionCollapse);

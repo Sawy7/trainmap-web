@@ -18,6 +18,11 @@ export class SingleMapRoad extends MapRoad {
         this.elevation = elevation;
     }
 
+    public AddPoint(point: L.LatLng, elevation: number) {
+        this.points.push(point);
+        this.elevation.push(elevation);
+    }
+
     public GetSignificantPoint(): L.LatLng {
         return this.points[0];
     }
