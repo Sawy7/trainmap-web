@@ -66,3 +66,4 @@ app.LoadLayersFromLocalStorage();
 // let apiLayer2 = new GhostMapLayer("Moje cesty z externího API 2", "http://api.com/endpoint");
 // app.AddGhostMapLayer(apiLayer);
 // app.AddGhostMapLayer(apiLayer2);
+

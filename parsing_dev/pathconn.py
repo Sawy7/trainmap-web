@@ -1,4 +1,4 @@
-from math import sqrt
+from math import atan2, cos, pi, sin, sqrt
 import sys
 
 class Group:
@@ -57,6 +57,17 @@ class Group:
             print('app.AddMapLayer(py);')
         return coord_count
 
+    def closest_point_distance(self, point):
+        min_distance = None
+        intersect_index = None
+        for i,c in enumerate(self.coords_array):
+            distance = calc_distance_gps(point, c)
+            if min_distance is None or distance < min_distance:
+                min_distance = distance
+                intersect_index = i
+        
+        return (intersect_index, min_distance)
+
 def parse_coords(line):
     coords = line.split(",")
     return [float(coords[1]), float(coords[0]), float(coords[2])]
@@ -66,6 +77,18 @@ def get_first_lat(group: Group):
 
 def calc_distance(coords_a, coords_b):
     return sqrt(pow(coords_a[0]-coords_b[0], 2) + pow(coords_a[1]-coords_b[1], 2))
+
+def calc_distance_gps(coords_a, coords_b):
+    R = 6371000
+    fi1 = coords_a[0] * pi/180
+    fi2 = coords_b[0] * pi/180
+    delta_fi = (coords_b[0] - coords_a[0]) * pi/180
+    delta_lambda = (coords_b[1] - coords_a[1]) * pi/180
+
+    a = sin(delta_fi/2) * sin(delta_fi/2) + cos(fi1) * cos(fi2) * sin(delta_lambda/2) * sin(delta_lambda/2)
+    c = atan2(sqrt(a), sqrt(1-a))
+    d = R * c
+    return c
 
 def calc_distance_start_end(group_a: Group, group_b: Group):
     return calc_distance(group_a.coords_array[0], group_b.coords_array[-1])
@@ -236,11 +259,62 @@ if __name__ == "__main__":
     #     print(f"Group {group.id} -> {[(x[0], x[2]) for x in group.next]}")
     #     # print(f"Group {group.prev} <- {group.id}")
 
+    isolated = [x for x in groups if len(x.prev) == 0 and len(x.next) == 0]
+    
+    for y in isolated:
+        min_distance_vals = None
+        min_group = None
+        for x in groups:
+            if x.id == y.id:
+                continue
+            # NOTE: Distance is not very accurate like this
+            dist_vals = x.closest_point_distance(y.coords_array[0])
+            if min_distance_vals is None or dist_vals[1] < min_distance_vals[1]:
+                min_distance_vals = dist_vals
+                min_group = x
+        y.assign_prev(x)
+        min_group.assign_next((min_distance_vals[0], y, y.id))
+        # print(min_distance_vals)
+        # print(f"{isolated[0].coords_array[0]} -> {min_group.coords_array[min_distance_vals[0]]}")
+
     # GUD
     no_parent = [x for x in groups if len(x.prev) == 0 and len(x.next) > 0]
-    for i,np in enumerate(no_parent):
-        coord_count = np.join_intersects(f"Python {i}")
-        print(coord_count, file=sys.stderr)
-        print("")
+    # print(len(no_parent))
+
+    # for i,x in enumerate(no_parent):
+    #     parent_group = None
+    #     child_group = None
+    #     min_distance_vals = None
+    #     if i+1 >= len(no_parent):
+    #         break
+    #     for y in no_parent[i+1::]:
+    #         if x.id == y.id:
+    #             continue
+    #         dist1 = x.closest_point_distance(y.coords_array[0])
+    #         dist2 = y.closest_point_distance(x.coords_array[0])
+    #         if dist1[1] <= dist2[1]:
+    #             parent_group = x
+    #             child_group = y
+    #             min_distance_vals = dist1
+    #         else:
+    #             parent_group = y
+    #             child_group = x
+    #             min_distance_vals = dist2
+    #     child_group.assign_prev(parent_group)
+    #     parent_group.assign_next((min_distance_vals[0], child_group, child_group.id))
+
+    # no_parent = [x for x in groups if len(x.prev) == 0 and len(x.next) > 0]
+    # print(len(no_parent))
+    
+    # # GUD
+    # for i,np in enumerate(no_parent):
+    #     coord_count = np.join_intersects(f"Python {i}")
+    #     print(coord_count, file=sys.stderr)
+    #     print("")
+
+    for group in groups:
+        # if len(group.prev) == 0 and len(group.next) != 0:
+        print(f"Group {group.id} -> {[x[2] for x in group.next]}")
+        print(f"Group {[x.id for x in group.prev]} <- {group.id}")        
 
     path_file.close()
