@@ -9,35 +9,24 @@ export class Lineator {
         this.roadGroups = roadGroups;
         this.PopulateIntersects();
         
+        console.log("isolated count:", this.FindIsolated().length);
         this.JoinIsolated();
 
         // TODO: Cleanup
-        this.JoinFinal();
+        // this.JoinFinal();
+        this.JoinHierarchies();
         let noParent = this.FindNoParent();
         noParent.forEach(rg => {
             let randomColor = "#" + Math.floor(Math.random()*16777215).toString(16);
-            this.constructedRoads.push(rg.JoinIntersects(randomColor));
+            this.constructedRoads.push(rg.JoinIntersects());
         });
         this.roadGroups.forEach(element => {
-            console.log("visited:", element.visited);
-            // if (element.visited == 0) {
-            //     console.log(element.id);
-            //     console.log(element.prevGroups);
-            // }
+            // console.log("visited:", element.visited);
         });
-        // this.FindOdd();
-        console.log(noParent.length);
-        console.log("all groups count: ", this.roadGroups.length);
-        
-        // console.log("691 summary");
-        // console.log(this.roadGroups[691].nextGroups);
-        // console.log(this.roadGroups[691].prevGroups);
+        console.log("nopar count:", noParent.length);
+        console.log("all groups count:", this.roadGroups.length);
 
-        // console.log("690 summary");
-        // console.log(this.roadGroups[690].nextGroups);
-        // console.log(this.roadGroups[690].prevGroups);
-
-        console.log(this.GenerateUMLDiagram());
+        // console.log(this.GenerateUMLDiagram());
     }
 
     private GenerateUMLDiagram(): string {
@@ -92,14 +81,76 @@ export class Lineator {
                     minRoadGroup = rg;
                     iso.SwapPointOrder();
                 }
+                // if (iso.id == 635 && rg.id == 679) {
+                //     console.log("mindissearch", minDistanceVals[0]);
+                // }
             });
-            // console.log(minDistanceVals[0]);
+            // console.log("mindistance:", minDistanceVals[0]);
+            if (minDistanceVals[0] > 3)
+                return;
             minRoadGroup.AddNextGroup(iso, minDistanceVals[1]);
             iso.AddPrevGroup(minRoadGroup);
         });
     }
 
-    public JoinFinal() {
+    // TODO: Make it run in a *smart* loop, so it catches every hole and refreshes its state
+    private JoinHierarchies() {
+        let noParent = this.FindNoParent();
+        // let toAddDelayed: [RoadGroup, RoadGroup, number, number][] = [];
+        // let minDistances: number[] = [];
+        // let minChilds: number[] = [];
+
+        for (let i = 0; i < noParent.length-1; i++) {
+            const groupA = noParent[i];
+            let extremesA: [L.LatLng, RoadGroup, number][] = [];
+            groupA.GetExtremePoints(extremesA);
+
+            let minDistance: number;
+            let minGroupAChild: RoadGroup;
+            let minGroupBChild: RoadGroup;
+            let minIndexA: number;
+            let minIndexChild: number;
+
+            for (let j = i+1; j < noParent.length; j++) {
+                const groupB = noParent[j];
+                let extremesB: [L.LatLng, RoadGroup, number][] = [];
+                groupB.GetExtremePoints(extremesB);
+
+                let groupsMatchedAlready = false;
+                for (let k = 0; k < extremesA.length; k++) {
+                    const pointAVals = extremesA[k];
+                    for (let l = 0; l < extremesB.length; l++) {
+                        const pointBVals = extremesB[l];
+                        let distance = RoadGroup.CalcPointsDistance(pointAVals[0], pointBVals[0]);
+                        if (minDistance === undefined || distance < minDistance) {
+                            minDistance = distance;
+                            minGroupAChild = pointAVals[1];
+                            minGroupBChild = pointBVals[1];
+                            minIndexA = pointAVals[2];
+                            minIndexChild = pointBVals[2];
+
+                            if (minDistance < 3) {
+                                console.log("");
+                                console.log("hiera merge:", groupA.id, groupB.id);
+                                console.log("thru:", minGroupAChild.id, minGroupBChild.id);
+                                console.log("distance:", minDistance);
+                                minGroupAChild.AddNextGroup(minGroupBChild, minIndexA, minIndexChild);
+                                minGroupBChild.AddPrevGroup(minGroupAChild);
+                                // // Transform prevs to nexts
+                                minGroupBChild.NextFixNG(groupB);
+                                groupsMatchedAlready = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (groupsMatchedAlready)
+                        break;
+                }
+            }
+        }
+    }
+
+    private JoinFinal() {
         let noParent = this.FindNoParent();
         // let toAddDelayed: [RoadGroup, RoadGroup, number, number][] = [];
         // let minDistances: number[] = [];
@@ -138,8 +189,9 @@ export class Lineator {
                                 console.log(minDistance);
                                 minGroupAChild.AddNextGroup(minGroupBChild, minIndexA, minIndexChild);
                                 minGroupBChild.AddPrevGroup(minGroupAChild);
+                                console.log("something happening here");
                                 // Transform prevs to nexts
-                                // minGroupBChild.NextFixNG(groupB);
+                                minGroupBChild.NextFixNG(groupB);
                             } else {
                             }
                         }
@@ -180,23 +232,6 @@ export class Lineator {
         //     console.log("indexes:", minIndexA, minIndexChild);
         //     console.log("groups", toAddDelayed[i][0].id, toAddDelayed[i][1].id);
         // }
-    }
-
-    private FindOdd() {
-        // let odd = this.roadGroups.filter((rg) => {
-        //     // let iso = this.FindIsolated();
-        //     // let nopar = this.FindNoParent();
-        //     // return !iso.includes(rg) && !nopar.includes(rg);
-        //     return !rg.visited;
-        // });
-
-        // odd.forEach(element => {
-        //     console.log("ele", element.id);
-        //     element.prevGroups.forEach(ele2 => {
-        //         console.log("prev", ele2.id);
-        //     });
-        // });
-        // console.log(odd);
     }
 
     private FindIsolated(): RoadGroup[] {

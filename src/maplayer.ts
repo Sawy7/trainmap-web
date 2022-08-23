@@ -128,7 +128,7 @@ export class MapLayer {
             } else if (entity["className"] == "MultiMapRoad") {
                 let multiRoad = new MultiMapRoad(entity["points"], entity["elevation"], entity["color"],
                 entity["weight"], entity["opacity"], entity["smoothFactor"]);
-                // deserializedLayer.AddMultiRoad(multiRoad);
+                deserializedLayer.AddMultiRoad(multiRoad);
 
                 multiRoad.lineator.constructedRoads.forEach(cr => {
                     deserializedLayer.AddMapRoad(cr);

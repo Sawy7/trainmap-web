@@ -4,10 +4,10 @@ import { SingleMapRoad } from "./singleroad";
 export class RoadGroup {
     public points: L.LatLng[];
     public elevation: number[];
-    public nextGroups: RoadGroup[] = [];
-    public nextGroupPoints: number[] = [];
-    public nextGroupConnects: number[] = [];
-    public prevGroups: RoadGroup[] = [];
+    private nextGroups: RoadGroup[] = [];
+    private nextGroupPoints: number[] = [];
+    private nextGroupConnects: number[] = [];
+    private prevGroups: RoadGroup[] = [];
     public visited: number = 0;
     public merged: boolean = false;
     static globalIDGen: number = -1;
@@ -77,8 +77,11 @@ export class RoadGroup {
             if (nextInside === callingGroup) {
                 // Adding [former previous] as [next]
                 callingGroup.AddNextGroup(this, this.nextGroupConnects[i], this.nextGroupPoints[i]);
+                console.log(this.nextGroupConnects[i], this.nextGroupPoints[i]);
                 // Removing [former next]
                 this.nextGroups.splice(i, 1);
+                this.nextGroupPoints.splice(i, 1);
+                this.nextGroupConnects.splice(i, 1);
                 // Adding [former next] as [previous]
                 this.AddPrevGroup(callingGroup);
                 break;
@@ -168,7 +171,7 @@ export class RoadGroup {
                 minIndex = i;
             }
         }
-
+        
         return [minDistance, minIndex];
     }
 
