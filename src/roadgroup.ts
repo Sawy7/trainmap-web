@@ -4,10 +4,11 @@ import { SingleMapRoad } from "./singleroad";
 export class RoadGroup {
     public points: L.LatLng[];
     public elevation: number[];
-    private nextGroups: RoadGroup[] = [];
-    private nextGroupPoints: number[] = [];
-    private prevGroups: RoadGroup[] = [];
-    public visited: boolean = false;
+    public nextGroups: RoadGroup[] = [];
+    public nextGroupPoints: number[] = [];
+    public prevGroups: RoadGroup[] = [];
+    public visited: number = 0;
+    public merged: boolean = false;
     static globalIDGen: number = -1;
     readonly id: number;
 
@@ -34,11 +35,35 @@ export class RoadGroup {
         return this.prevGroups.length;
     }
 
+    public GetExtremePoints(extremes: [L.LatLng, RoadGroup, number][]) {
+        extremes.push([this.points[0], this, 0]);
+        extremes.push([this.points[this.points.length-1], this, this.points.length-1]);
+        this.nextGroups.forEach(next => {
+            next.GetExtremePoints(extremes);
+        });
+    }
+
     public IsGroupNext(group: RoadGroup): boolean {
         let nextNested = this.nextGroups.some((next) => {
             return next.IsGroupNext(group);
         });
         return this.nextGroups.includes(group) || nextNested;
+    }
+
+    public IsGroupMerged(): boolean {
+        let nextNested = this.nextGroups.some((next) => {
+            return next.IsGroupMerged();
+        });
+        return this.merged || nextNested;
+    }
+
+    public SwapPointOrder() {
+        this.points = this.points.reverse();
+        this.elevation = this.elevation.reverse();
+        
+        for (let i = 0; i < this.nextGroupPoints.length; i++) {
+            this.nextGroupPoints[i] = this.points.length - this.nextGroupPoints[i];
+        }
     }
 
     // public IsGroupPrev(group: RoadGroup): boolean {
@@ -50,7 +75,7 @@ export class RoadGroup {
         let minIndex: number;
         for (let i = 0; i < this.points.length; i++) {
             const point = this.points[i];
-            let distance = this.CalcPointsDistance(point, foreignPoint);
+            let distance = RoadGroup.CalcPointsDistance(point, foreignPoint);
             if (minDistance === undefined || distance < minDistance) {
                 minDistance = distance;
                 minIndex = i;
@@ -61,7 +86,7 @@ export class RoadGroup {
     }
 
     // http://www.movable-type.co.uk/scripts/latlong.html
-    private CalcPointsDistance(pointA: L.LatLng, pointB: L.LatLng): number {
+    public static CalcPointsDistance(pointA: L.LatLng, pointB: L.LatLng): number {
         const R = 6371e3; // metres
         const φ1 = pointA.lat * Math.PI/180; // φ, λ in radians
         const φ2 = pointB.lat * Math.PI/180;
@@ -80,26 +105,27 @@ export class RoadGroup {
         return new SingleMapRoad(this.points, this.elevation);
     }
 
-    // TODO: Add road props (color, weight, ...)
     public JoinIntersects(
-        doubleUp: boolean = false, previouslyVisited: RoadGroup[] = [],
-        constructedRoad: SingleMapRoad = new SingleMapRoad([], [])
+        color?: string, weight?: number, opacity?: number, smoothFactor?: number,
+        doubleUp: boolean = false,
+        constructedRoad: SingleMapRoad = new SingleMapRoad([], [], color, weight, opacity, smoothFactor),
+        fromIndex?: number, toIndex?: number
     ) {
-        previouslyVisited.push(this);
-        this.visited = true;
+        this.visited++;
+        
 
         for (let i = 0; i < this.points.length; i++) {
             let childFound = false;
+
             
             for (let j = 0; j < this.nextGroups.length; j++) {
                 const child = this.nextGroups[j];
                 const childPoint = this.nextGroupPoints[j];
-                if (previouslyVisited.includes(child)) {
+                if (child.visited > 0) {
                     continue;
                 } else if (i == childPoint) {
                     childFound = true;
-                    previouslyVisited.push(child);
-                    child.JoinIntersects(true, previouslyVisited, constructedRoad);
+                    child.JoinIntersects(color, weight, opacity, smoothFactor, true, constructedRoad);
                 }
             }
 

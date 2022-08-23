@@ -48,8 +48,8 @@ export class App {
         this.SetupGPXLoader();
         this.SetupShapefileLoader();
         this.AddKeyListener();
-        // TODO: Dev - remove
-        this.sidebarOffcanvas.toggle();
+        // // TODO: Dev - remove
+        // this.sidebarOffcanvas.toggle();
     }
 
     public AddMapLayer(mapLayer: MapLayer) {
