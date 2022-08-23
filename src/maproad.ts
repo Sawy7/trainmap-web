@@ -10,6 +10,7 @@ export abstract class MapRoad extends MapEntity {
     private opacity: number;
     private smoothFactor: number;
     private polyLine: L.Polyline;
+    public name: string = "";
     readonly className: string = "MapRoad";
 
     protected constructor(
@@ -57,6 +58,12 @@ export abstract class MapRoad extends MapEntity {
 
         this.polyLine.on("click", (event) => {
             App.Instance.SetElevationChart(this.points, this.elevation, layerName);
+
+            this.points.forEach(point => {
+                App.Instance.PushToLog(point.lat + "," + point.lng);
+            });
+
+            console.log(this.name);
         });
     }
 }

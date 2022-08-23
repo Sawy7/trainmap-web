@@ -12,26 +12,41 @@ export class Lineator {
         this.JoinIsolated();
 
         // TODO: Cleanup
+        this.JoinFinal();
         let noParent = this.FindNoParent();
-        this.JoinFinal(noParent);
-        noParent = this.FindNoParent();
         noParent.forEach(rg => {
             let randomColor = "#" + Math.floor(Math.random()*16777215).toString(16);
-            this.constructedRoads.push(rg.JoinIntersects());
+            this.constructedRoads.push(rg.JoinIntersects(randomColor));
         });
         this.roadGroups.forEach(element => {
             console.log("visited:", element.visited);
-            if (element.visited == 0) {
-                console.log(element.id);
-                console.log(element.prevGroups);
-            }
+            // if (element.visited == 0) {
+            //     console.log(element.id);
+            //     console.log(element.prevGroups);
+            // }
         });
         // this.FindOdd();
         console.log(noParent.length);
+        console.log("all groups count: ", this.roadGroups.length);
         
-        // this.roadGroups.forEach(element => {
-        //     this.constructedRoads.push(element.GetAsSingleMapRoad());
-        // });
+        // console.log("691 summary");
+        // console.log(this.roadGroups[691].nextGroups);
+        // console.log(this.roadGroups[691].prevGroups);
+
+        // console.log("690 summary");
+        // console.log(this.roadGroups[690].nextGroups);
+        // console.log(this.roadGroups[690].prevGroups);
+
+        console.log(this.GenerateUMLDiagram());
+    }
+
+    private GenerateUMLDiagram(): string {
+        let umlComplete = "@startuml\n";
+        this.roadGroups.forEach(rg => {
+            umlComplete += rg.GenerateUMLNodes();
+        });
+        umlComplete += "@enduml";
+        return umlComplete;
     }
 
     private PopulateIntersects() {
@@ -39,7 +54,7 @@ export class Lineator {
             this.roadGroups.forEach(groupB => {
                 if (groupA === groupB) 
                     return; // NOTE: Works like 'continue' in for loop
-                if (groupB.IsGroupNext(groupA))
+                if (groupB.IsGroupNext(groupA) || groupB.SetAndCheckThisNext())
                     return;
 
                 for (let i = 0; i < groupA.points.length; i++) {
@@ -84,8 +99,9 @@ export class Lineator {
         });
     }
 
-    public JoinFinal(noParent: RoadGroup[]) {
-        let toAddDelayed: [RoadGroup, RoadGroup, number][] = [];
+    public JoinFinal() {
+        let noParent = this.FindNoParent();
+        // let toAddDelayed: [RoadGroup, RoadGroup, number, number][] = [];
         // let minDistances: number[] = [];
         // let minChilds: number[] = [];
 
@@ -97,15 +113,14 @@ export class Lineator {
             let minDistance: number;
             let minGroupAChild: RoadGroup;
             let minGroupBChild: RoadGroup;
-            let minGroupB: RoadGroup;
             let minIndexA: number;
             let minIndexChild: number;
 
             for (let j = i+1; j < noParent.length; j++) {
                 const groupB = noParent[j];
-                if (groupB.IsGroupMerged()) {
-                    continue;
-                }
+                // if (groupB.IsGroupMerged()) {
+                //     continue;
+                // }
                 let extremesB: [L.LatLng, RoadGroup, number][] = [];
                 groupB.GetExtremePoints(extremesB);
 
@@ -116,32 +131,46 @@ export class Lineator {
                             minDistance = distance;
                             minGroupAChild = pointAVals[1];
                             minGroupBChild = pointBVals[1];
-                            minGroupB = groupB;
                             minIndexA = pointAVals[2];
                             minIndexChild = pointBVals[2];
+
+                            if (minDistance < 3) {
+                                console.log(minDistance);
+                                minGroupAChild.AddNextGroup(minGroupBChild, minIndexA, minIndexChild);
+                                minGroupBChild.AddPrevGroup(minGroupAChild);
+                                // Transform prevs to nexts
+                                // minGroupBChild.NextFixNG(groupB);
+                            } else {
+                            }
                         }
                     });
                 });
             }
 
-            if (minDistance < 100 && minIndexChild == 0) {
+            if (minDistance < 100) {
                 // minDistances.push(minDistance);
                 // minChilds.push(minIndexChild);
-                toAddDelayed.push([minGroupAChild, minGroupBChild, minIndexA]);
-                minGroupBChild.merged = true;
-            } else if (minDistance < 100 && minIndexA == 0) {
-                toAddDelayed.push([minGroupBChild, minGroupAChild, minIndexChild]);
-                minGroupAChild.merged = true;
-            } else if (minDistance < 100) {
-                console.log(minDistance);
-                console.log(minIndexA, minIndexChild);
+                
+                // toAddDelayed.push([minGroupAChild, minGroupBChild, minIndexA, minIndexChild]);
+                // minGroupBChild.merged = true;
+
+                // minGroupAChild.AddNextGroup(minGroupBChild, minIndexA, minIndexChild);
+                // minGroupBChild.AddPrevGroup(minGroupAChild);
+            } else {
+                // console.log(minDistance);
+                // console.log(minIndexA, minIndexChild);
             }
+
+            // if (minDistance2 < 100) {
+            //     toAddDelayed.push([minGroupAChild2, minGroupBChild2, minIndexA2, minIndexChild2]);
+            //     minGroupBChild2.merged = true;
+            // }
         }
 
-        toAddDelayed.forEach(batch => {
-            batch[0].AddNextGroup(batch[1], batch[2]);
-            batch[1].AddPrevGroup(batch[0]);
-        });
+        // toAddDelayed.forEach(batch => {
+        //     batch[0].AddNextGroup(batch[1], batch[2], batch[3]);
+        //     batch[1].AddPrevGroup(batch[0]);
+        // });
         // minDistances.forEach(dist => {
         //     console.log(dist);
         // });

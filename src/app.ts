@@ -398,7 +398,7 @@ export class App {
         }
     }
 
-    private PushToLog(text: string) {
+    public PushToLog(text: string) {
         let logBody = document.getElementById("logModalBody");
         let line = document.createElement("p");
         line.innerHTML = text;
