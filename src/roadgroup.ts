@@ -4,10 +4,10 @@ import { SingleMapRoad } from "./singleroad";
 export class RoadGroup {
     public points: L.LatLng[];
     public elevation: number[];
-    private nextGroups: RoadGroup[] = [];
-    private nextGroupPoints: number[] = [];
-    private nextGroupConnects: number[] = [];
-    private prevGroups: RoadGroup[] = [];
+    public nextGroups: RoadGroup[] = [];
+    public nextGroupPoints: number[] = [];
+    public nextGroupConnects: number[] = [];
+    public prevGroups: RoadGroup[] = [];
     public visited: number = 0;
     public merged: boolean = false;
     static globalIDGen: number = -1;
@@ -62,13 +62,13 @@ export class RoadGroup {
     public GenerateUMLNodes(): string {
         let umlRelations = "";
         this.nextGroups.forEach(next => {
-            umlRelations += "NODE_" + this.id + "--|>" + "NODE_" + next.id + "\n";
+            umlRelations += "NODE_" + this.id + "_--|>" + "NODE_" + next.id + "_\n";
         });
         return umlRelations;
     }
 
     private ResetNext(callingGroup: RoadGroup) {
-        console.log("fixing group: ", this.id);
+        // console.log("fixing group: ", this.id);
         if (callingGroup === undefined)
             return;
 
@@ -77,7 +77,7 @@ export class RoadGroup {
             if (nextInside === callingGroup) {
                 // Adding [former previous] as [next]
                 callingGroup.AddNextGroup(this, this.nextGroupConnects[i], this.nextGroupPoints[i]);
-                console.log(this.nextGroupConnects[i], this.nextGroupPoints[i]);
+                // console.log(this.nextGroupConnects[i], this.nextGroupPoints[i]);
                 // Removing [former next]
                 this.nextGroups.splice(i, 1);
                 this.nextGroupPoints.splice(i, 1);
@@ -92,7 +92,7 @@ export class RoadGroup {
     public NextFixNG(destinationGroup: RoadGroup, callingGroup?: RoadGroup): boolean {
         // console.log("in group: ", this.id);
         if (this === destinationGroup) {
-            console.log("Found destination group");
+            // console.log("Found destination group");
 
             this.ResetNext(callingGroup);
 
@@ -152,7 +152,7 @@ export class RoadGroup {
         this.elevation = this.elevation.reverse();
         
         for (let i = 0; i < this.nextGroupPoints.length; i++) {
-            this.nextGroupPoints[i] = this.points.length - this.nextGroupPoints[i];
+            this.nextGroupPoints[i] = this.points.length - this.nextGroupPoints[i] - 1;
         }
     }
 
