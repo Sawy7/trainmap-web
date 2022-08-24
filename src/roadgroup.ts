@@ -1,4 +1,5 @@
 import * as L from "leaflet";
+import { App } from "./app";
 import { SingleMapRoad } from "./singleroad";
 
 export class RoadGroup {
@@ -18,6 +19,7 @@ export class RoadGroup {
         this.points = points;
         this.elevation = elevation;
         this.id = ++RoadGroup.globalIDGen;
+        // this.FixElevation();
     }
 
     public AddNextGroup(group: RoadGroup, pointIndex: number, connectIndex: number = 0) {
@@ -25,32 +27,6 @@ export class RoadGroup {
         this.nextGroupPoints.push(pointIndex);
         this.nextGroupConnects.push(connectIndex);
     }
-
-    // public PrevsToNexts() {
-    //     console.log(this.id);
-    //     for (let i = 0; i < this.prevGroups.length; i++) {
-    //         let prev = this.prevGroups[i];
-    //         prev.HandOverNext(this);
-    //     }
-    //     this.prevGroups = [];
-    //     for (let i = 0; i < this.prevGroups.length; i++) {
-    //         let prev = this.prevGroups[i];
-    //         prev.AddPrevGroup(this);
-    //     }
-    // }
-
-    // public HandOverNext(formerNext: RoadGroup) {
-    //     this.PrevsToNexts();
-    //     let toRemove: number;
-    //     for (let i = 0; i < this.nextGroups.length; i++) {
-    //         let nextInside = this.nextGroups[i];
-    //         if (nextInside === formerNext) {
-    //             formerNext.AddNextGroup(this, this.nextGroupConnects[i], this.nextGroupPoints[i]);
-    //             toRemove = i;
-    //         }
-    //     }
-    //     this.nextGroups.splice(toRemove, 1);
-    // }
 
     public SetAndCheckThisNext(): boolean {
         let wasNext = this.thisIsNext;
@@ -68,7 +44,6 @@ export class RoadGroup {
     }
 
     private ResetNext(callingGroup: RoadGroup) {
-        // console.log("fixing group: ", this.id);
         if (callingGroup === undefined)
             return;
 
@@ -77,7 +52,6 @@ export class RoadGroup {
             if (nextInside === callingGroup) {
                 // Adding [former previous] as [next]
                 callingGroup.AddNextGroup(this, this.nextGroupConnects[i], this.nextGroupPoints[i]);
-                // console.log(this.nextGroupConnects[i], this.nextGroupPoints[i]);
                 // Removing [former next]
                 this.nextGroups.splice(i, 1);
                 this.nextGroupPoints.splice(i, 1);
@@ -90,12 +64,8 @@ export class RoadGroup {
     }
 
     public NextFixNG(destinationGroup: RoadGroup, callingGroup?: RoadGroup): boolean {
-        // console.log("in group: ", this.id);
         if (this === destinationGroup) {
-            // console.log("Found destination group");
-
             this.ResetNext(callingGroup);
-
             return true;
         }
 
@@ -125,7 +95,6 @@ export class RoadGroup {
     }
 
     public GetExtremePoints(extremes: [L.LatLng, RoadGroup, number][]) {
-        // console.log("extremes in ", this.id);
         extremes.push([this.points[0], this, 0]);
         extremes.push([this.points[this.points.length-1], this, this.points.length-1]);
         this.nextGroups.forEach(next => {
@@ -155,10 +124,6 @@ export class RoadGroup {
             this.nextGroupPoints[i] = this.points.length - this.nextGroupPoints[i] - 1;
         }
     }
-
-    // public IsGroupPrev(group: RoadGroup): boolean {
-    //     return this.prevGroups.includes(group);
-    // }
 
     public GetNearestPoint(foreignPoint: L.LatLng): [number, number] {
         let minDistance: number;
@@ -202,8 +167,6 @@ export class RoadGroup {
         fromIndex?: number, toIndex?: number
     ) {
         this.visited++;
-        // TODO: remove + property 'name'
-        constructedRoad.name += this.id + ", "; 
 
         if (fromIndex === undefined && toIndex === undefined) {
             fromIndex = 0;
@@ -254,4 +217,120 @@ export class RoadGroup {
             return constructedRoad;
         }
     }
+
+    public GetUndupedRoute(
+        keepFactor: number = 10, throwIndex: number = 1,
+        notRoot: boolean = false,
+        undupedPoints: L.LatLng[] = [], undupedElevation: number[] = [],
+        fromIndex?: number, toIndex?: number
+    ): [L.LatLng[], number[]] {
+        if (fromIndex === undefined && toIndex === undefined) {
+            fromIndex = 0;
+            toIndex = this.points.length;
+        }
+
+        if (notRoot && toIndex < this.points.length) {
+            // Reversed
+            for (let i = toIndex - 1; i >= fromIndex; i--) {
+                throwIndex = this.PushPointsWithThrow(
+                    keepFactor, throwIndex,
+                    undupedPoints, undupedElevation, i
+                );
+            }
+        }
+
+        for (let i = fromIndex; i < toIndex; i++) {
+            let childFound = false;
+            
+            for (let j = 0; j < this.nextGroups.length; j++) {
+                const child = this.nextGroups[j];
+                const childPoint = this.nextGroupPoints[j];
+                const connectPoint = this.nextGroupConnects[j];
+                if (i == childPoint) {
+                    childFound = true;
+                    if (connectPoint != 0) {
+                        child.GetUndupedRoute(
+                            keepFactor, throwIndex, true,
+                            undupedPoints, undupedElevation,
+                            0, connectPoint
+                        );
+                        child.GetUndupedRoute(
+                            keepFactor, throwIndex, true,
+                            undupedPoints, undupedElevation,
+                            connectPoint, child.points.length
+                        );
+                    } else {
+                        child.GetUndupedRoute(
+                            keepFactor, throwIndex, true,
+                            undupedPoints, undupedElevation
+                        );
+                    }
+                }
+            }
+
+            if (childFound)
+                continue;
+
+            throwIndex = this.PushPointsWithThrow(
+                keepFactor, throwIndex,
+                undupedPoints, undupedElevation, i
+            );
+        }
+
+        if (notRoot && toIndex == this.points.length) {
+            // Reversed
+            for (let i = toIndex - 1; i >= fromIndex; i--) {
+                throwIndex = this.PushPointsWithThrow(
+                    keepFactor, throwIndex,
+                    undupedPoints, undupedElevation, i
+                );
+            }
+        }
+
+        if (!notRoot) {
+            return [undupedPoints, undupedElevation];
+        }
+    }
+
+    private PushPointsWithThrow(
+        keepFactor: number, throwIndex: number,
+        undupedPoints: L.LatLng[], undupedElevation: number[],
+        pointIndex: number
+    ): number {
+        if (throwIndex == keepFactor) {
+            undupedPoints.push(this.points[pointIndex]);
+            undupedElevation.push(this.elevation[pointIndex]);
+            throwIndex = 0;
+        } else {
+            throwIndex++;
+        }
+
+        return throwIndex;
+    }
+
+    // private FixElevation() {
+    //     for (let i = 0; i < this.elevation.length; i++) {
+    //         if (this.elevation[i] == 0) {
+    //             let sumCandidates: number[] = [];
+    //             for (let j = i-1; j > 0; j--) {
+    //                 if (this.elevation[j] != 0) {
+    //                     sumCandidates.push(this.elevation[j]);
+    //                     break;
+    //                 }
+    //             }
+    //             for (let j = i+1; j < this.elevation.length; j++) {
+    //                 if (this.elevation[j] != 0) {
+    //                     sumCandidates.push(this.elevation[j]);
+    //                     break;
+    //                 }
+    //             }
+                
+    //             sumCandidates.forEach(sc => {
+    //                 this.elevation[i] += sc;
+    //             });
+    //             // this.elevation[i] /= sumCandidates.length;
+    //             App.Instance.PushToLog(this.elevation[i].toString());
+    //         }
+    //     }
+    // }
 }

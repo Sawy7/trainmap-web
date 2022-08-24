@@ -58,25 +58,7 @@ export class App {
         this.AddToLayerList();
     }
 
-    // public AddGhostMapLayer(ghostMapLayer: GhostMapLayer) {
-    //     this.ghostMapLayers.push(ghostMapLayer);
-    //     this.RenderLayerList();
-    // }
-
-    // private RemoveGhostMapLayer(index: number) {
-    //     this.ghostMapLayers.splice(index, 1);
-    //     this.RenderLayerList();
-    // }
-
     private PopulateLayerEntitesList(index: number, mapLayer: MapLayer) {
-        // const layers = document.getElementById("layersList").children;
-        // console.log(index)
-
-        // if (state)
-        //     layers[index].setAttribute("class", "list-group-item list-group-item-dark active");
-        // else
-        //     layers[index].setAttribute("class", "list-group-item list-group-item-dark");
-
         let entitiesList = document.getElementById("layer_"+index).children[0].children[1];
         if (entitiesList.innerHTML !== "")
             return;
@@ -120,87 +102,6 @@ export class App {
         this.activeElevationChart = new ElevationChart(points, elevation, layerName);
     }
 
-    // private SetDownloadingInLayerList(index: number) {
-    //     const layers = document.getElementById("layersList").children;
-    //     index += this.mapLayers.length;
-    //     layers[index].setAttribute("class", "list-group-item list-group-item-warning d-flex justify-content-between align-items-center");
-    //     layers[index].children[0].innerHTML = "Stahování...";
-    // }
-
-    // public DownloadGhostLayer(index: number) {
-    //     let ghostLayer = this.ghostMapLayers[index];
-    //     this.SetDownloadingInLayerList(index);
-    //     // this.mapLayers.push(ghostLayer.Download());
-    //     // this.RemoveGhostMapLayer(index);
-    // }
-
-    // // TODO: This potentially runs too many times
-    // private RenderLayerList() {
-    //     const layersList = document.getElementById("layersList");
-    //     layersList.innerHTML = "";
-
-    //     for (let i = 0; i < this.mapLayers.length; i++) {
-    //         const l = this.mapLayers[i];
-
-    //         // Accordions
-    //         var accordion = document.createElement("a");
-    //         accordion.setAttribute("class", "list-group-item list-group-item-dark d-flex justify-content-between align-items-center");
-    //         accordion.setAttribute("href", "#");
-    //         accordion.innerHTML = l.layerName;
-
-    //         var accordionCollapse = document.createElement("div");
-    //         accordionCollapse.setAttribute("class", "accordion-collapse collapse bg-secondary");
-    //         accordionCollapse.setAttribute("id", "layer_"+i);
-    //         accordion.onclick = () => {
-    //             this.ActivateMapLayer(i);
-    //         };
-
-    //         var accordionBody = document.createElement("div");
-    //         accordionBody.setAttribute("class", "accordion-body");
-
-    //         var routesHeader = document.createElement("h7");
-    //         routesHeader.innerHTML = "Elementy vrstvy";
-    //         accordionBody.appendChild(routesHeader);
-
-    //         var entityList = document.createElement("div");
-    //         accordionBody.appendChild(entityList);
-
-    //         accordionCollapse.appendChild(accordionBody);
-
-    //         var badge = document.createElement("span");
-    //         badge.innerHTML = "XY";
-    //         badge.setAttribute("class", "badge bg-primary rounded-pill");
-    //         accordion.appendChild(badge);
-
-    //         layersList.appendChild(accordion);
-    //         layersList.appendChild(accordionCollapse);
-
-    //         this.PopulateLayerEntitesList(i, this.mapLayers[i]);
-    //         if (l.GetActiveState())
-    //             this.ActivateMapLayer(i, true);
-    //     }
-
-    //     // Non-existent (ghost) layers (Note: external sources)
-    //     for (let i = 0; i < this.ghostMapLayers.length; i++) {
-    //         const g = this.ghostMapLayers[i];
-    //         var listItem = document.createElement("a");
-    //         listItem.innerHTML = g.layerName;
-    //         listItem.setAttribute("class", "list-group-item list-group-item-danger d-flex justify-content-between align-items-center");
-    //         // TODO: disabled for now
-    //         // listItem.onclick = function() {
-    //         //     App.Instance.DownloadGhostLayer(i);
-    //         // };
-    //         listItem.setAttribute("href", "#");
-
-    //         var badge = document.createElement("span");
-    //         badge.innerHTML = "Ke stažení";
-    //         badge.setAttribute("class", "badge bg-primary rounded-pill");
-
-    //         listItem.appendChild(badge);
-    //         layersList.appendChild(listItem);
-    //     }
-    // }
-
     private FlushLayers() {
         const layersList = document.getElementById("layersList");
         layersList.innerHTML = "";
@@ -216,7 +117,7 @@ export class App {
 
         // Accordions
         var accordion = document.createElement("a");
-        accordion.setAttribute("class", "list-group-item list-group-item-dark");
+        accordion.setAttribute("class", "list-group-item list-group-item-dark d-flex justify-content-between align-items-center");
         accordion.setAttribute("href", "#");
         accordion.innerHTML = l.layerName;
 
@@ -251,26 +152,6 @@ export class App {
         layersList.appendChild(accordionCollapse);
 
         this.PopulateLayerEntitesList(index, this.mapLayers[index]);
-
-        // // Non-existent (ghost) layers (Note: external sources)
-        // for (let i = 0; i < this.ghostMapLayers.length; i++) {
-        //     const g = this.ghostMapLayers[i];
-        //     var listItem = document.createElement("a");
-        //     listItem.innerHTML = g.layerName;
-        //     listItem.setAttribute("class", "list-group-item list-group-item-danger d-flex justify-content-between align-items-center");
-        //     // TODO: disabled for now
-        //     // listItem.onclick = function() {
-        //     //     App.Instance.DownloadGhostLayer(i);
-        //     // };
-        //     listItem.setAttribute("href", "#");
-
-        //     var badge = document.createElement("span");
-        //     badge.innerHTML = "Ke stažení";
-        //     badge.setAttribute("class", "badge bg-primary rounded-pill");
-
-        //     listItem.appendChild(badge);
-        //     layersList.appendChild(listItem);
-        // }
     }
 
     private SaveLayersToLocalStorage() {
@@ -357,11 +238,9 @@ export class App {
                             // let gpsPoint = proj4("EPSG:5514", "EPSG:4326", coords); // NOTE: .prj file must have correct projection spec
                             pointsArr.push(new L.LatLng(coords[1], coords[0]));
                             elevArr.push(coords[2]);
-                            this.PushToLog(coords);
                         });
                         multiPointsArr.push(pointsArr);
                         multiElevArr.push(elevArr);
-                        this.PushToLog(" ");
                     });
 
                     let addFunction = (name: string) => {
@@ -430,5 +309,38 @@ export class App {
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
+    }
+
+    public PushAlert(message: string, linkVerbage?: string, linkFunction?: Function) {
+        const alertPlace = document.getElementById("alertPlace");
+        
+        let alert = document.createElement("div");
+        alert.setAttribute("class", "alert alert-primary alert-dismissible");
+        alert.setAttribute("role", "alert");
+        alert.innerHTML = message + " ";
+
+        let dismissButton = document.createElement("button");
+        dismissButton.setAttribute("type", "button");
+        dismissButton.setAttribute("class", "btn-close");
+        dismissButton.setAttribute("data-bs-dismiss", "alert");
+        dismissButton.setAttribute("aria-label", "Close");
+
+        if (linkVerbage !== undefined && linkFunction !== undefined) {
+            let link = document.createElement("a");
+            link.setAttribute("href", "#");
+            link.setAttribute("class", "alert-link");
+            link.setAttribute("id", "alertLink");
+            link.setAttribute("data-bs-dismiss", "alert");
+            link.innerHTML = linkVerbage;
+            alert.appendChild(link);
+
+            // Give the link a purpose
+            link.onclick = (event) => {
+                linkFunction();
+            };
+        }
+        
+        alert.appendChild(dismissButton);
+        alertPlace.appendChild(alert);
     }
 }

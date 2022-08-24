@@ -130,9 +130,9 @@ export class MapLayer {
                 entity["weight"], entity["opacity"], entity["smoothFactor"]);
                 deserializedLayer.AddMultiRoad(multiRoad);
 
-                multiRoad.lineator.constructedRoads.forEach(cr => {
-                    deserializedLayer.AddMapRoad(cr);
-                });
+                // multiRoad.lineator.constructedRoads.forEach(cr => {
+                //     deserializedLayer.AddMapRoad(cr);
+                // });
             } else if (entity["className"] == "MapMarker") {
                 deserializedLayer.AddMapMarker(
                     new MapMarker(entity["point"], entity["popupMsg"])

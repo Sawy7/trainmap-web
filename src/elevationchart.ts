@@ -41,11 +41,20 @@ export class ElevationChart {
             type: "line",
             data: this.data,
             options: {
+                normalized: true,
                 responsive: true,
                 maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        display: false
+                    }
+                },
                 plugins: {
                     tooltip: {
-                        enabled: true
+                        enabled: true,
+                        callbacks: {
+                            title: (items) => {return ""}
+                        }
                     },
                     legend: {
                         display: false
