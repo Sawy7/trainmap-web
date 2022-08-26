@@ -13,12 +13,12 @@ export class ElevationChart {
     private elevation: number[];
     private data;
     private chart: Chart;
-    readonly layerName: string;
+    readonly layerID: number;
 
-    public constructor(points: L.LatLng[], elevation: number[], layerName: string) {
+    public constructor(points: L.LatLng[], elevation: number[], layerID: number) {
         this.points = points;
         this.elevation = elevation;
-        this.layerName = layerName;
+        this.layerID = layerID;
         this.RenderChart();
         this.ShowChart();
         this.RegisterChartClosing();

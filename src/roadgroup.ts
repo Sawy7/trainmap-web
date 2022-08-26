@@ -1,5 +1,4 @@
 import * as L from "leaflet";
-import { App } from "./app";
 import { SingleMapRoad } from "./singleroad";
 
 export class RoadGroup {
@@ -19,7 +18,7 @@ export class RoadGroup {
         this.points = points;
         this.elevation = elevation;
         this.id = ++RoadGroup.globalIDGen;
-        // this.FixElevation();
+        this.FixElevation();
     }
 
     public AddNextGroup(group: RoadGroup, pointIndex: number, connectIndex: number = 0) {
@@ -308,29 +307,30 @@ export class RoadGroup {
         return throwIndex;
     }
 
-    // private FixElevation() {
-    //     for (let i = 0; i < this.elevation.length; i++) {
-    //         if (this.elevation[i] == 0) {
-    //             let sumCandidates: number[] = [];
-    //             for (let j = i-1; j > 0; j--) {
-    //                 if (this.elevation[j] != 0) {
-    //                     sumCandidates.push(this.elevation[j]);
-    //                     break;
-    //                 }
-    //             }
-    //             for (let j = i+1; j < this.elevation.length; j++) {
-    //                 if (this.elevation[j] != 0) {
-    //                     sumCandidates.push(this.elevation[j]);
-    //                     break;
-    //                 }
-    //             }
-                
-    //             sumCandidates.forEach(sc => {
-    //                 this.elevation[i] += sc;
-    //             });
-    //             // this.elevation[i] /= sumCandidates.length;
-    //             App.Instance.PushToLog(this.elevation[i].toString());
-    //         }
-    //     }
-    // }
+    private FixElevation() {
+        for (let i = 0; i < this.elevation.length; i++) {
+            if (this.elevation[i] == 0) {
+                let nonZeroFound = false;
+                for (let j = i+1; j < this.elevation.length; j++) {
+                    if (this.elevation[j] != 0)
+                        this.elevation[i] = this.elevation[j];
+                        nonZeroFound = true;
+                        break;
+                }
+
+                if (nonZeroFound)
+                    continue;
+
+                for (let j = i-1; j >= 0; j--) {
+                    if (this.elevation[j] != 0)
+                        this.elevation[i] = this.elevation[j];
+                        nonZeroFound = true;
+                        break;
+                }
+
+                if (nonZeroFound)
+                    continue;
+            }
+        }
+    }
 }

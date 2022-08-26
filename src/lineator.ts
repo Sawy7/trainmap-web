@@ -5,28 +5,18 @@ export class Lineator {
     private roadGroups: RoadGroup[];
     private constructedRoads: SingleMapRoad[] = [];
     private rootGroup: RoadGroup;
+    private isInitialized: boolean = false;
 
     constructor(roadGroups: RoadGroup[]) {
         this.roadGroups = roadGroups;
         // NOTE: Debug info
         // console.log("isolated count:", this.FindIsolated().length);
-        this.JoinIsolated();
-
-        // TODO: Add exhaustion check
-        let noParent: RoadGroup[];
-        while (true) {
-            this.JoinHierarchies();
-            noParent = this.FindNoParent();
-            if (noParent.length == 1)
-                break
-        }
 
         // noParent.forEach(rg => {
         //     let randomColor = "#" + Math.floor(Math.random()*16777215).toString(16);
         //     this.constructedRoads.push(rg.JoinIntersects());
         // });
 
-        this.rootGroup = noParent[0];
         // this.GenerateChartPoints(noParent[0]);
 
         // // NOTE: Debug info
@@ -38,6 +28,41 @@ export class Lineator {
         // console.log("all groups count:", this.roadGroups.length);
 
         // console.log(this.GenerateUMLDiagram());
+    }
+
+    public Init() {
+        if (this.isInitialized)
+            return;
+
+        this.JoinIsolated();
+
+        // TODO: Add exhaustion check
+        let noParent: RoadGroup[];
+        while (true) {
+            this.JoinHierarchies();
+            noParent = this.FindNoParent();
+            if (noParent.length == 1)
+                break
+        }
+        this.rootGroup = noParent[0];
+        this.isInitialized = true;
+    }
+
+    public CheckInit(): boolean {
+        return this.isInitialized;
+    }
+
+    public GetPoints(): L.LatLng[][] {
+        let points: L.LatLng[][] = [];
+        this.roadGroups.forEach(rg => {
+            points.push(rg.points);
+        });
+
+        return points;
+    }
+
+    public GetSignificantPoint(): L.LatLng {
+        return this.roadGroups[0].points[0];
     }
 
     private GenerateUMLDiagram(): string {

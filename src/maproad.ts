@@ -3,12 +3,12 @@ import { MapEntity } from "./mapentity";
 import { App } from "./app";
 
 export abstract class MapRoad extends MapEntity {
-    protected points: any;
-    protected elevation: any;
-    private color: string;
-    private weight: number;
-    private opacity: number;
-    private smoothFactor: number;
+    // protected points: any;
+    // protected elevation: any;
+    protected color: string;
+    protected weight: number;
+    protected opacity: number;
+    protected smoothFactor: number;
     protected polyLine: L.Polyline;
     readonly className: string = "MapRoad";
 
@@ -28,16 +28,7 @@ export abstract class MapRoad extends MapEntity {
         ]
     }
 
-    public GetMapEntity(): L.Polyline {
-        this.polyLine = new L.Polyline(this.points, {
-            color: this.color,
-            weight: this.weight,
-            opacity: this.opacity,
-            smoothFactor: this.smoothFactor
-        });
-        // this.SetupInteractivity();
-        return this.polyLine;
-    }
+    public abstract GetMapEntity(): L.Polyline;
 
     public GetListInfo(): string {
         return "Cesta";
@@ -45,18 +36,5 @@ export abstract class MapRoad extends MapEntity {
 
     public abstract GetSignificantPoint(): L.LatLng;
 
-    public SetupInteractivity(layerName: string) {
-        // this.polyLine.on("mouseover", function (event) {
-        //     let mouseMarker = new MapMarker(event["latlng"], "This is a popup #1");
-        //     App.Instance.RenderElevationMarker(new L.LatLng(event["latlng"]["lat"], event["latlng"]["lng"]));
-        // });
-
-        // this.polyLine.on("mouseout", function (event) {
-        //     console.log("out");
-        // });
-
-        this.polyLine.on("click", (event) => {
-            App.Instance.SetElevationChart(this.points, this.elevation, layerName);
-        });
-    }
+    public abstract SetupInteractivity(layerID: number);
 }

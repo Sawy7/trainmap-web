@@ -25,3 +25,7 @@ body {
 .alert {
     margin-bottom: 0 !important;
 }
+
+.accordion-body {
+    padding: 1rem 1.25rem !important;
+}

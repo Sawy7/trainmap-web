@@ -14,9 +14,12 @@ export class MapLayer {
     public layerName: string;
     private isActive: boolean = false;
     readonly className: string = "MapLayer";
+    static globalIDGen: number = -1;
+    readonly id: number;
 
     public constructor(name: string) {
         this.layerName = name;
+        this.id = ++MapLayer.globalIDGen;
     }
 
     public AddMapMarker(marker: MapMarker) {
@@ -61,11 +64,11 @@ export class MapLayer {
         });
         this.layerRoads.forEach(r => {
             activeMapEntities.push(r.GetMapEntity());
-            r.SetupInteractivity(this.layerName);
+            r.SetupInteractivity(this.id);
         });
         this.multiRoads.forEach(r => {
             activeMapEntities.push(r.GetMapEntity());
-            r.SetupInteractivity(this.layerName);
+            r.SetupInteractivity(this.id);
         });
         this.layerAreas.forEach(a => {
             activeMapEntities.push(a.GetMapEntity());

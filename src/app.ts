@@ -24,6 +24,7 @@ export class App {
     private activeElevationChart: ElevationChart;
     private sidebarOffcanvas: Offcanvas = new Offcanvas(document.getElementById("offcanvasNavbar"));
     private fileLoader: FileLoader = new FileLoader();
+    private layerActivating: boolean = false;
     private static _instance: App;
 
     private constructor(){};
@@ -82,24 +83,38 @@ export class App {
         });
     }
 
-    public ActivateMapLayer(index: number, soft: boolean = false) {
-        new Collapse(document.getElementById("layer_"+index)).toggle();
-        if (soft)
+    public ActivateMapLayer(index: number) {
+        if (this.layerActivating)
             return;
+        this.layerActivating = true;
 
         let mapLayer = this.mapLayers[index];
         const mapLayerNewState = !mapLayer.GetAndToggleActiveState();
         this.mapWindow.RenderMapLayer(this.mapLayers[index], mapLayerNewState);
         // this.SetActiveInLayerList(index, mapLayer, mapLayerNewState);
+        
+        if (this.activeElevationChart !== undefined && !mapLayerNewState && this.activeElevationChart.layerID == mapLayer.id)
+        this.activeElevationChart.HideChart();
 
-        if (this.activeElevationChart !== undefined && !mapLayerNewState && this.activeElevationChart.layerName == mapLayer.layerName)
-            this.activeElevationChart.HideChart();
+        let collapseElement = document.getElementById("layer_"+index);
+        let collapse = new Collapse(collapseElement);
+        collapse.toggle();
+
+        let collapseEvent: string;
+        if (mapLayerNewState)
+            collapseEvent = "shown.bs.collapse";
+        else
+            collapseEvent = "hidden.bs.collapse";            
+        
+        collapseElement.addEventListener(collapseEvent, () => {
+            this.layerActivating = false;
+        }, { once: true });
     }
 
-    public SetElevationChart(points: L.LatLng[], elevation: number[], layerName: string) {
+    public SetElevationChart(points: L.LatLng[], elevation: number[], layerID: number) {
         if (this.activeElevationChart !== undefined)
             this.activeElevationChart.DestroyChart();
-        this.activeElevationChart = new ElevationChart(points, elevation, layerName);
+        this.activeElevationChart = new ElevationChart(points, elevation, layerID);
     }
 
     private FlushLayers() {

@@ -1,10 +1,10 @@
 {
-  "name": "map-test",
+  "name": "mapster",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "devDependencies": {
-    "@types/bootstrap": "^5.2.1",
+    "@types/bootstrap": "^5.2.3",
     "@types/chart.js": "^2.9.37",
     "@types/leaflet": "^1.7.11",
     "@types/proj4": "^2.5.2",
@@ -15,10 +15,10 @@
     "file-loader": "^6.2.0",
     "style-loader": "^3.3.1",
     "ts-loader": "^9.3.1",
-    "typescript": "^4.7.4",
-    "webpack": "^5.73.0",
+    "typescript": "^4.8.2",
+    "webpack": "^5.74.0",
     "webpack-cli": "^4.10.0",
-    "webpack-dev-server": "^4.9.3"
+    "webpack-dev-server": "^4.10.0"
   },
   "scripts": {
     "build": "webpack && rm public/*.png && rm public/*.svg",
@@ -36,9 +36,9 @@
   },
   "homepage": "https://github.com/Sawy7/enet-sz-map#readme",
   "dependencies": {
-    "bootstrap": "^5.1.3",
+    "bootstrap": "^5.2.0",
     "bootstrap-icons": "^1.9.1",
-    "chart.js": "^3.9.0",
+    "chart.js": "^3.9.1",
     "font-awesome": "^4.7.0",
     "leaflet": "^1.8.0",
     "proj4": "^2.8.0",
