@@ -1,15 +1,10 @@
 <?php
 /**
- * Created by Sawy7
+ * Link to original: https://gist.github.com/bmcbride/1913855
+ * Modified by Sawy7
  * 
  * @return 		string					resulting json string
  */
-function escapeJsonString($value) { # list from www.json.org: (\b backspace, \f formfeed)
-  $escapers = array("\\", "/", "\"", "\n", "\r", "\t", "\x08", "\x0c");
-  $replacements = array("\\\\", "\\/", "\\\"", "\\n", "\\r", "\\t", "\\f", "\\b");
-  $result = str_replace($escapers, $replacements, $value);
-  return $result;
-}
 header("Access-Control-Allow-Origin: *"); // NOTE: This can be configured in Apache
  
 # Connect to PostgreSQL database

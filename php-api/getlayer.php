@@ -6,14 +6,6 @@
  * Query a PostGIS table or view and return the results in GeoJSON format, suitable for use in OpenLayers, Leaflet, etc.
  * 
  * @param 		string		$geotable		The PostGIS layer name *REQUIRED*
- * @param 		string		$geomfield		The PostGIS geometry field *REQUIRED*
- * @param 		string		$srid			The SRID of the returned GeoJSON *OPTIONAL (If omitted, EPSG: 4326 will be used)*
- * @param 		string 		$fields 		Fields to be returned *OPTIONAL (If omitted, all fields will be returned)* NOTE- Uppercase field names should be wrapped in double quotes
- * @param 		string		$parameters		SQL WHERE clause parameters *OPTIONAL*
- * @param 		string		$orderby		SQL ORDER BY constraint *OPTIONAL*
- * @param 		string		$sort			SQL ORDER BY sort order (ASC or DESC) *OPTIONAL*
- * @param 		string		$limit			Limit number of results returned *OPTIONAL*
- * @param 		string		$offset			Offset used in conjunction with limit *OPTIONAL*
  * @return 		string					resulting geojson string
  */
 function escapeJsonString($value) { # list from www.json.org: (\b backspace, \f formfeed)
@@ -31,35 +23,9 @@ if (empty($_GET['geotable'])) {
 } else
     $geotable = $_GET['geotable'];
 
-if (empty($_GET['geomfield'])) {
-    echo "missing required parameter: <i>geomfield</i>";
-    exit;
-} else
-    $geomfield = $_GET['geomfield'];
-
-if (empty($_GET['srid'])) {
-    $srid = '4326';
-} else
-    $srid = $_GET['srid'];
-
-if (empty($_GET['fields'])) {
-    $fields = '';
-} else
-    $fields = $_GET['fields'] . ', ';
-
-$parameters = $_GET['parameters'] ?? null;
-
-$orderby = $_GET['orderby'] ?? null;
-
-if (empty($_GET['sort'])) {
-    $sort = 'ASC';
-} else
-    $sort = $_GET['sort'];
+$geomfield = "geom";
+$srid = "4326"; // WGS-84 (GPS)
 	
-$limit = $_GET['limit'] ?? null;
-
-$offset = $_GET['offset'] ?? null;
-
 # Connect to PostgreSQL database
 $conn = pg_connect("dbname='nyc' user='postgres' password='mysecretpassword' host='localhost'");
 if (!$conn) {
@@ -68,19 +34,7 @@ if (!$conn) {
 }
 
 # Build SQL SELECT statement and return the geometry as a GeoJSON element in EPSG: 4326
-$sql = "SELECT " . pg_escape_string($conn, $fields) . "ST_AsGeoJSON(ST_Transform(" . pg_escape_string($conn, $geomfield) . ",$srid)) AS geojson FROM " . pg_escape_string($conn, $geotable);
-if (! is_null($parameters)) {
-    $sql .= " WHERE " . pg_escape_string($conn, $parameters);
-}
-if (! is_null($orderby)) {
-    $sql .= " ORDER BY " . pg_escape_string($conn, $orderby) . " " . $sort;
-}
-if (! is_null($limit)) {
-    $sql .= " LIMIT " . pg_escape_string($conn, $limit);
-}
-if (! is_null($offset)) {
-    $sql .= " OFFSET " . pg_escape_string($conn, $offset);
-}
+$sql = "SELECT " . "ST_AsGeoJSON(ST_LineMerge(ST_Transform(" . pg_escape_string($conn, $geomfield) . ",$srid))) AS geojson FROM " . pg_escape_string($conn, $geotable);
 // echo $sql;
 
 # Try query or error

@@ -4,8 +4,10 @@ import { MapLayer } from "./maplayer";
 import { MapEntity } from "./mapentity";
 import { LocalLayer } from "./locallayer";
 import { ApiComms } from "./apicomms";
+import { SingleMapRoad } from "./singleroad";
 
 export class GeoJSONLayer extends MapLayer {
+    private layerRoads: SingleMapRoad[] = [];
     public activeLayerGroup: L.LayerGroup;
     public layerName: string;
     // private geoJSON: GeoJsonObject;
@@ -18,7 +20,17 @@ export class GeoJSONLayer extends MapLayer {
     }
 
     public CreateLayerGroup(): L.LayerGroup {
-        let geoJSON = JSON.parse(ApiComms.GetRequest(`http://localhost:3000/getlayer.php?geotable=${this.layerName}&geomfield=geom`));
+        let geoJSON = JSON.parse(ApiComms.GetRequest(`http://localhost:3000/getlayer.php?geotable=${this.layerName}`));
+        
+        let elevation: number[] = [];
+        geoJSON["features"].forEach(feature => {
+            let coords = feature["geometry"]["coordinates"][0];
+            coords.forEach(coord => {
+                elevation.push(coord[2]);
+            });
+        });
+
+        console.log(elevation);
 
         return L.geoJSON(geoJSON);
     }
