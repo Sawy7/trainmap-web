@@ -1,4 +1,4 @@
-import { MapLayer } from "./maplayer";
+import { LocalLayer } from "./locallayer";
 
 export class GhostMapLayer {
     public layerName: string;
@@ -9,7 +9,7 @@ export class GhostMapLayer {
         this.layerLink = link;
     }
 
-    public Download(): MapLayer {
-        return new MapLayer(this.layerName);
+    public Download(): LocalLayer {
+        return new LocalLayer(this.layerName);
     }
 }

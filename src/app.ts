@@ -1,5 +1,5 @@
 import { MapWindow } from "./mapwindow";
-import { MapLayer } from "./maplayer";
+import { LocalLayer } from "./locallayer";
 // import { GhostMapLayer } from "./ghostmaplayer";
 import { SingleMapRoad } from "./singleroad";
 import { MultiMapRoad } from "./multiroad";
@@ -8,6 +8,7 @@ import { FileLoader } from "./fileloader";
 import { Offcanvas, Collapse, Modal } from "bootstrap";
 import * as L from "leaflet";
 import * as shp from "shpjs";
+import { MapLayer } from "./maplayer";
 // import proj4 from "proj4";
 
 // http://lepsi-nez-zivot.blogspot.com/2017/08/konverze-s-jtsk-krovak-do-wsg84-gsm-api.html
@@ -19,7 +20,7 @@ import * as shp from "shpjs";
 // TS Singleton: https://stackoverflow.com/questions/30174078/how-to-define-singleton-in-typescript
 export class App {
     private mapWindow: MapWindow;
-    private mapLayers: MapLayer[] = [];
+    private localLayers: MapLayer[] = [];
     // private ghostMapLayers: GhostMapLayer[] = [];
     private activeElevationChart: ElevationChart;
     private sidebarOffcanvas: Offcanvas = new Offcanvas(document.getElementById("offcanvasNavbar"));
@@ -54,7 +55,7 @@ export class App {
     }
 
     public AddMapLayer(mapLayer: MapLayer) {
-        this.mapLayers.push(mapLayer);
+        this.localLayers.push(mapLayer);
         // this.RenderLayerList();
         this.AddToLayerList();
     }
@@ -88,9 +89,9 @@ export class App {
             return;
         this.layerActivating = true;
 
-        let mapLayer = this.mapLayers[index];
+        let mapLayer = this.localLayers[index];
         const mapLayerNewState = !mapLayer.GetAndToggleActiveState();
-        this.mapWindow.RenderMapLayer(this.mapLayers[index], mapLayerNewState);
+        this.mapWindow.RenderMapLayer(this.localLayers[index], mapLayerNewState);
         // this.SetActiveInLayerList(index, mapLayer, mapLayerNewState);
         
         if (this.activeElevationChart !== undefined && !mapLayerNewState && this.activeElevationChart.layerID == mapLayer.id)
@@ -120,15 +121,15 @@ export class App {
     private FlushLayers() {
         const layersList = document.getElementById("layersList");
         layersList.innerHTML = "";
-        this.mapLayers = [];
+        this.localLayers = [];
     }
 
     private AddToLayerList(index: number = undefined) {
         const layersList = document.getElementById("layersList");
 
         if (index === undefined)
-            index = this.mapLayers.length - 1
-        let l = this.mapLayers[index];
+            index = this.localLayers.length - 1
+        let l = this.localLayers[index];
 
         // Accordions
         var accordion = document.createElement("a");
@@ -159,19 +160,21 @@ export class App {
         // lineatorLink.innerHTML = "LINEAR";
         // lineatorLink.href = "#";
         // lineatorLink.onclick = () => {
-        //     this.mapLayers[index]
+        //     this.localLayers[index]
         // };
         // accordionBody.appendChild(lineatorLink);
 
         layersList.appendChild(accordion);
         layersList.appendChild(accordionCollapse);
 
-        this.PopulateLayerEntitesList(index, this.mapLayers[index]);
+        this.PopulateLayerEntitesList(index, this.localLayers[index]);
     }
 
     private SaveLayersToLocalStorage() {
         let layersToSave: Object[] = [];
-        this.mapLayers.forEach(mapLayer => {
+        this.localLayers.forEach(mapLayer => {
+            if (mapLayer.className === "GeoJSONLayer")
+                return;
             layersToSave.push(mapLayer.Serialize());
         });
         localStorage.setItem("savedLayers", JSON.stringify(layersToSave));
@@ -184,7 +187,7 @@ export class App {
         let storageLayersParsed = JSON.parse(storageLayers);
         this.FlushLayers();
         storageLayersParsed.forEach(storageLayer => {
-            let deserializedLayer = MapLayer.Deserialize(storageLayer);
+            let deserializedLayer = LocalLayer.Deserialize(storageLayer);
             this.AddMapLayer(deserializedLayer);
         });
     }
@@ -221,7 +224,7 @@ export class App {
                 }
 
                 let addFunction = (name: string) => {
-                    let gpxLayer = new MapLayer(name);
+                    let gpxLayer = new LocalLayer(name);
                     gpxLayer.AddMapRoad(new SingleMapRoad(pointsArr, elevArr, "purple"));
                     this.AddMapLayer(gpxLayer);
                     this.SaveLayersToLocalStorage();
@@ -259,7 +262,7 @@ export class App {
                     });
 
                     let addFunction = (name: string) => {
-                        let shapefileLayer = new MapLayer(name);
+                        let shapefileLayer = new LocalLayer(name);
                         shapefileLayer.AddMultiRoad(new MultiMapRoad(multiPointsArr, multiElevArr, "blue"));
                         App.Instance.AddMapLayer(shapefileLayer);
                         this.SaveLayersToLocalStorage();
