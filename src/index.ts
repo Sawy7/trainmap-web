@@ -15,18 +15,17 @@ L.Icon.Default.mergeOptions({
 
 // Internal imports
 import { App } from "./app";
+import { MapLayer } from './maplayer';
 import { MapMarker } from "./mapmarker";
 import { SingleMapRoad } from "./singleroad";
-import { LocalLayer } from "./locallayer"
 import { GeoJSONLayer } from './geojsonlayer';
 import { ApiComms } from './apicomms';
-// import { GhostMapLayer } from "./ghostmaplayer"
 
 let app = App.Instance;
 app.Init(49.86, 15.51, 15);
 
 // First test layer (BODY)
-let myPoints = new LocalLayer("Moje body #1");
+let myPoints = new MapLayer("Moje body #1");
 
 myPoints.AddMapMarker(new MapMarker(new L.LatLng(49.86, 15.511), "This is a popup #1"));
 myPoints.AddMapMarker(new MapMarker(new L.LatLng(49.86, 15.512), "This is a popup #2"));
@@ -36,7 +35,7 @@ myPoints.AddMapMarker(new MapMarker(new L.LatLng(49.86, 15.514), "This is a popu
 app.AddMapLayer(myPoints);
 
 // Second test layer (CESTY)
-let myRoads = new LocalLayer("Moje cesty #1");
+let myRoads = new MapLayer("Moje cesty #1");
 
 myRoads.AddMapRoad(new SingleMapRoad([
     new L.LatLng(49.86, 15.511),
@@ -64,20 +63,7 @@ myRoads.AddMapRoad(new SingleMapRoad([
 app.AddMapLayer(myRoads);
 app.LoadLayersFromLocalStorage();
 
-// let apiLayer = new GhostMapLayer("Moje cesty z externího API", "http://api.com/endpoint");
-// let apiLayer2 = new GhostMapLayer("Moje cesty z externího API 2", "http://api.com/endpoint");
-// app.AddGhostMapLayer(apiLayer);
-// app.AddGhostMapLayer(apiLayer2);
-
-// GeoJSON layers
-// let feature: GeoJSON.Feature<any> = {
-//     type: 'Feature',
-//     geometry: {"type":"MultiLineString","coordinates":[[[18.211206726,49.823150853,213.435],[18.211266054,49.823295195,0],[18.211300474,49.823442932,213.401],[18.211325397,49.823550023,213.39],[18.211359726,49.823697718,0],[18.211419233,49.82384208,213.358]]]},
-//     properties: {}
-//   };
-// let geoj = new GeoJSONLayer("geojson");
-// app.AddMapLayer(geoj);
-
+// TODO: Move
 let layers = JSON.parse(ApiComms.GetRequest("http://localhost:3000/listlayers.php"));
 layers["names"].forEach(dbLayerName => {
     app.AddMapLayer(new GeoJSONLayer(dbLayerName));

@@ -1,5 +1,4 @@
 import * as L from "leaflet";
-import { LocalLayer } from "./locallayer";
 import { MapLayer } from "./maplayer";
 import { MapMarker } from "./mapmarker";
 

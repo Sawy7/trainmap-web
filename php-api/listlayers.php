@@ -6,6 +6,7 @@
  * @return 		string					resulting json string
  */
 header("Access-Control-Allow-Origin: *"); // NOTE: This can be configured in Apache
+header("Content-Type: application/json");
  
 # Connect to PostgreSQL database
 $conn = pg_connect("dbname='nyc' user='postgres' password='mysecretpassword' host='localhost'");

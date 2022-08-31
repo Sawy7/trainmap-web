@@ -15,6 +15,7 @@ function escapeJsonString($value) { # list from www.json.org: (\b backspace, \f 
   return $result;
 }
 header("Access-Control-Allow-Origin: *"); // NOTE: This can be configured in Apache
+header("Content-Type: application/json");
  
 # Retrive URL variables
 if (empty($_GET['geotable'])) {
@@ -27,14 +28,14 @@ $geomfield = "geom";
 $srid = "4326"; // WGS-84 (GPS)
 	
 # Connect to PostgreSQL database
-$conn = pg_connect("dbname='nyc' user='postgres' password='mysecretpassword' host='localhost'");
+$conn = pg_connect("dbname='map_data' user='postgres' password='mysecretpassword' host='localhost'");
 if (!$conn) {
     echo "Not connected : " . pg_error();
     exit;
 }
 
 # Build SQL SELECT statement and return the geometry as a GeoJSON element in EPSG: 4326
-$sql = "SELECT " . "ST_AsGeoJSON(ST_LineMerge(ST_Transform(" . pg_escape_string($conn, $geomfield) . ",$srid))) AS geojson FROM " . pg_escape_string($conn, $geotable);
+$sql = "SELECT " . "ST_AsGeoJSON(ST_Collect(ST_Transform(" . pg_escape_string($conn, $geomfield) . ", " . $srid . ") ORDER BY ST_YMin(" . pg_escape_string($conn, $geomfield) . ") DESC)) AS geojson FROM " . pg_escape_string($conn, $geotable);
 // echo $sql;
 
 # Try query or error

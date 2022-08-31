@@ -1,6 +1,5 @@
 import { MapWindow } from "./mapwindow";
-import { LocalLayer } from "./locallayer";
-// import { GhostMapLayer } from "./ghostmaplayer";
+import { MapLayer } from "./maplayer";
 import { SingleMapRoad } from "./singleroad";
 import { MultiMapRoad } from "./multiroad";
 import { ElevationChart } from "./elevationchart";
@@ -8,7 +7,6 @@ import { FileLoader } from "./fileloader";
 import { Offcanvas, Collapse, Modal } from "bootstrap";
 import * as L from "leaflet";
 import * as shp from "shpjs";
-import { MapLayer } from "./maplayer";
 // import proj4 from "proj4";
 
 // http://lepsi-nez-zivot.blogspot.com/2017/08/konverze-s-jtsk-krovak-do-wsg84-gsm-api.html
@@ -21,7 +19,6 @@ import { MapLayer } from "./maplayer";
 export class App {
     private mapWindow: MapWindow;
     private localLayers: MapLayer[] = [];
-    // private ghostMapLayers: GhostMapLayer[] = [];
     private activeElevationChart: ElevationChart;
     private sidebarOffcanvas: Offcanvas = new Offcanvas(document.getElementById("offcanvasNavbar"));
     private fileLoader: FileLoader = new FileLoader();
@@ -50,7 +47,6 @@ export class App {
         this.SetupGPXLoader();
         this.SetupShapefileLoader();
         this.AddKeyListener();
-        // // TODO: Dev - remove
         // this.sidebarOffcanvas.toggle();
     }
 
@@ -187,7 +183,7 @@ export class App {
         let storageLayersParsed = JSON.parse(storageLayers);
         this.FlushLayers();
         storageLayersParsed.forEach(storageLayer => {
-            let deserializedLayer = LocalLayer.Deserialize(storageLayer);
+            let deserializedLayer = MapLayer.Deserialize(storageLayer);
             this.AddMapLayer(deserializedLayer);
         });
     }
@@ -224,7 +220,7 @@ export class App {
                 }
 
                 let addFunction = (name: string) => {
-                    let gpxLayer = new LocalLayer(name);
+                    let gpxLayer = new MapLayer(name);
                     gpxLayer.AddMapRoad(new SingleMapRoad(pointsArr, elevArr, "purple"));
                     this.AddMapLayer(gpxLayer);
                     this.SaveLayersToLocalStorage();
@@ -262,7 +258,7 @@ export class App {
                     });
 
                     let addFunction = (name: string) => {
-                        let shapefileLayer = new LocalLayer(name);
+                        let shapefileLayer = new MapLayer(name);
                         shapefileLayer.AddMultiRoad(new MultiMapRoad(multiPointsArr, multiElevArr, "blue"));
                         App.Instance.AddMapLayer(shapefileLayer);
                         this.SaveLayersToLocalStorage();
