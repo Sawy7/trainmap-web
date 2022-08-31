@@ -7,6 +7,7 @@ import { FileLoader } from "./fileloader";
 import { Offcanvas, Collapse, Modal } from "bootstrap";
 import * as L from "leaflet";
 import * as shp from "shpjs";
+import { DBLayerBuilder } from "./dblayerbuilder";
 // import proj4 from "proj4";
 
 // http://lepsi-nez-zivot.blogspot.com/2017/08/konverze-s-jtsk-krovak-do-wsg84-gsm-api.html
@@ -22,6 +23,7 @@ export class App {
     private activeElevationChart: ElevationChart;
     private sidebarOffcanvas: Offcanvas = new Offcanvas(document.getElementById("offcanvasNavbar"));
     private fileLoader: FileLoader = new FileLoader();
+    private dbLayerBuilder: DBLayerBuilder = new DBLayerBuilder();
     private layerActivating: boolean = false;
     private static _instance: App;
 
