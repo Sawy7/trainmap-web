@@ -65,6 +65,6 @@ app.LoadLayersFromLocalStorage();
 
 // TODO: Move
 let layers = JSON.parse(ApiComms.GetRequest("http://localhost:3000/listlayers.php"));
-layers["names"].forEach(dbLayerName => {
-    app.AddMapLayer(new GeoJSONLayer(dbLayerName));
+layers["layers"].forEach(dbMapEntity => {
+    app.AddMapLayer(new GeoJSONLayer(dbMapEntity["name"], dbMapEntity["id"]));
 });

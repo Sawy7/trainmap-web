@@ -6,9 +6,11 @@ export class Lineator {
     private constructedRoads: SingleMapRoad[] = [];
     private rootGroup: RoadGroup;
     private isInitialized: boolean = false;
+    private name: string;
 
-    constructor(roadGroups: RoadGroup[]) {
+    constructor(roadGroups: RoadGroup[], name: string) {
         this.roadGroups = roadGroups;
+        this.name = name;
         // NOTE: Debug info
         // console.log("isolated count:", this.FindIsolated().length);
 
@@ -168,5 +170,18 @@ export class Lineator {
         return this.roadGroups.filter((rg) => {
             return rg.GetPrevCount() == 0;
         });
+    }
+
+    private ExportToSQL() {
+        let sql = "CREATE TABLE map_data_index ( \
+            id serial PRIMARY KEY, \
+            layer_name VARCHAR ( 200 ) UNIQUE NOT NULL, \
+            color VARCHAR ( 50 ), \
+            weight INT, \
+            opacity FLOAT, \
+            smooth_factor FLOAT, \
+            lineator_name VARCHAR ( 200 ) UNIQUE);";
+
+
     }
 }

@@ -5,15 +5,17 @@ import { MultiMapRoad } from "./multiroad";
 
 export class GeoJSONLayer extends MapLayer {
     public layerName: string;
+    public layerID: number;
     readonly className: string = "GeoJSONLayer";
 
-    public constructor(name: string) {
+    public constructor(name: string, id: number) {
         super(name);
         this.layerName = name;
+        this.layerID = id;
     }
 
     private ParseGeoJSON() {
-        let geoJSON = JSON.parse(ApiComms.GetRequest(`http://localhost:3000/getlayer.php?geotable=${this.layerName}`));
+        let geoJSON = JSON.parse(ApiComms.GetRequest(`http://localhost:3000/getlayer.php?id=${this.layerID}`));
         
         geoJSON["features"].forEach(feature => {
             let type = feature["geometry"]["type"];

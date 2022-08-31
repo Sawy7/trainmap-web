@@ -5,8 +5,6 @@ import { RoadGroup } from "./roadgroup";
 import { App } from "./app";
 
 export class MultiMapRoad extends MapRoad {
-    // private points: L.LatLng[][];
-    private elevation: number[][];
     public lineator: Lineator;
     readonly className: string = "MultiMapRoad";
 
@@ -39,7 +37,7 @@ export class MultiMapRoad extends MapRoad {
         for (let i = 0; i < points.length; i++) {
             roadGroups.push(new RoadGroup(points[i], elevation[i]));
         }
-        this.lineator = new Lineator(roadGroups);
+        this.lineator = new Lineator(roadGroups, this.nameFromLayer);
     }
 
     private EngageLineator() {

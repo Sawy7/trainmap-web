@@ -9,17 +9,14 @@ header("Access-Control-Allow-Origin: *"); // NOTE: This can be configured in Apa
 header("Content-Type: application/json");
  
 # Connect to PostgreSQL database
-$conn = pg_connect("dbname='nyc' user='postgres' password='mysecretpassword' host='localhost'");
+$conn = pg_connect("dbname='map_data' user='postgres' password='mysecretpassword' host='localhost'");
 if (!$conn) {
     echo "Not connected : " . pg_error();
     exit;
 }
 
 # Build SQL SELECT statement and return the geometry as a GeoJSON element in EPSG: 4326
-$sql = "SELECT * FROM pg_catalog.pg_tables
-        WHERE schemaname != 'pg_catalog' AND 
-              schemaname != 'information_schema' AND
-	          tablename != 'spatial_ref_sys'";
+$sql = "SELECT id, nazevtrasy FROM map_data_index";
 // echo $sql;
 
 # Try query or error
@@ -34,10 +31,10 @@ $output    = '';
 $rowOutput = '';
 
 while ($row = pg_fetch_assoc($rs)) {
-    $rowOutput = (strlen($rowOutput) > 0 ? ', ' : '') . '"' . $row['tablename'] . '"';   
+    $rowOutput = (strlen($rowOutput) > 0 ? ', ' : '') . '{"id": "' . $row['id'] . '", "name": "' . $row['nazevtrasy'] . '"}';   
     $output .= $rowOutput;
 }
 
-$output = '{ "type": "LayerList", "names": [ ' . $output . ' ] }';
+$output = '{ "type": "LayerList", "layers": [ ' . $output . ' ] }';
 echo $output;
 ?>

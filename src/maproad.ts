@@ -10,6 +10,7 @@ export abstract class MapRoad extends MapEntity {
     protected opacity: number;
     protected smoothFactor: number;
     protected polyLine: L.Polyline;
+    protected nameFromLayer: string;
     readonly className: string = "MapRoad";
 
     protected constructor(
@@ -26,6 +27,10 @@ export abstract class MapRoad extends MapEntity {
         this.dontSerializeList = [
             "polyLine"
         ]
+    }
+
+    public AssignNameFromLayer(nameFromLayer: string) {
+        this.nameFromLayer = nameFromLayer;
     }
 
     public abstract GetMapEntity(): L.Polyline;

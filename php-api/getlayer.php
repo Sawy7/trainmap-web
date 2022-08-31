@@ -5,7 +5,7 @@
  * Modified by Sawy7
  * Query a PostGIS table or view and return the results in GeoJSON format, suitable for use in OpenLayers, Leaflet, etc.
  * 
- * @param 		string		$geotable		The PostGIS layer name *REQUIRED*
+ * @param 		string		$id		    The PostGIS entity id *REQUIRED*
  * @return 		string					resulting geojson string
  */
 function escapeJsonString($value) { # list from www.json.org: (\b backspace, \f formfeed)
@@ -18,14 +18,15 @@ header("Access-Control-Allow-Origin: *"); // NOTE: This can be configured in Apa
 header("Content-Type: application/json");
  
 # Retrive URL variables
-if (empty($_GET['geotable'])) {
-    echo "missing required parameter: <i>geotable</i>";
+if (empty($_GET['id'])) {
+    echo "missing required parameter: <i>id</i>";
     exit;
 } else
-    $geotable = $_GET['geotable'];
+    $id = $_GET['id'];
 
 $geomfield = "geom";
 $srid = "4326"; // WGS-84 (GPS)
+$routes_table = "map_routes";
 	
 # Connect to PostgreSQL database
 $conn = pg_connect("dbname='map_data' user='postgres' password='mysecretpassword' host='localhost'");
@@ -35,7 +36,7 @@ if (!$conn) {
 }
 
 # Build SQL SELECT statement and return the geometry as a GeoJSON element in EPSG: 4326
-$sql = "SELECT " . "ST_AsGeoJSON(ST_Collect(ST_Transform(" . pg_escape_string($conn, $geomfield) . ", " . $srid . ") ORDER BY ST_YMin(" . pg_escape_string($conn, $geomfield) . ") DESC)) AS geojson FROM " . pg_escape_string($conn, $geotable);
+$sql = "SELECT " . "ST_AsGeoJSON(ST_Collect(ST_Transform(" . pg_escape_string($conn, $geomfield) . ", " . $srid . ") ORDER BY ST_YMin(" . pg_escape_string($conn, $geomfield) . ") DESC)) AS geojson FROM " . pg_escape_string($conn, $routes_table) . " WHERE idtrasy = " . pg_escape_string($conn, $id);
 // echo $sql;
 
 # Try query or error
