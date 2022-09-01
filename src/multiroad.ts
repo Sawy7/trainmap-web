@@ -10,13 +10,14 @@ export class MultiMapRoad extends MapRoad {
 
     public constructor(points: L.LatLng[][],
                 elevation: number[][],
+                name: string = "Cesta",
                 color: string = "red",
                 weight: number = 5,
                 opacity: number = 0.5,
                 smoothFactor: number = 1
     ) {
-        super(color, weight, opacity, smoothFactor);
-        this.dontSerializeList.push("lineator");
+        super(name, color, weight, opacity, smoothFactor);
+        this.dontSerializeList.push("lineator"); // TODO: Investigate, why this is not neccessary
         this.PrepareLineator(points, elevation);
         // this.points = points;
         // this.elevation = elevation;
@@ -37,7 +38,7 @@ export class MultiMapRoad extends MapRoad {
         for (let i = 0; i < points.length; i++) {
             roadGroups.push(new RoadGroup(points[i], elevation[i]));
         }
-        this.lineator = new Lineator(roadGroups, this.nameFromLayer);
+        this.lineator = new Lineator(roadGroups);
     }
 
     private EngageLineator() {

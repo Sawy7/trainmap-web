@@ -1,17 +1,23 @@
 export abstract class MapEntity {
+    protected name: string = "Entita";
     readonly className: string;
+
     protected dontSerializeList: string[] = [];
 
     public abstract GetMapEntity(): any;
-    public abstract GetListInfo(): string;
     public abstract GetSignificantPoint(): L.LatLng;
+    
+    public GetListInfo(): string {
+        return this.name;
+    }
 
     public Serialize(): Object {
-        let toBeSerialized = this;
+        let toBeSerialized = Object.assign({}, this);
         Object.entries(toBeSerialized).map(item => {
             if (this.dontSerializeList.includes(item[0]))
                 delete toBeSerialized[item[0]];
         })
+        console.log("");
         return toBeSerialized;
     }
 }

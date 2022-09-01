@@ -47,7 +47,7 @@ myRoads.AddMapRoad(new SingleMapRoad([
     100,
     500,
     100
-], "blue"));
+], "Cesta #1", "blue"));
 myRoads.AddMapRoad(new SingleMapRoad([
     new L.LatLng(49.859, 15.511),
     new L.LatLng(49.859, 15.512),
@@ -58,13 +58,7 @@ myRoads.AddMapRoad(new SingleMapRoad([
     400,
     500,
     100
-]));
+], "Cesta #2"));
 
 app.AddMapLayer(myRoads);
 app.LoadLayersFromLocalStorage();
-
-// TODO: Move
-let layers = JSON.parse(ApiComms.GetRequest("http://localhost:3000/listlayers.php"));
-layers["layers"].forEach(dbMapEntity => {
-    app.AddMapLayer(new GeoJSONLayer(dbMapEntity["name"], dbMapEntity["id"]));
-});

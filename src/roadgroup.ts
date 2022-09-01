@@ -160,9 +160,9 @@ export class RoadGroup {
     }
 
     public JoinIntersects(
-        color?: string, weight?: number, opacity?: number, smoothFactor?: number,
+        name?: string, color?: string, weight?: number, opacity?: number, smoothFactor?: number,
         doubleUp: boolean = false,
-        constructedRoad: SingleMapRoad = new SingleMapRoad([], [], color, weight, opacity, smoothFactor),
+        constructedRoad: SingleMapRoad = new SingleMapRoad([], [], name, color, weight, opacity, smoothFactor),
         fromIndex?: number, toIndex?: number
     ) {
         this.visited++;
@@ -191,11 +191,11 @@ export class RoadGroup {
                 } else if (i == childPoint) {
                     childFound = true;
                     if (connectPoint != 0) {
-                        child.JoinIntersects(color, weight, opacity, smoothFactor, true, constructedRoad, 0, connectPoint);
-                        child.JoinIntersects(color, weight, opacity, smoothFactor, true, constructedRoad, connectPoint, child.points.length);
+                        child.JoinIntersects(name, color, weight, opacity, smoothFactor, true, constructedRoad, 0, connectPoint);
+                        child.JoinIntersects(name, color, weight, opacity, smoothFactor, true, constructedRoad, connectPoint, child.points.length);
                         child.visited--;  
                     } else {
-                        child.JoinIntersects(color, weight, opacity, smoothFactor, true, constructedRoad);
+                        child.JoinIntersects(name, color, weight, opacity, smoothFactor, true, constructedRoad);
                     }
                 }
             }

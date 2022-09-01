@@ -40,12 +40,10 @@ export class MapLayer {
     }
 
     public AddMapRoad(road: SingleMapRoad) {
-        road.AssignNameFromLayer(this.layerName);
         this.layerRoads.push(road);
     }
 
     public AddMultiRoad(road: MultiMapRoad) {
-        road.AssignNameFromLayer(this.layerName);
         this.multiRoads.push(road);
     }
 

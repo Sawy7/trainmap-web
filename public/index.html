@@ -112,7 +112,15 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zavřít</button>
-                <button type="button" class="btn btn-primary" id="dbLayerBuilderModalCreateButton">Vytvořit</button>
+                <div class="col" id="dbLayerBuilderNameDiv">
+                    <div class="col">
+                        <input type="text" class="form-control" id="dbLayerBuilderName" placeholder="Název vrstvy" required>
+                        <div class="invalid-tooltip">
+                            Název vrstvy nemůže být prázdný.
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" id="dbLayerBuilderModalCreateButton">Vytvořit</button>
             </div>
         </div>
         </div>

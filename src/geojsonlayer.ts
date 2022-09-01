@@ -15,6 +15,7 @@ export class GeoJSONLayer extends MapLayer {
     }
 
     private ParseGeoJSON() {
+        // let geoJSON = JSON.parse(ApiComms.GetRequest(`${window.location.protocol}//${window.location.host}/getlayer.php?id=${this.layerID}`));
         let geoJSON = JSON.parse(ApiComms.GetRequest(`http://localhost:3000/getlayer.php?id=${this.layerID}`));
         
         geoJSON["features"].forEach(feature => {

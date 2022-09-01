@@ -69,6 +69,6 @@ while ($row = pg_fetch_assoc($rs)) {
     $output .= $rowOutput;
 }
 
-$output = '{ "type": "FeatureCollection", "features": [ ' . $output . ' ]}';
+// $output = '{ "type": "FeatureCollection", "features": [ ' . $output . ' ]}';
 echo $output;
 ?>

@@ -5,6 +5,22 @@
  * 
  * @return 		string					resulting json string
  */
+function createJsonKey($name, $value, $isNumber=false) {
+    $result = '"' . $name . '": ';
+
+    if (is_null($value))
+    {
+        $value = "null";
+        $isNumber = true;
+    }
+
+    if ($isNumber) {
+        $result .= $value;
+    } else {
+        $result .= '"' . $value . '"';
+    }
+    return $result;
+}
 header("Access-Control-Allow-Origin: *"); // NOTE: This can be configured in Apache
 header("Content-Type: application/json");
  
@@ -16,7 +32,7 @@ if (!$conn) {
 }
 
 # Build SQL SELECT statement and return the geometry as a GeoJSON element in EPSG: 4326
-$sql = "SELECT id, nazevtrasy FROM map_data_index";
+$sql = "SELECT * FROM map_data_index";
 // echo $sql;
 
 # Try query or error
@@ -31,7 +47,16 @@ $output    = '';
 $rowOutput = '';
 
 while ($row = pg_fetch_assoc($rs)) {
-    $rowOutput = (strlen($rowOutput) > 0 ? ', ' : '') . '{"id": "' . $row['id'] . '", "name": "' . $row['nazevtrasy'] . '"}';   
+    $rowOutput = (strlen($rowOutput) > 0 ? ', ' : '') . '{';
+    $rowOutput .= createJsonKey("id", $row["id"], true);
+    $rowOutput .= ', ' . createJsonKey("name", $row["nazevtrasy"]);
+    $rowOutput .= ', ' . createJsonKey("color", $row["color"]);
+    $rowOutput .= ', ' . createJsonKey("weight", $row["weight"], true);
+    $rowOutput .= ', ' . createJsonKey("opacity", $row["opacity"], true);
+    $rowOutput .= ', ' . createJsonKey("smooth_factor", $row["smooth_factor"], true);
+    $rowOutput .= ', ' . createJsonKey("lineator_id", $row["lineator_id"], true);
+    $rowOutput .= ', ' . createJsonKey("tags", $row["tags"]);
+    $rowOutput .= '}';
     $output .= $rowOutput;
 }
 

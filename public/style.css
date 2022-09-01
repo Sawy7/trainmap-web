@@ -29,3 +29,7 @@ body {
 .accordion-body {
     padding: 1rem 1.25rem !important;
 }
+
+#dbLayerBuilderNameDiv {
+    margin-left: 30%;
+}

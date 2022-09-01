@@ -3,15 +3,17 @@ import {MapEntity} from "./mapentity";
 
 export class MapMarker extends MapEntity {
     private point: L.LatLng;
+    readonly name: string;
     private popupMsg: string;
     private customIcon: L.Icon;
     public activeMarker: L.Marker;
     readonly className: string = "MapMarker";
 
-    public constructor(point: L.LatLng, popupMsg: string, useCustomIcon: boolean = false) {
+    public constructor(point: L.LatLng, popupMsg: string, name: string = "Bod", useCustomIcon: boolean = false) {
         super();
         this.point = point;
         this.popupMsg = popupMsg;
+        this.name = name;
         this.dontSerializeList = [
             "customIcon",
             "activeMarker"
@@ -39,10 +41,6 @@ export class MapMarker extends MapEntity {
                 this.activeMarker.bindPopup(this.popupMsg);
         }
         return this.activeMarker;
-    }
-
-    public GetListInfo(): string {
-        return "Bod";
     }
 
     public GetSignificantPoint(): L.LatLng {

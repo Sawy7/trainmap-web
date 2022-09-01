@@ -9,12 +9,13 @@ export class SingleMapRoad extends MapRoad {
 
     public constructor(points: L.LatLng[],
                 elevation: number[],
+                name: string = "Cesta",
                 color: string = "red",
                 weight: number = 5,
                 opacity: number = 0.5,
                 smoothFactor: number = 1
                 ) {
-        super(color, weight, opacity, smoothFactor);
+        super(name, color, weight, opacity, smoothFactor);
         this.points = points;
         this.elevation = elevation;
     }

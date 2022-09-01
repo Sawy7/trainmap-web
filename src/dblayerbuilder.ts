@@ -1,5 +1,8 @@
 import { Modal } from "bootstrap";
 import { ApiComms } from "./apicomms";
+import { App } from "./app";
+import { DBMultiMapRoad } from "./dbmultiroad";
+import { MapLayer } from "./maplayer";
 
 export class DBLayerBuilder {
     private modalElement = document.getElementById("dbLayerBuilderModal");
@@ -7,16 +10,18 @@ export class DBLayerBuilder {
     private searchBar = document.getElementById("dbLayerBuilderSearch") as HTMLInputElement;
     private searchResults = document.getElementById("dbLayerBuilderResults");
     private createButton = document.getElementById("dbLayerBuilderModalCreateButton");
+    private layerNameBar = document.getElementById("dbLayerBuilderName") as HTMLInputElement;
+    private layerNameBarDiv = document.getElementById("dbLayerBuilderNameDiv");
+    private elementsDownloaded = false;
 
     constructor() {
-        this.ToggleInterface();
         this.SetInteraction();
-        this.GetElementsFromDB();
     }
 
     private SetInteraction() {
         this.showButton.onclick = () => {
             this.ToggleInterface();
+            this.GetElementsFromDB();
         };
 
         this.searchBar.onkeyup = () => {
@@ -29,10 +34,17 @@ export class DBLayerBuilder {
     }
 
     private GetElementsFromDB() {
+        if (this.elementsDownloaded)
+            return;
+
+        console.log("Downloading from DB");
+
+        // let layers = JSON.parse(ApiComms.GetRequest(`${window.location.protocol}//${window.location.host}/listlayers.php`));
         let layers = JSON.parse(ApiComms.GetRequest("http://localhost:3000/listlayers.php"));
         layers["layers"].forEach(dbMapEntity => {
             this.CreateEntry(dbMapEntity["name"], dbMapEntity["id"]);
         });
+        this.elementsDownloaded = true;
     }
 
     private CreateEntry(name: string, id: number) {
@@ -50,22 +62,39 @@ export class DBLayerBuilder {
         this.searchResults.appendChild(li);
     }
 
-    public ToggleInterface() {
-        if (!this.modalElement.classList.contains("show")) {
-            let modal = new Modal(this.modalElement);
+    public ToggleInterface(show: boolean = true) {
+        let modal = new Modal(this.modalElement);
+        if (show)
             modal.show();
+        else {
+            this.modalElement.classList.remove("show");
+            let backdrop = document.getElementsByClassName("modal-backdrop")[0];
+            backdrop.parentNode.removeChild(backdrop);
+            this.modalElement.style.display = "none";
         }
     }
 
     private BuildLayer() {
-        let allResults = this.searchResults.children;
-        let layerIDs: number[] = [];
-        Array.from(allResults).forEach(res => {
+        if (!this.layerNameBar.checkValidity())
+        {
+            this.layerNameBarDiv.classList.add("was-validated");
+            return;
+        }
+
+        let allResults = Array.from(this.searchResults.children);
+        let layer = new MapLayer(this.layerNameBar.value);
+        this.ToggleInterface(false);
+        this.layerNameBar.value = "";
+        allResults.forEach(res => {
             let input = res.children[0] as HTMLInputElement;
-            if (input.checked)
-                layerIDs.push(parseInt(input.value));
+            if (input.checked) {
+                let resultName = res.textContent.trim();
+                layer.AddMultiRoad(new DBMultiMapRoad(parseInt(input.value), resultName));
+                input.checked = false;
+            }
         });
-        console.log(layerIDs);
+
+        App.Instance.AddMapLayer(layer);
     }
 
     // https://www.w3schools.com/howto/howto_js_filter_lists.asp

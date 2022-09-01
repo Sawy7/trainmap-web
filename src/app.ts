@@ -225,7 +225,7 @@ export class App {
                     let gpxLayer = new MapLayer(name);
                     gpxLayer.AddMapRoad(new SingleMapRoad(pointsArr, elevArr, "purple"));
                     this.AddMapLayer(gpxLayer);
-                    this.SaveLayersToLocalStorage();
+                    // this.SaveLayersToLocalStorage();
                 }
                 this.fileLoader.SpawnNameInput("gpxFileInputContainer", addFunction);
 
@@ -261,9 +261,9 @@ export class App {
 
                     let addFunction = (name: string) => {
                         let shapefileLayer = new MapLayer(name);
-                        shapefileLayer.AddMultiRoad(new MultiMapRoad(multiPointsArr, multiElevArr, "blue"));
+                        shapefileLayer.AddMultiRoad(new MultiMapRoad(multiPointsArr, multiElevArr, "Cesta", "blue"));
                         App.Instance.AddMapLayer(shapefileLayer);
-                        this.SaveLayersToLocalStorage();
+                        // this.SaveLayersToLocalStorage();
                     }
                     App.Instance.fileLoader.SpawnNameInput("shapefileInputContainer", addFunction);
                 })

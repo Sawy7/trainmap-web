@@ -49,7 +49,7 @@ export class MapWindow {
         }
 
         if (this.activeElevationMarker === undefined) {
-            this.activeElevationMarker = new MapMarker(point, "", true);
+            this.activeElevationMarker = new MapMarker(point, "", "E", true);
             this.activeElevationMarker.GetMapEntity().addTo(this.map);
         }
         else {

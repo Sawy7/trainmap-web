@@ -6,11 +6,9 @@ export class Lineator {
     private constructedRoads: SingleMapRoad[] = [];
     private rootGroup: RoadGroup;
     private isInitialized: boolean = false;
-    private name: string;
 
-    constructor(roadGroups: RoadGroup[], name: string) {
+    constructor(roadGroups: RoadGroup[]) {
         this.roadGroups = roadGroups;
-        this.name = name;
         // NOTE: Debug info
         // console.log("isolated count:", this.FindIsolated().length);
 

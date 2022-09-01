@@ -10,16 +10,17 @@ export abstract class MapRoad extends MapEntity {
     protected opacity: number;
     protected smoothFactor: number;
     protected polyLine: L.Polyline;
-    protected nameFromLayer: string;
     readonly className: string = "MapRoad";
 
     protected constructor(
+                name: string = "Cesta",
                 color: string = "red",
                 weight: number = 5,
                 opacity: number = 0.5,
                 smoothFactor: number = 1
-                ) {
+    ) {
         super();
+        this.name = name;
         this.color = color;
         this.weight = weight;
         this.opacity = opacity;
@@ -29,15 +30,7 @@ export abstract class MapRoad extends MapEntity {
         ]
     }
 
-    public AssignNameFromLayer(nameFromLayer: string) {
-        this.nameFromLayer = nameFromLayer;
-    }
-
     public abstract GetMapEntity(): L.Polyline;
-
-    public GetListInfo(): string {
-        return "Cesta";
-    }
 
     public abstract GetSignificantPoint(): L.LatLng;
 
