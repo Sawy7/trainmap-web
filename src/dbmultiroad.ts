@@ -5,16 +5,11 @@ import { MultiMapRoad } from "./multiroad";
 import { RoadGroup } from "./roadgroup";
 
 export class DBMultiMapRoad extends MultiMapRoad {
-    public constructor(
-                id: number,
-                name: string = "Cesta",
-                color: string = "red",
-                weight: number = 5,
-                opacity: number = 0.5,
-                smoothFactor: number = 1
-    ) {       
+    readonly className: string;
+
+    public constructor(infoObject: Object) {
         // let geoJSON = JSON.parse(ApiComms.GetRequest(`${window.location.protocol}//${window.location.host}/getlayer.php?id=${id}`));
-        let geoJSON = JSON.parse(ApiComms.GetRequest(`http://localhost:3000/getlayer.php?id=${id}`));
+        let geoJSON = JSON.parse(ApiComms.GetRequest(`http://localhost:3000/getlayer.php?id=${infoObject["id"]}`));
         
         let type = geoJSON["geometry"]["type"];
         if (type == "MultiLineString") {
@@ -31,7 +26,13 @@ export class DBMultiMapRoad extends MultiMapRoad {
                 mlPoints.push(lsPoints);
                 mlElevation.push(lsElevation);
             });
-            super(mlPoints, mlElevation, name, color, weight, opacity, smoothFactor, id);
+            super(
+                mlPoints, mlElevation, infoObject["name"],
+                infoObject["color"], infoObject["weight"],
+                infoObject["opacity"], infoObject["smoothFactor"],
+                infoObject["id"]
+            );
+            this.className = "DBMultiMapRoad";
         } else {
             console.log("Unknown feature type!")
         }
@@ -44,5 +45,10 @@ export class DBMultiMapRoad extends MultiMapRoad {
             roadGroups.push(new RoadGroup(points[i], elevation[i], gidList["gids"][i]));
         }
         this.lineator = new Lineator(roadGroups);
+        this.InsertDBLineatorHierarchy();
+    }
+
+    public InsertDBLineatorHierarchy() {
+        this.lineator.InsertDBHierarchy(this.id);
     }
 }

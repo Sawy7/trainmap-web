@@ -1,3 +1,4 @@
+import { ApiComms } from "./apicomms";
 import { RoadGroup } from "./roadgroup";
 import { SingleMapRoad } from "./singleroad";
 
@@ -178,6 +179,8 @@ export class Lineator {
             idtrasy int NOT NULL,
             parent_gid int,
             child_gid int,
+            point_index int,
+            connect_index int,
             CONSTRAINT fk_idtrasy
 		        FOREIGN KEY(idtrasy)
 			        REFERENCES map_data_index(id)
@@ -186,14 +189,46 @@ export class Lineator {
         sql += `INSERT INTO "${Lineator.lineatorDBTable}" (idtrasy, child_gid) VALUES (${id}, ${this.rootGroup.id});\n`;
         
         this.roadGroups.forEach(rg => {
-            let nextids = rg.GetNextGroups();
-            nextids.forEach(rgNext => {
-                sql += `INSERT INTO "${Lineator.lineatorDBTable}" (idtrasy, parent_gid, child_gid) VALUES (${id}, ${rg.id}, ${rgNext.id});\n`;
-            });
+            sql += rg.ExportToSQL(id);
         });
 
         sql += `UPDATE "${Lineator.indexDBTable}" SET lineator = true WHERE id = ${id};\n`;
 
         console.log(sql);
+    }
+
+    // NOTE: DB queries are ordered in a certain way that makes this work
+    public InsertDBHierarchy(id: number) {
+        // TODO: Check if table exists (php maybe)
+
+        let lineatorJSON = JSON.parse(ApiComms.GetRequest(`http://localhost:3000/getlineator.php?id=${id}`));
+        let minGid = lineatorJSON["min_gid"];
+        if (minGid === null)
+            return;
+        let hierarchy = lineatorJSON["hierarchy"];
+
+        let hiIndex = 1;
+        let rootIndex = hierarchy[0];
+
+        this.roadGroups.forEach(rg => {
+            if (rg.id == rootIndex.child) {
+                this.rootGroup = rg;
+            }
+
+            while (true) {
+                if (hiIndex >= hierarchy.length)
+                    break;
+                
+                if (rg.id == hierarchy[hiIndex].parent) {
+                    const child = this.roadGroups[hierarchy[hiIndex].child-minGid];
+                    rg.AddNextGroup(child, hierarchy[hiIndex].point_index, hierarchy[hiIndex].connect_index);
+                    hiIndex++;
+                } else {
+                    break;
+                }
+            }
+        });
+
+        this.isInitialized = true;
     }
 }

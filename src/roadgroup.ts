@@ -1,4 +1,5 @@
 import * as L from "leaflet";
+import { Lineator } from "./lineator";
 import { SingleMapRoad } from "./singleroad";
 
 export class RoadGroup {
@@ -340,7 +341,12 @@ export class RoadGroup {
         }
     }
 
-    public GetNextGroups(): RoadGroup[] {
-        return this.nextGroups;
+    public ExportToSQL(roadID: number): string {
+        let sql = "";
+        for (let i = 0; i < this.nextGroups.length; i++) {
+            sql += `INSERT INTO "${Lineator.lineatorDBTable}" (idtrasy, parent_gid, child_gid, point_index, connect_index) VALUES (${roadID}, ${this.id}, ${this.nextGroups[i].id}, ${this.nextGroupPoints[i]}, ${this.nextGroupConnects[i]});\n`;
+        }
+
+        return sql;
     }
 }

@@ -19,6 +19,7 @@ export class MultiMapRoad extends MapRoad {
     ) {
         super(name, color, weight, opacity, smoothFactor, id);
         this.dontSerializeList.push("lineator"); // TODO: Investigate, why this is not neccessary
+        
         this.PrepareLineator(points, elevation);
     }
 

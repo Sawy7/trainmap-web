@@ -13,6 +13,7 @@ export class DBLayerBuilder {
     private layerNameBar = document.getElementById("dbLayerBuilderName") as HTMLInputElement;
     private layerNameBarDiv = document.getElementById("dbLayerBuilderNameDiv");
     private elementsDownloaded = false;
+    private elementInfo: Object[] = [];
 
     constructor() {
         this.SetInteraction();
@@ -41,25 +42,32 @@ export class DBLayerBuilder {
 
         // let layers = JSON.parse(ApiComms.GetRequest(`${window.location.protocol}//${window.location.host}/listlayers.php`));
         let layers = JSON.parse(ApiComms.GetRequest("http://localhost:3000/listlayers.php"));
-        layers["layers"].forEach(dbMapEntity => {
-            this.CreateEntry(dbMapEntity["name"], dbMapEntity["id"]);
-        });
+        for (let i = 0; i < layers["layers"].length; i++) {
+            const dbMapEntity = layers["layers"][i];
+            
+            this.CreateEntry(dbMapEntity["name"], i);
+            this.StashInfo(dbMapEntity);
+        }
         this.elementsDownloaded = true;
     }
 
-    private CreateEntry(name: string, id: number) {
+    private CreateEntry(name: string, index: number) {
         let li = document.createElement("li");
         li.setAttribute("class", "list-group-item list-group-item-dark");
         
         let input = document.createElement("input");
         input.setAttribute("class", "form-check-input me-1");
         input.setAttribute("type", "checkbox");
-        input.setAttribute("value", id.toString());
+        input.setAttribute("value", index.toString());
 
         li.appendChild(input);
         li.innerHTML += "\n" + name;
 
         this.searchResults.appendChild(li);
+    }
+
+    private StashInfo(infoObject: Object) {
+        this.elementInfo.push(infoObject);
     }
 
     public ToggleInterface(show: boolean = true) {
@@ -85,11 +93,12 @@ export class DBLayerBuilder {
         let layer = new MapLayer(this.layerNameBar.value);
         this.ToggleInterface(false);
         this.layerNameBar.value = "";
+        
         allResults.forEach(res => {
             let input = res.children[0] as HTMLInputElement;
             if (input.checked) {
-                let resultName = res.textContent.trim();
-                layer.AddMultiRoad(new DBMultiMapRoad(parseInt(input.value), resultName));
+                let resultInfoObject = this.elementInfo[parseInt(input.value)];
+                layer.AddMultiRoad(new DBMultiMapRoad(resultInfoObject));
                 input.checked = false;
             }
         });
