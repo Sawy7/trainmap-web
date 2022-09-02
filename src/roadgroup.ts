@@ -4,20 +4,26 @@ import { SingleMapRoad } from "./singleroad";
 export class RoadGroup {
     public points: L.LatLng[];
     public elevation: number[];
-    public nextGroups: RoadGroup[] = [];
-    public nextGroupPoints: number[] = [];
-    public nextGroupConnects: number[] = [];
-    public prevGroups: RoadGroup[] = [];
+    private nextGroups: RoadGroup[] = [];
+    private nextGroupPoints: number[] = [];
+    private nextGroupConnects: number[] = [];
+    private prevGroups: RoadGroup[] = [];
     public visited: number = 0;
     public merged: boolean = false;
     static globalIDGen: number = -1;
     readonly id: number;
+    readonly idIsGid: boolean = false;
     private thisIsNext: boolean = false;
 
-    constructor(points: L.LatLng[], elevation: number[]) {
+    constructor(points: L.LatLng[], elevation: number[], id: number = undefined) {
         this.points = points;
         this.elevation = elevation;
-        this.id = ++RoadGroup.globalIDGen;
+        if (id !== undefined) {
+            this.id = id;
+            this.idIsGid = true;
+        } else {
+            this.id = ++RoadGroup.globalIDGen;
+        }
         this.FixElevation();
     }
 
@@ -332,5 +338,9 @@ export class RoadGroup {
                     continue;
             }
         }
+    }
+
+    public GetNextGroups(): RoadGroup[] {
+        return this.nextGroups;
     }
 }

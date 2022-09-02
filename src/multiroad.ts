@@ -14,13 +14,12 @@ export class MultiMapRoad extends MapRoad {
                 color: string = "red",
                 weight: number = 5,
                 opacity: number = 0.5,
-                smoothFactor: number = 1
+                smoothFactor: number = 1,
+                id: number = undefined
     ) {
-        super(name, color, weight, opacity, smoothFactor);
+        super(name, color, weight, opacity, smoothFactor, id);
         this.dontSerializeList.push("lineator"); // TODO: Investigate, why this is not neccessary
         this.PrepareLineator(points, elevation);
-        // this.points = points;
-        // this.elevation = elevation;
     }
 
     public GetMapEntity(): L.Polyline {
@@ -33,7 +32,7 @@ export class MultiMapRoad extends MapRoad {
         return this.polyLine;
     }
 
-    private PrepareLineator(points: L.LatLng[][], elevation: number[][]) {
+    protected PrepareLineator(points: L.LatLng[][], elevation: number[][]) {
         let roadGroups: RoadGroup[] = [];
         for (let i = 0; i < points.length; i++) {
             roadGroups.push(new RoadGroup(points[i], elevation[i]));
@@ -43,6 +42,7 @@ export class MultiMapRoad extends MapRoad {
 
     private EngageLineator() {
         this.lineator.Init();
+        this.lineator.ExportToSQL(this.id);
     }
 
     public GetSignificantPoint(): L.LatLng {

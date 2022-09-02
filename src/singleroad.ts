@@ -13,9 +13,10 @@ export class SingleMapRoad extends MapRoad {
                 color: string = "red",
                 weight: number = 5,
                 opacity: number = 0.5,
-                smoothFactor: number = 1
+                smoothFactor: number = 1,
+                id: number = undefined
                 ) {
-        super(name, color, weight, opacity, smoothFactor);
+        super(name, color, weight, opacity, smoothFactor, id);
         this.points = points;
         this.elevation = elevation;
     }

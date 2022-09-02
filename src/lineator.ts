@@ -6,6 +6,8 @@ export class Lineator {
     private constructedRoads: SingleMapRoad[] = [];
     private rootGroup: RoadGroup;
     private isInitialized: boolean = false;
+    static lineatorDBTable: string = "map_lineators";
+    static indexDBTable: string = "map_data_index";
 
     constructor(roadGroups: RoadGroup[]) {
         this.roadGroups = roadGroups;
@@ -170,16 +172,28 @@ export class Lineator {
         });
     }
 
-    private ExportToSQL() {
-        let sql = "CREATE TABLE map_data_index ( \
-            id serial PRIMARY KEY, \
-            layer_name VARCHAR ( 200 ) UNIQUE NOT NULL, \
-            color VARCHAR ( 50 ), \
-            weight INT, \
-            opacity FLOAT, \
-            smooth_factor FLOAT, \
-            lineator_name VARCHAR ( 200 ) UNIQUE);";
+    public ExportToSQL(id: number) {
+        let sql = `CREATE TABLE IF NOT EXISTS ${Lineator.lineatorDBTable} (
+            id serial PRIMARY KEY,
+            idtrasy int NOT NULL,
+            parent_gid int,
+            child_gid int,
+            CONSTRAINT fk_idtrasy
+		        FOREIGN KEY(idtrasy)
+			        REFERENCES map_data_index(id)
+        );\n`;
 
+        sql += `INSERT INTO "${Lineator.lineatorDBTable}" (idtrasy, child_gid) VALUES (${id}, ${this.rootGroup.id});\n`;
+        
+        this.roadGroups.forEach(rg => {
+            let nextids = rg.GetNextGroups();
+            nextids.forEach(rgNext => {
+                sql += `INSERT INTO "${Lineator.lineatorDBTable}" (idtrasy, parent_gid, child_gid) VALUES (${id}, ${rg.id}, ${rgNext.id});\n`;
+            });
+        });
 
+        sql += `UPDATE "${Lineator.indexDBTable}" SET lineator = true WHERE id = ${id};\n`;
+
+        console.log(sql);
     }
 }

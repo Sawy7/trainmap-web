@@ -36,7 +36,7 @@ if (!$conn) {
 }
 
 # Build SQL SELECT statement and return the geometry as a GeoJSON element in EPSG: 4326
-$sql = "SELECT " . "ST_AsGeoJSON(ST_Collect(ST_Transform(" . pg_escape_string($conn, $geomfield) . ", " . $srid . ") ORDER BY gid ASC)) AS geojson FROM " . pg_escape_string($conn, $routes_table) . " WHERE idtrasy = " . pg_escape_string($conn, $id);
+$sql = "SELECT gid FROM " . pg_escape_string($conn, $routes_table) . " WHERE idtrasy = " . pg_escape_string($conn, $id) . " ORDER BY gid ASC";
 // echo $sql;
 
 # Try query or error
@@ -51,24 +51,10 @@ $output    = '';
 $rowOutput = '';
 
 while ($row = pg_fetch_assoc($rs)) {
-    $rowOutput = (strlen($rowOutput) > 0 ? ',' : '') . '{"type": "Feature", "geometry": ' . $row['geojson'] . ', "properties": {';
-    $props = '';
-    $id    = '';
-    foreach ($row as $key => $val) {
-        if ($key != "geojson") {
-            $props .= (strlen($props) > 0 ? ',' : '') . '"' . $key . '":"' . escapeJsonString($val) . '"';
-        }
-        if ($key == "id") {
-            $id .= ',"id":"' . escapeJsonString($val) . '"';
-        }
-    }
-    
-    $rowOutput .= $props . '}';
-    $rowOutput .= $id;
-    $rowOutput .= '}';
+    $rowOutput = (strlen($rowOutput) > 0 ? ', ' : '') . $row["gid"];
     $output .= $rowOutput;
 }
 
-// $output = '{ "type": "FeatureCollection", "features": [ ' . $output . ' ]}';
+$output = '{"type": "GidList", "gids":  [ ' . $output . ' ] }';
 echo $output;
 ?>

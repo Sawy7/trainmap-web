@@ -36,7 +36,7 @@ customSQL="CREATE TABLE IF NOT EXISTS \"$indexTable\" (\n\
 	weight int,\n\
 	opacity float,\n\
 	smooth_factor float,\n\
-	lineator_id int UNIQUE,\n\
+	lineator boolean DEFAULT false,\n\
 	tags varchar(200)\n\
 );\n\
 CREATE TABLE IF NOT EXISTS \"$routesTable\" (\n\

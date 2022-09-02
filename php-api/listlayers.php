@@ -12,6 +12,12 @@ function createJsonKey($name, $value, $isNumber=false) {
     {
         $value = "null";
         $isNumber = true;
+    } else if ($value == "f") {
+        $value = "false";
+        $isNumber = true;
+    } else if ($value == "t") {
+        $value = "true";
+        $isNumber = true;
     }
 
     if ($isNumber) {
@@ -54,7 +60,7 @@ while ($row = pg_fetch_assoc($rs)) {
     $rowOutput .= ', ' . createJsonKey("weight", $row["weight"], true);
     $rowOutput .= ', ' . createJsonKey("opacity", $row["opacity"], true);
     $rowOutput .= ', ' . createJsonKey("smooth_factor", $row["smooth_factor"], true);
-    $rowOutput .= ', ' . createJsonKey("lineator_id", $row["lineator_id"], true);
+    $rowOutput .= ', ' . createJsonKey("lineator", $row["lineator"], true);
     $rowOutput .= ', ' . createJsonKey("tags", $row["tags"]);
     $rowOutput .= '}';
     $output .= $rowOutput;
