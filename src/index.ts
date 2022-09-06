@@ -18,7 +18,6 @@ import { App } from "./app";
 import { MapLayer } from './maplayer';
 import { MapMarker } from "./mapmarker";
 import { SingleMapRoad } from "./singleroad";
-import { GeoJSONLayer } from './geojsonlayer';
 import { ApiComms } from './apicomms';
 
 let app = App.Instance;
@@ -61,4 +60,5 @@ myRoads.AddMapRoad(new SingleMapRoad([
 ], "Cesta #2"));
 
 app.AddMapLayer(myRoads);
-app.LoadLayersFromLocalStorage();
+// app.LoadLayersFromLocalStorage();
+app.LoadFromLocalStorage();

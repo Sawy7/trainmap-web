@@ -1,25 +1,21 @@
 import { Modal } from "bootstrap";
 import { ApiComms } from "./apicomms";
 import { App } from "./app";
+import { DBMapLayer } from "./dblayer";
 import { DBMultiMapRoad } from "./dbmultiroad";
-import { MapLayer } from "./maplayer";
 
 export class DBLayerBuilder {
-    private modalElement = document.getElementById("dbLayerBuilderModal");
-    private showButton = document.getElementById("layerBuilderButton");
-    private searchBar = document.getElementById("dbLayerBuilderSearch") as HTMLInputElement;
-    private searchResults = document.getElementById("dbLayerBuilderResults");
-    private createButton = document.getElementById("dbLayerBuilderModalCreateButton");
-    private layerNameBar = document.getElementById("dbLayerBuilderName") as HTMLInputElement;
-    private layerNameBarDiv = document.getElementById("dbLayerBuilderNameDiv");
-    private elementsDownloaded = false;
-    private elementInfo: Object[] = [];
+    static modalElement = document.getElementById("dbLayerBuilderModal");
+    static showButton = document.getElementById("layerBuilderButton");
+    static searchBar = document.getElementById("dbLayerBuilderSearch") as HTMLInputElement;
+    static searchResults = document.getElementById("dbLayerBuilderResults");
+    static createButton = document.getElementById("dbLayerBuilderModalCreateButton");
+    static layerNameBar = document.getElementById("dbLayerBuilderName") as HTMLInputElement;
+    static layerNameBarDiv = document.getElementById("dbLayerBuilderNameDiv");
+    static elementsDownloaded = false;
+    static elementInfo: Object[] = [];
 
-    constructor() {
-        this.SetInteraction();
-    }
-
-    private SetInteraction() {
+    static SetInteraction() {
         this.showButton.onclick = () => {
             this.ToggleInterface();
             this.GetElementsFromDB();
@@ -34,14 +30,14 @@ export class DBLayerBuilder {
         };
     }
 
-    private GetElementsFromDB() {
+    static GetElementsFromDB() {
         if (this.elementsDownloaded)
             return;
 
         console.log("Downloading from DB");
 
-        // let layers = JSON.parse(ApiComms.GetRequest(`${window.location.protocol}//${window.location.host}/listlayers.php`));
-        let layers = JSON.parse(ApiComms.GetRequest("http://localhost:3000/listlayers.php"));
+        // let layers = JSON.parse(ApiComms.GetRequest(`${window.location.protocol}//${window.location.host}/listelements.php`));
+        let layers = JSON.parse(ApiComms.GetRequest("http://localhost:3000/listelements.php"));
         for (let i = 0; i < layers["layers"].length; i++) {
             const dbMapEntity = layers["layers"][i];
             
@@ -51,7 +47,7 @@ export class DBLayerBuilder {
         this.elementsDownloaded = true;
     }
 
-    private CreateEntry(name: string, index: number) {
+    static CreateEntry(name: string, index: number) {
         let li = document.createElement("li");
         li.setAttribute("class", "list-group-item list-group-item-dark");
         
@@ -66,11 +62,11 @@ export class DBLayerBuilder {
         this.searchResults.appendChild(li);
     }
 
-    private StashInfo(infoObject: Object) {
+    static StashInfo(infoObject: Object) {
         this.elementInfo.push(infoObject);
     }
 
-    public ToggleInterface(show: boolean = true) {
+    static ToggleInterface(show: boolean = true) {
         let modal = new Modal(this.modalElement);
         if (show)
             modal.show();
@@ -82,7 +78,7 @@ export class DBLayerBuilder {
         }
     }
 
-    private BuildLayer() {
+    static BuildLayer() {
         if (!this.layerNameBar.checkValidity())
         {
             this.layerNameBarDiv.classList.add("was-validated");
@@ -90,7 +86,7 @@ export class DBLayerBuilder {
         }
 
         let allResults = Array.from(this.searchResults.children);
-        let layer = new MapLayer(this.layerNameBar.value);
+        let layer = new DBMapLayer(this.layerNameBar.value);
         this.ToggleInterface(false);
         this.layerNameBar.value = "";
         
@@ -98,7 +94,7 @@ export class DBLayerBuilder {
             let input = res.children[0] as HTMLInputElement;
             if (input.checked) {
                 let resultInfoObject = this.elementInfo[parseInt(input.value)];
-                layer.AddMultiRoad(new DBMultiMapRoad(resultInfoObject));
+                layer.AddMapRoad(new DBMultiMapRoad(resultInfoObject["id"]));
                 input.checked = false;
             }
         });
@@ -107,7 +103,7 @@ export class DBLayerBuilder {
     }
 
     // https://www.w3schools.com/howto/howto_js_filter_lists.asp
-    private LocalSearch() {
+    static LocalSearch() {
         let filter, li, txtValue;
         filter = this.searchBar.value.toUpperCase();
         li = this.searchResults.getElementsByTagName("li");

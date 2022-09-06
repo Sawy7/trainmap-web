@@ -9,8 +9,14 @@ export class MapMarker extends MapEntity {
     public activeMarker: L.Marker;
     readonly className: string = "MapMarker";
 
-    public constructor(point: L.LatLng, popupMsg: string, name: string = "Bod", useCustomIcon: boolean = false) {
-        super();
+    public constructor(
+        point: L.LatLng,
+        popupMsg: string,
+        name: string = "Bod",
+        useCustomIcon: boolean = false,
+        dbID: number = undefined
+    ) {
+        super(dbID);
         this.point = point;
         this.popupMsg = popupMsg;
         this.name = name;

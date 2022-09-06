@@ -173,7 +173,7 @@ export class Lineator {
         });
     }
 
-    public ExportToSQL(id: number) {
+    public ExportToSQL(id: number): string {
         let sql = `CREATE TABLE IF NOT EXISTS ${Lineator.lineatorDBTable} (
             id serial PRIMARY KEY,
             idtrasy int NOT NULL,
@@ -194,13 +194,11 @@ export class Lineator {
 
         sql += `UPDATE "${Lineator.indexDBTable}" SET lineator = true WHERE id = ${id};\n`;
 
-        console.log(sql);
+        return sql;
     }
 
     // NOTE: DB queries are ordered in a certain way that makes this work
     public InsertDBHierarchy(id: number) {
-        // TODO: Check if table exists (php maybe)
-
         let lineatorJSON = JSON.parse(ApiComms.GetRequest(`http://localhost:3000/getlineator.php?id=${id}`));
         let minGid = lineatorJSON["min_gid"];
         if (minGid === null)

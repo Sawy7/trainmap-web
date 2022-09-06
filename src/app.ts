@@ -8,6 +8,8 @@ import { Offcanvas, Collapse, Modal } from "bootstrap";
 import * as L from "leaflet";
 import * as shp from "shpjs";
 import { DBLayerBuilder } from "./dblayerbuilder";
+import { DBMapLayer } from "./dblayer";
+import { DBMultiMapRoad } from "./dbmultiroad";
 // import proj4 from "proj4";
 
 // http://lepsi-nez-zivot.blogspot.com/2017/08/konverze-s-jtsk-krovak-do-wsg84-gsm-api.html
@@ -23,7 +25,6 @@ export class App {
     private activeElevationChart: ElevationChart;
     private sidebarOffcanvas: Offcanvas = new Offcanvas(document.getElementById("offcanvasNavbar"));
     private fileLoader: FileLoader = new FileLoader();
-    private dbLayerBuilder: DBLayerBuilder = new DBLayerBuilder();
     private layerActivating: boolean = false;
     private static _instance: App;
 
@@ -41,6 +42,8 @@ export class App {
         document.getElementById("logModalSaveButton").onclick = () => {
             this.SaveLogToDisk();
         };
+
+        DBLayerBuilder.SetInteraction();
     }
 
     public Init(centerLat: number, centerLong: number, zoom: number) {
@@ -52,10 +55,13 @@ export class App {
         // this.sidebarOffcanvas.toggle();
     }
 
-    public AddMapLayer(mapLayer: MapLayer) {
+    public AddMapLayer(mapLayer: MapLayer, notFromStorage: boolean = true) {
         this.localLayers.push(mapLayer);
         // this.RenderLayerList();
         this.AddToLayerList();
+
+        if (mapLayer instanceof DBMapLayer && notFromStorage)
+            (mapLayer as DBMapLayer).SaveToLocalStorage();
     }
 
     private PopulateLayerEntitesList(index: number, mapLayer: MapLayer) {
@@ -168,25 +174,42 @@ export class App {
         this.PopulateLayerEntitesList(index, this.localLayers[index]);
     }
 
-    private SaveLayersToLocalStorage() {
-        let layersToSave: Object[] = [];
-        this.localLayers.forEach(mapLayer => {
-            if (mapLayer.className === "GeoJSONLayer")
-                return;
-            layersToSave.push(mapLayer.Serialize());
-        });
-        localStorage.setItem("savedLayers", JSON.stringify(layersToSave));
-    }
+    // private SaveLayersToLocalStorage() {
+    //     let layersToSave: Object[] = [];
+    //     this.localLayers.forEach(mapLayer => {
+    //         if (mapLayer.className === "GeoJSONLayer")
+    //             return;
+    //         layersToSave.push(mapLayer.Serialize());
+    //     });
+    //     localStorage.setItem("savedLayers", JSON.stringify(layersToSave));
+    // }
 
-    public LoadLayersFromLocalStorage() {
-        let storageLayers = localStorage.getItem("savedLayers");
-        if (storageLayers === null)
+    // public LoadLayersFromLocalStorage() {
+    //     let storageLayers = localStorage.getItem("savedLayers");
+    //     if (storageLayers === null)
+    //         return;
+    //     let storageLayersParsed = JSON.parse(storageLayers);
+    //     this.FlushLayers();
+    //     storageLayersParsed.forEach(storageLayer => {
+    //         let deserializedLayer = MapLayer.Deserialize(storageLayer);
+    //         this.AddMapLayer(deserializedLayer);
+    //     });
+    // }
+
+    public LoadFromLocalStorage() {
+        if (localStorage["dblayers"] === undefined)
             return;
-        let storageLayersParsed = JSON.parse(storageLayers);
-        this.FlushLayers();
-        storageLayersParsed.forEach(storageLayer => {
-            let deserializedLayer = MapLayer.Deserialize(storageLayer);
-            this.AddMapLayer(deserializedLayer);
+
+        let storageList = JSON.parse(localStorage["dblayers"]);
+        storageList.forEach(layerInfo => {
+            let layer = new DBMapLayer(layerInfo["name"]);
+            layerInfo["ids"].forEach(id => {
+                let road = new DBMultiMapRoad(id);
+                // TODO: Something more elegant (+ maybe user indication, that something's been yeeted)
+                if (!road.wasRemoved)
+                    layer.AddMapRoad(road);
+            });
+            this.AddMapLayer(layer, false);
         });
     }
 
@@ -261,7 +284,7 @@ export class App {
 
                     let addFunction = (name: string) => {
                         let shapefileLayer = new MapLayer(name);
-                        shapefileLayer.AddMultiRoad(new MultiMapRoad(multiPointsArr, multiElevArr, "Cesta", "blue"));
+                        shapefileLayer.AddMapRoad(new MultiMapRoad(multiPointsArr, multiElevArr, "Cesta", "blue"));
                         App.Instance.AddMapLayer(shapefileLayer);
                         // this.SaveLayersToLocalStorage();
                     }
@@ -300,6 +323,13 @@ export class App {
         logBody.appendChild(line);
     }
 
+    public SaveTextToDisk(text: string, filename: string, type: string = "text/plain") {
+        let data = new Blob([text], {type: "text/plain"});
+        let link = window.URL.createObjectURL(data);
+        this.DownloadLink(link, filename);
+        window.URL.revokeObjectURL(link);
+    }
+
     // https://stackoverflow.com/questions/8178825/create-text-file-in-javascript
     private SaveLogToDisk() {
         let logLines = document.getElementById("logModalBody").children;
@@ -310,28 +340,24 @@ export class App {
             text += line + "\n";
         }
 
-        console.log([text]);
-        let data = new Blob([text], {type: "text/plain"});
-        let link = window.URL.createObjectURL(data);
-        this.DownloadLink(link);
-        window.URL.revokeObjectURL(link);
+        this.SaveTextToDisk(text, "log.txt", "text/plain");
     }
 
     // https://stackoverflow.com/questions/11620698/how-to-trigger-a-file-download-when-clicking-an-html-button-or-javascript
-    private DownloadLink(link: string) {
+    private DownloadLink(link: string, filename: string) {
         const a = document.createElement("a");
         a.href = link;
-        a.download = link.split("/").pop();
+        a.download = filename;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
     }
 
-    public PushAlert(message: string, linkVerbage?: string, linkFunction?: Function) {
+    public PushAlert(message: string, linkVerbage?: string, linkFunction?: Function, type: string = "primary") {
         const alertPlace = document.getElementById("alertPlace");
         
         let alert = document.createElement("div");
-        alert.setAttribute("class", "alert alert-primary alert-dismissible");
+        alert.setAttribute("class", `alert alert-${type} alert-dismissible`);
         alert.setAttribute("role", "alert");
         alert.innerHTML = message + " ";
 

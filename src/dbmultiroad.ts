@@ -6,10 +6,18 @@ import { RoadGroup } from "./roadgroup";
 
 export class DBMultiMapRoad extends MultiMapRoad {
     readonly className: string;
+    readonly wasRemoved: boolean
 
-    public constructor(infoObject: Object) {
-        // let geoJSON = JSON.parse(ApiComms.GetRequest(`${window.location.protocol}//${window.location.host}/getlayer.php?id=${id}`));
-        let geoJSON = JSON.parse(ApiComms.GetRequest(`http://localhost:3000/getlayer.php?id=${infoObject["id"]}`));
+    public constructor(dbID: number) {
+        // let geoJSON = JSON.parse(ApiComms.GetRequest(`${window.location.protocol}//${window.location.host}/getelement.php?id=${dbID}`));
+        let geoJSON = JSON.parse(ApiComms.GetRequest(`http://localhost:3000/getelement.php?id=${dbID}`));
+
+        if (geoJSON["status"] !== "ok") {
+            super([], [], "");
+            this.wasRemoved = true;
+            this.className = "DBMultiMapRoad";
+            return;
+        }
         
         let type = geoJSON["geometry"]["type"];
         if (type == "MultiLineString") {
@@ -27,11 +35,12 @@ export class DBMultiMapRoad extends MultiMapRoad {
                 mlElevation.push(lsElevation);
             });
             super(
-                mlPoints, mlElevation, infoObject["name"],
-                infoObject["color"], infoObject["weight"],
-                infoObject["opacity"], infoObject["smoothFactor"],
-                infoObject["id"]
+                mlPoints, mlElevation, geoJSON["properties"]["name"],
+                geoJSON["properties"]["color"], geoJSON["properties"]["weight"],
+                geoJSON["properties"]["opacity"], geoJSON["properties"]["smoothFactor"],
+                geoJSON["properties"]["id"]
             );
+            this.wasRemoved = false;
             this.className = "DBMultiMapRoad";
         } else {
             console.log("Unknown feature type!")
@@ -39,8 +48,13 @@ export class DBMultiMapRoad extends MultiMapRoad {
     }
 
     protected PrepareLineator(points: L.LatLng[][], elevation: number[][]) {
+        // In case of removed DB road
+        if (this.dbID === undefined)
+            return;
+        
+            // TODO: Add agnostic URL for API
+        let gidList = JSON.parse(ApiComms.GetRequest(`http://localhost:3000/getgids.php?id=${this.dbID}`));
         let roadGroups: RoadGroup[] = [];
-        let gidList = JSON.parse(ApiComms.GetRequest(`http://localhost:3000/getgids.php?id=${this.id}`));
         for (let i = 0; i < points.length; i++) {
             roadGroups.push(new RoadGroup(points[i], elevation[i], gidList["gids"][i]));
         }
@@ -49,6 +63,6 @@ export class DBMultiMapRoad extends MultiMapRoad {
     }
 
     public InsertDBLineatorHierarchy() {
-        this.lineator.InsertDBHierarchy(this.id);
+        this.lineator.InsertDBHierarchy(this.dbID);
     }
 }

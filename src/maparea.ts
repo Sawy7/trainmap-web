@@ -10,11 +10,12 @@ export class MapArea extends MapEntity {
 
     public constructor(points: L.LatLng[],
         popupMsg: string,
-        name: string = "Plocha"
+        name: string = "Plocha",
         // color: string = "red",
         // opacity: number = 0.5,
-        ) {
-        super();
+        dbID: number = undefined
+    ) {
+        super(dbID);
         this.points = points;
         this.popupMsg = popupMsg;
         this.name = name;

@@ -33,37 +33,25 @@ header("Content-Type: application/json");
 
 # Retrive URL variables
 if (empty($_GET['id'])) {
-    echo "missing required parameter: <i>id</i>";
+    echo '{"type": "MissingParameter", "name": "id"}';
     exit;
 } else
     $id = $_GET['id'];
-// if (empty($_GET['parent'])) {
-//     echo "missing required parameter: <i>parent</i>";
-//     exit;
-// } else
-//     $parent = $_GET['parent'];
  
 # Connect to PostgreSQL database
-$conn = pg_connect("dbname='map_data' user='postgres' password='mysecretpassword' host='localhost'");
+$conn = @pg_connect("dbname='map_data' user='postgres' password='mysecretpassword' host='localhost'");
 if (!$conn) {
-    echo "Not connected : " . pg_error();
+    echo '{ "type": "LineatorList", "min_gid": null, "hierarchy": [ ], "status": "dboff" }';
     exit;
 }
 
 # Build SQL SELECT statement and return the geometry as a GeoJSON element in EPSG: 4326
 $sql = "SELECT parent_gid, child_gid, point_index, connect_index FROM map_lineators WHERE idtrasy = " . pg_escape_string($conn, $id) . " ORDER BY id";// . " AND parent_gid";
-// if (strtolower($parent) == "null") {
-//     $sql .= " IS ";
-// } else {
-//     $sql .= " = ";
-// }
-// $sql .= pg_escape_string($conn, $parent);
-// echo $sql;
 
 # Try query or error
-$rs = pg_query($conn, $sql);
+$rs = @pg_query($conn, $sql);
 if (!$rs) {
-    echo "An SQL error occured.\n";
+    echo '{ "type": "LineatorList", "min_gid": null, "hierarchy": [ ], "status": "sqlerror" }';
     exit;
 }
 
@@ -85,14 +73,18 @@ $sql = "SELECT MIN(child_gid) AS min_gid FROM map_lineators WHERE idtrasy = " . 
 // echo $sql;
 
 # Try query or error
-$rs = pg_query($conn, $sql);
+$rs = @pg_query($conn, $sql);
 if (!$rs) {
-    echo "An SQL error occured.\n";
+    echo '{ "type": "LineatorList", "min_gid": null, "hierarchy": [ ], "status": "sqlerror" }';
     exit;
 }
 
 $row = pg_fetch_assoc($rs);
 
-$output = '{ "type": "LineatorList", "min_gid": ' . (empty($row['min_gid']) ? 'null' : $row['min_gid']) . ', "hierarchy": [ ' . $output . ' ] }';
-echo $output;
+if (empty($output)) {
+    echo '{ "type": "LineatorList", "min_gid": null, "hierarchy": [ ], "status": "nodata" }';
+} else {
+    $output = '{ "type": "LineatorList", "min_gid": ' . (empty($row['min_gid']) ? 'null' : $row['min_gid']) . ', "hierarchy": [ ' . $output . ' ], "status": "ok" }';
+    echo $output;
+}
 ?>

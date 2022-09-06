@@ -19,7 +19,7 @@ header("Content-Type: application/json");
  
 # Retrive URL variables
 if (empty($_GET['id'])) {
-    echo "missing required parameter: <i>id</i>";
+    echo '{"type": "MissingParameter", "name": "id"}';
     exit;
 } else
     $id = $_GET['id'];
@@ -29,9 +29,9 @@ $srid = "4326"; // WGS-84 (GPS)
 $routes_table = "map_routes";
 	
 # Connect to PostgreSQL database
-$conn = pg_connect("dbname='map_data' user='postgres' password='mysecretpassword' host='localhost'");
+$conn = @pg_connect("dbname='map_data' user='postgres' password='mysecretpassword' host='localhost'");
 if (!$conn) {
-    echo "Not connected : " . pg_error();
+    echo '{"type": "GidList", "gids":  [ ], "status": "dboff" }';
     exit;
 }
 
@@ -42,7 +42,7 @@ $sql = "SELECT gid FROM " . pg_escape_string($conn, $routes_table) . " WHERE idt
 # Try query or error
 $rs = pg_query($conn, $sql);
 if (!$rs) {
-    echo "An SQL error occured.\n";
+    echo '{"type": "GidList", "gids":  [ ], "status": "sqlerror" }';
     exit;
 }
 
@@ -55,6 +55,10 @@ while ($row = pg_fetch_assoc($rs)) {
     $output .= $rowOutput;
 }
 
-$output = '{"type": "GidList", "gids":  [ ' . $output . ' ] }';
-echo $output;
+if (empty($output)) {
+    echo '{"type": "GidList", "gids":  [ ], "status": "nodata" }';
+} else {
+    $output = '{"type": "GidList", "gids":  [ ' . $output . ' ], "status": "ok" }';
+    echo $output;
+}
 ?>

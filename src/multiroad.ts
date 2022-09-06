@@ -15,10 +15,10 @@ export class MultiMapRoad extends MapRoad {
                 weight: number = 5,
                 opacity: number = 0.5,
                 smoothFactor: number = 1,
-                id: number = undefined
+                dbID: number = undefined
     ) {
-        super(name, color, weight, opacity, smoothFactor, id);
-        this.dontSerializeList.push("lineator"); // TODO: Investigate, why this is not neccessary
+        super(name, color, weight, opacity, smoothFactor, dbID);
+        this.dontSerializeList.push("lineator");
         
         this.PrepareLineator(points, elevation);
     }
@@ -43,11 +43,26 @@ export class MultiMapRoad extends MapRoad {
 
     private EngageLineator() {
         this.lineator.Init();
-        this.lineator.ExportToSQL(this.id);
+
+        // Don't create SQL script if not in DB (no id) - TODO: move
+        if (this.dbID === undefined)
+            return;
+
+        App.Instance.PushAlert(
+            "Tato strategie není součástí globální databáze.",
+            "Stáhnout SQL skript?",
+            this.ExportLineatorToSQL.bind(this),
+            "success"
+        );
     }
 
     public GetSignificantPoint(): L.LatLng {
         return this.lineator.GetSignificantPoint();
+    }
+
+    private ExportLineatorToSQL() {
+        let text = this.lineator.ExportToSQL(this.dbID);
+        App.Instance.SaveTextToDisk(text, "strategie.sql", "text/sql");
     }
 
     public override SetupInteractivity(layerID: number) {
