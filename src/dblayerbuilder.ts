@@ -66,6 +66,7 @@ export class DBLayerBuilder {
         this.elementInfo.push(infoObject);
     }
 
+    // TODO: Now immune to click-offs and keyboard. Make better mayhaps?
     static ToggleInterface(show: boolean = true) {
         let modal = new Modal(this.modalElement);
         if (show)

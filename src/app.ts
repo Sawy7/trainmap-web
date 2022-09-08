@@ -182,7 +182,7 @@ export class App {
     }
 
     private RemoveFromLayerList(mapLayer: MapLayer, collapseElement: HTMLElement) {
-        // Deactive the layer (remove from map)
+        // Deactivate the layer (remove from map)
         this.ActivateMapLayer(mapLayer, collapseElement);
         
         // Remove UI list reference
@@ -304,6 +304,7 @@ export class App {
             let file = target.files[0];
             let reader = new FileReader();
             reader.onload = (e: Event) => {
+                this.ToggleThrobber();
                 shp(reader.result)
                 .then((geojson) => {
                     let multiPointsArr: L.LatLng[][] = [];
@@ -327,8 +328,12 @@ export class App {
                         // this.SaveLayersToLocalStorage();
                     }
                     App.Instance.fileLoader.SpawnNameInput("shapefileInputContainer", addFunction);
+                    this.ToggleThrobber();
                 })
-                .catch(error => console.error(error.stack));
+                .catch(error => {
+                    console.error(error.stack);
+                    this.ToggleThrobber();
+                });
             };
             reader.readAsArrayBuffer(file);
         }
