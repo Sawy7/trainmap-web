@@ -10,6 +10,7 @@ export abstract class MapRoad extends MapEntity {
     protected opacity: number;
     protected smoothFactor: number;
     protected polyLine: L.Polyline;
+    protected layerID: number;
     readonly className: string = "MapRoad";
 
     protected constructor(
@@ -35,5 +36,10 @@ export abstract class MapRoad extends MapEntity {
 
     public abstract GetSignificantPoint(): L.LatLng;
 
-    public abstract SetupInteractivity(layerID: number);
+    public SetupInteractivity(layerID: number) {
+        this.layerID = layerID;
+        this.polyLine.on("click", this.ClickSetElevationChart.bind(this));
+    }
+
+    protected abstract ClickSetElevationChart(event: L.LeafletEvent): L.LeafletMouseEventHandlerFn;
 }

@@ -52,7 +52,6 @@ export class App {
         this.SetupGPXLoader();
         this.SetupShapefileLoader();
         this.AddKeyListener();
-        // this.sidebarOffcanvas.toggle();
     }
 
     public AddMapLayer(mapLayer: MapLayer, notFromStorage: boolean = true) {
@@ -64,8 +63,8 @@ export class App {
             (mapLayer as DBMapLayer).SaveToLocalStorage();
     }
 
-    private PopulateLayerEntitesList(index: number, mapLayer: MapLayer) {
-        let entitiesList = document.getElementById("layer_"+index).children[0].children[1];
+    private PopulateLayerEntitesList(mapLayer: MapLayer, collapseElement: HTMLElement) {
+        let entitiesList = collapseElement.children[0].children[1];
         if (entitiesList.innerHTML !== "")
             return;
         let mapEntities = mapLayer.GetLayerEntities();
@@ -88,20 +87,19 @@ export class App {
         });
     }
 
-    public ActivateMapLayer(index: number) {
+    public ActivateMapLayer(mapLayer: MapLayer, collapseElement: HTMLElement) {
         if (this.layerActivating)
             return;
         this.layerActivating = true;
 
-        let mapLayer = this.localLayers[index];
+        // let mapLayer = this.localLayers[index];
         const mapLayerNewState = !mapLayer.GetAndToggleActiveState();
-        this.mapWindow.RenderMapLayer(this.localLayers[index], mapLayerNewState);
-        // this.SetActiveInLayerList(index, mapLayer, mapLayerNewState);
+        this.mapWindow.RenderMapLayer(mapLayer, mapLayerNewState);
         
         if (this.activeElevationChart !== undefined && !mapLayerNewState && this.activeElevationChart.layerID == mapLayer.id)
         this.activeElevationChart.HideChart();
 
-        let collapseElement = document.getElementById("layer_"+index);
+        // let collapseElement = document.getElementById("layer_"+index);
         let collapse = new Collapse(collapseElement);
         collapse.toggle();
 
@@ -143,9 +141,8 @@ export class App {
 
         var accordionCollapse = document.createElement("div");
         accordionCollapse.setAttribute("class", "accordion-collapse collapse bg-secondary");
-        accordionCollapse.setAttribute("id", "layer_"+index);
         accordion.onclick = () => {
-            this.ActivateMapLayer(index);
+            this.ActivateMapLayer(l, accordionCollapse);
         };
 
         var accordionBody = document.createElement("div");
@@ -157,21 +154,52 @@ export class App {
 
         var entityList = document.createElement("div");
         accordionBody.appendChild(entityList);
+       
+        if (l instanceof DBMapLayer) {
+            var operationDelete = document.createElement("button");
+            operationDelete.setAttribute("type", "button");
+            operationDelete.setAttribute("class", "btn btn-danger float-end");
+            operationDelete.onclick = () => {
+                this.RemoveFromLayerList(l, accordionCollapse);
+            };
+            var operationDeleteIcon = document.createElement("i");
+            operationDeleteIcon.setAttribute("class", "bi-trash-fill");
+            operationDelete.appendChild(operationDeleteIcon);
+            
+            accordionBody.appendChild(document.createElement("br"));
+            accordionBody.appendChild(operationDelete);
+            var br = document.createElement("br");
+            br.setAttribute("style", "clear:both");
+            accordionBody.appendChild(br);
+        }
 
         accordionCollapse.appendChild(accordionBody);
-
-        // var lineatorLink = document.createElement("a");
-        // lineatorLink.innerHTML = "LINEAR";
-        // lineatorLink.href = "#";
-        // lineatorLink.onclick = () => {
-        //     this.localLayers[index]
-        // };
-        // accordionBody.appendChild(lineatorLink);
 
         layersList.appendChild(accordion);
         layersList.appendChild(accordionCollapse);
 
-        this.PopulateLayerEntitesList(index, this.localLayers[index]);
+        this.PopulateLayerEntitesList(l, accordionCollapse);
+    }
+
+    private RemoveFromLayerList(mapLayer: MapLayer, collapseElement: HTMLElement) {
+        // Deactive the layer (remove from map)
+        this.ActivateMapLayer(mapLayer, collapseElement);
+        
+        // Remove UI list reference
+        collapseElement.previousSibling.remove(); // Link
+        collapseElement.remove(); // Collapse
+        
+        // Remove the layer object from store
+        let layerIndex = this.localLayers.indexOf(mapLayer);
+        if (layerIndex != -1) {
+            this.localLayers.splice(layerIndex, 1);
+        }
+
+        // Rebuild localStorage (if DBLayer)
+        if (!(mapLayer instanceof DBMapLayer))
+            return;
+
+        this.RebuildLocalStorage();
     }
 
     // private SaveLayersToLocalStorage() {
@@ -210,6 +238,16 @@ export class App {
                     layer.AddMapRoad(road);
             });
             this.AddMapLayer(layer, false);
+        });
+    }
+
+    // Used after layer removal
+    private RebuildLocalStorage() {
+        localStorage.removeItem("dblayers");
+
+        this.localLayers.forEach(mapLayer => {
+            if (mapLayer instanceof DBMapLayer)
+                (mapLayer as DBMapLayer).SaveToLocalStorage();
         });
     }
 
@@ -384,5 +422,14 @@ export class App {
         
         alert.appendChild(dismissButton);
         alertPlace.appendChild(alert);
+    }
+
+    public ToggleThrobber() {
+        let throbberOverlay = document.getElementById("throbberOverlay");
+        if (throbberOverlay.style.display != "") {
+            throbberOverlay.style.display = "";
+        }
+        else
+            throbberOverlay.style.display = "none";
     }
 }

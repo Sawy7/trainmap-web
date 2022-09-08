@@ -40,9 +40,9 @@ export class SingleMapRoad extends MapRoad {
         return this.points[0];
     }
 
-    public SetupInteractivity(layerID: number) {
-        this.polyLine.on("click", (event) => {
-            App.Instance.SetElevationChart(this.points, this.elevation, layerID);
-        });
+    protected ClickSetElevationChart(event: L.LeafletEvent): L.LeafletMouseEventHandlerFn {
+        // TODO: Maybe don't let the user spam this, if it is already open?
+        App.Instance.SetElevationChart(this.points, this.elevation, this.layerID);
+        return;
     }
 }

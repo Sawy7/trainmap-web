@@ -11,6 +11,7 @@ export class MapLayer {
     public activeLayerGroup: L.LayerGroup;
     public layerName: string;
     private isActive: boolean = false;
+    private listIndex: number;
     static globalIDGen: number = -1;
     readonly id: number;
     readonly className: string = "MapLayer";
@@ -64,6 +65,10 @@ export class MapLayer {
 
     public GetLayerEntities(): MapEntity[] {
         return this.layerEntities;
+    }
+
+    public AssignListIndex(index: number) {
+        this.listIndex = index;
     }
 
     public Serialize(): Object {

@@ -42,18 +42,24 @@ export class MultiMapRoad extends MapRoad {
     }
 
     private EngageLineator() {
-        this.lineator.Init();
+        App.Instance.ToggleThrobber();
+        setTimeout(() => {
+            this.lineator.Init();
+            App.Instance.ToggleThrobber();
 
-        // Don't create SQL script if not in DB (no id) - TODO: move
-        if (this.dbID === undefined)
-            return;
+            this.SetElevationChartFromLineator();
 
-        App.Instance.PushAlert(
-            "Tato strategie není součástí globální databáze.",
-            "Stáhnout SQL skript?",
-            this.ExportLineatorToSQL.bind(this),
-            "success"
-        );
+            // Don't create SQL script if not in DB (no id) - TODO: move
+            if (this.dbID === undefined)
+                return;
+    
+            App.Instance.PushAlert(
+                "Tato strategie není součástí globální databáze.",
+                "Stáhnout SQL skript?",
+                this.ExportLineatorToSQL.bind(this),
+                "success"
+            );
+        }, 0);
     }
 
     public GetSignificantPoint(): L.LatLng {
@@ -65,19 +71,22 @@ export class MultiMapRoad extends MapRoad {
         App.Instance.SaveTextToDisk(text, "strategie.sql", "text/sql");
     }
 
-    public override SetupInteractivity(layerID: number) {
-        this.polyLine.on("click", (event) => {
-            // TODO: Maybe don't let the user spam this, if it is already open?
-            if (!this.lineator.CheckInit()) {
-                App.Instance.PushAlert(
-                    "Pro tuto trasu nebyla vytvořena interní strategie výškového průchodu.",
-                    "Vytvořit nyní?",
-                    this.EngageLineator.bind(this)
-                );
-            } else {
-                let chartPoints = this.lineator.GenerateChartPoints();
-                App.Instance.SetElevationChart(chartPoints[0], chartPoints[1], layerID);
-            }
-        });
+    protected ClickSetElevationChart(event: L.LeafletEvent): L.LeafletMouseEventHandlerFn {
+        // TODO: Maybe don't let the user spam this, if it is already open?
+        if (!this.lineator.CheckInit()) {
+            App.Instance.PushAlert(
+                "Pro tuto trasu nebyla vytvořena interní strategie výškového průchodu.",
+                "Vytvořit nyní?",
+                this.EngageLineator.bind(this)
+            );
+        } else {
+            this.SetElevationChartFromLineator();
+        }
+        return;
+    }
+
+    private SetElevationChartFromLineator() {
+        let chartPoints = this.lineator.GenerateChartPoints();
+        App.Instance.SetElevationChart(chartPoints[0], chartPoints[1], this.layerID);
     }
 }
