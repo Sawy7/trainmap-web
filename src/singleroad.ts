@@ -1,4 +1,4 @@
-import * as L from "leaflet";
+import L from "leaflet";
 import { MapRoad } from "./maproad";
 import { App } from "./app";
 
@@ -41,7 +41,6 @@ export class SingleMapRoad extends MapRoad {
     }
 
     protected ClickSetElevationChart(event: L.LeafletEvent): L.LeafletMouseEventHandlerFn {
-        // TODO: Maybe don't let the user spam this, if it is already open?
         App.Instance.SetElevationChart(this.points, this.elevation, this.layerID);
         return;
     }

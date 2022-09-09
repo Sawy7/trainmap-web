@@ -1,4 +1,4 @@
-import * as L from "leaflet";
+import L from "leaflet";
 import { ApiComms } from "./apicomms";
 import { Lineator } from "./lineator";
 import { MultiMapRoad } from "./multiroad";

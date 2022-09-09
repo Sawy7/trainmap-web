@@ -1,4 +1,4 @@
-import * as L from "leaflet";
+import L from "leaflet";
 import { MapEntity } from "./mapentity";
 
 export class MapArea extends MapEntity {
@@ -8,7 +8,8 @@ export class MapArea extends MapEntity {
     // private color: string;
     // private opacity: number;
 
-    public constructor(points: L.LatLng[],
+    public constructor(
+        points: L.LatLng[],
         popupMsg: string,
         name: string = "Plocha",
         // color: string = "red",

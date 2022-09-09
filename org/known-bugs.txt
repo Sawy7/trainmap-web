@@ -1,6 +1,0 @@
-TODO + bugs
-- Adding new GPX (and shapefile) will reset and break the list
-- Clicking layer will not close height chart
-- Height chart needs some design love
-- Elements don't work yet
-- 'Rogue' point as public/private entity within 'App' class

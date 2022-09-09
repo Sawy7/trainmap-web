@@ -17,5 +17,3 @@ export class ApiComms {
         xmlHttp.send(null);
     }
 }
-
-// ApiComms.GetRequestAsync("https://catfact.ninja/fact", console.log);

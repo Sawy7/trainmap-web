@@ -1,4 +1,5 @@
-import * as L from "leaflet";
+import L from "leaflet";
+import { MapEntityFactory } from "./mapentityfactory";
 import { MapLayer } from "./maplayer";
 import { MapMarker } from "./mapmarker";
 
@@ -49,7 +50,7 @@ export class MapWindow {
         }
 
         if (this.activeElevationMarker === undefined) {
-            this.activeElevationMarker = new MapMarker(point, "", "E", true);
+            this.activeElevationMarker = MapEntityFactory.CreateMapMarker(point, "", "E", true);
             this.activeElevationMarker.GetMapEntity().addTo(this.map);
         }
         else {

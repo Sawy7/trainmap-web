@@ -4,7 +4,7 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import 'font-awesome/css/font-awesome.min.css';
 
-import * as L from "leaflet";
+import L from "leaflet";
 import 'leaflet/dist/leaflet.css';
 delete L.Icon.Default.prototype['_getIconUrl' as any as keyof L.Icon.Default];
 L.Icon.Default.mergeOptions({
@@ -15,28 +15,25 @@ L.Icon.Default.mergeOptions({
 
 // Internal imports
 import { App } from "./app";
-import { MapLayer } from './maplayer';
-import { MapMarker } from "./mapmarker";
-import { SingleMapRoad } from "./singleroad";
-import { ApiComms } from './apicomms';
+import { MapEntityFactory } from './mapentityfactory';
 
 let app = App.Instance;
 app.Init(49.86, 15.51, 15);
 
 // First test layer (BODY)
-let myPoints = new MapLayer("Moje body #1");
+let myPoints = MapEntityFactory.CreateMapLayer("Moje body #1");
 
-myPoints.AddMapMarker(new MapMarker(new L.LatLng(49.86, 15.511), "This is a popup #1"));
-myPoints.AddMapMarker(new MapMarker(new L.LatLng(49.86, 15.512), "This is a popup #2"));
-myPoints.AddMapMarker(new MapMarker(new L.LatLng(49.86, 15.513), "This is a popup #3"));
-myPoints.AddMapMarker(new MapMarker(new L.LatLng(49.86, 15.514), "This is a popup #4"));
+myPoints.AddMapMarker(MapEntityFactory.CreateMapMarker(new L.LatLng(49.86, 15.511), "This is a popup #1"));
+myPoints.AddMapMarker(MapEntityFactory.CreateMapMarker(new L.LatLng(49.86, 15.512), "This is a popup #2"));
+myPoints.AddMapMarker(MapEntityFactory.CreateMapMarker(new L.LatLng(49.86, 15.513), "This is a popup #3"));
+myPoints.AddMapMarker(MapEntityFactory.CreateMapMarker(new L.LatLng(49.86, 15.514), "This is a popup #4"));
 
 app.AddMapLayer(myPoints);
 
 // Second test layer (CESTY)
-let myRoads = new MapLayer("Moje cesty #1");
+let myRoads = MapEntityFactory.CreateMapLayer("Moje cesty #1");
 
-myRoads.AddMapRoad(new SingleMapRoad([
+myRoads.AddMapRoad(MapEntityFactory.CreateSingleMapRoad([
     new L.LatLng(49.86, 15.511),
     new L.LatLng(49.861, 15.512),
     new L.LatLng(49.86, 15.513),
@@ -47,7 +44,7 @@ myRoads.AddMapRoad(new SingleMapRoad([
     500,
     100
 ], "Cesta #1", "blue"));
-myRoads.AddMapRoad(new SingleMapRoad([
+myRoads.AddMapRoad(MapEntityFactory.CreateSingleMapRoad([
     new L.LatLng(49.859, 15.511),
     new L.LatLng(49.859, 15.512),
     new L.LatLng(49.858, 15.513),

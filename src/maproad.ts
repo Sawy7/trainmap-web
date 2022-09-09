@@ -1,6 +1,5 @@
-import * as L from "leaflet";
+import L from "leaflet";
 import { MapEntity } from "./mapentity";
-import { App } from "./app";
 
 export abstract class MapRoad extends MapEntity {
     // protected points: any;

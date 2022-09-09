@@ -1,5 +1,6 @@
-import * as L from "leaflet";
+import L from "leaflet";
 import { Lineator } from "./lineator";
+import { MapEntityFactory } from "./mapentityfactory";
 import { SingleMapRoad } from "./singleroad";
 
 export class RoadGroup {
@@ -163,13 +164,13 @@ export class RoadGroup {
     }
 
     public GetAsSingleMapRoad(): SingleMapRoad {
-        return new SingleMapRoad(this.points, this.elevation);
+        return MapEntityFactory.CreateSingleMapRoad(this.points, this.elevation);
     }
 
     public JoinIntersects(
         name?: string, color?: string, weight?: number, opacity?: number, smoothFactor?: number,
         doubleUp: boolean = false,
-        constructedRoad: SingleMapRoad = new SingleMapRoad([], [], name, color, weight, opacity, smoothFactor),
+        constructedRoad: SingleMapRoad = MapEntityFactory.CreateSingleMapRoad([], [], name, color, weight, opacity, smoothFactor),
         fromIndex?: number, toIndex?: number
     ) {
         this.visited++;

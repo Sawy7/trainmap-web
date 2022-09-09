@@ -1,9 +1,8 @@
 import Chart from 'chart.js/auto';
 import { getRelativePosition } from 'chart.js/helpers';
 import { Offcanvas } from 'bootstrap';
-import * as L from "leaflet";
+import L from "leaflet";
 import { App } from './app';
-// import { App } from './app';
 
 export class ElevationChart {
     private static ctx: HTMLCanvasElement = <HTMLCanvasElement> document.getElementById("elevationChart");

@@ -1,17 +1,15 @@
-import * as L from "leaflet";
+import L from "leaflet";
 import { MapArea } from "./maparea";
 import { MapEntity } from "./mapentity";
+import { MapEntityFactory } from "./mapentityfactory";
 import { MapMarker } from "./mapmarker";
 import { MapRoad } from "./maproad";
-import { MultiMapRoad } from "./multiroad";
-import { SingleMapRoad } from "./singleroad";
 
 export class MapLayer {
     protected layerEntities: MapEntity[] = [];
     public activeLayerGroup: L.LayerGroup;
     public layerName: string;
     private isActive: boolean = false;
-    private listIndex: number;
     static globalIDGen: number = -1;
     readonly id: number;
     readonly className: string = "MapLayer";
@@ -67,10 +65,6 @@ export class MapLayer {
         return this.layerEntities;
     }
 
-    public AssignListIndex(index: number) {
-        this.listIndex = index;
-    }
-
     public Serialize(): Object {
         let entitiesList: any[] = [];
 
@@ -86,15 +80,15 @@ export class MapLayer {
     }
 
     public static Deserialize(serializedLayer: Object) {
-        let deserializedLayer = new MapLayer(serializedLayer["name"]);
+        let deserializedLayer = MapEntityFactory.CreateMapLayer(serializedLayer["name"]);
         serializedLayer["subEntities"].forEach(entity => {
             if (entity["className"] == "SingleMapRoad") {
                 deserializedLayer.AddMapRoad(
-                    new SingleMapRoad(entity["points"], entity["elevation"], entity["color"],
+                    MapEntityFactory.CreateSingleMapRoad(entity["points"], entity["elevation"], entity["color"],
                     entity["weight"], entity["opacity"], entity["smoothFactor"])
                 );
             } else if (entity["className"] == "MultiMapRoad") {
-                let multiRoad = new MultiMapRoad(entity["points"], entity["elevation"], entity["color"],
+                let multiRoad = MapEntityFactory.CreateMultiMapRoad(entity["points"], entity["elevation"], entity["color"],
                 entity["weight"], entity["opacity"], entity["smoothFactor"]);
                 deserializedLayer.AddMapRoad(multiRoad);
 
@@ -103,11 +97,11 @@ export class MapLayer {
                 // });
             } else if (entity["className"] == "MapMarker") {
                 deserializedLayer.AddMapMarker(
-                    new MapMarker(entity["point"], entity["popupMsg"])
+                    MapEntityFactory.CreateMapMarker(entity["point"], entity["popupMsg"])
                 );
             } else if (entity["className"] == "MapArea") {
                 deserializedLayer.AddMapArea(
-                    new MapArea(entity["points"], entity["popupMsg"])
+                    MapEntityFactory.CreateMapArea(entity["points"], entity["popupMsg"])
                 );
             }
         });

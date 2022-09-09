@@ -1,8 +1,9 @@
-import * as L from "leaflet";
+import L from "leaflet";
 import { Lineator } from "./lineator";
 import { MapRoad } from "./maproad";
 import { RoadGroup } from "./roadgroup";
 import { App } from "./app";
+import { LogNotify } from "./lognotify";
 
 export class MultiMapRoad extends MapRoad {
     public lineator: Lineator;
@@ -42,10 +43,10 @@ export class MultiMapRoad extends MapRoad {
     }
 
     private EngageLineator() {
-        App.Instance.ToggleThrobber();
+        LogNotify.ToggleThrobber();
         setTimeout(() => {
             this.lineator.Init();
-            App.Instance.ToggleThrobber();
+            LogNotify.ToggleThrobber();
 
             this.SetElevationChartFromLineator();
 
@@ -53,7 +54,7 @@ export class MultiMapRoad extends MapRoad {
             if (this.dbID === undefined)
                 return;
     
-            App.Instance.PushAlert(
+            LogNotify.PushAlert(
                 "Tato strategie není součástí globální databáze.",
                 "Stáhnout SQL skript?",
                 this.ExportLineatorToSQL.bind(this),
@@ -74,7 +75,7 @@ export class MultiMapRoad extends MapRoad {
     protected ClickSetElevationChart(event: L.LeafletEvent): L.LeafletMouseEventHandlerFn {
         // TODO: Maybe don't let the user spam this, if it is already open?
         if (!this.lineator.CheckInit()) {
-            App.Instance.PushAlert(
+            LogNotify.PushAlert(
                 "Pro tuto trasu nebyla vytvořena interní strategie výškového průchodu.",
                 "Vytvořit nyní?",
                 this.EngageLineator.bind(this)

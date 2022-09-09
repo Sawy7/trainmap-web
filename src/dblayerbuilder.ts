@@ -1,8 +1,7 @@
 import { Modal } from "bootstrap";
 import { ApiComms } from "./apicomms";
 import { App } from "./app";
-import { DBMapLayer } from "./dblayer";
-import { DBMultiMapRoad } from "./dbmultiroad";
+import { MapEntityFactory } from "./mapentityfactory";
 
 export class DBLayerBuilder {
     static modalElement = document.getElementById("dbLayerBuilderModal");
@@ -87,7 +86,7 @@ export class DBLayerBuilder {
         }
 
         let allResults = Array.from(this.searchResults.children);
-        let layer = new DBMapLayer(this.layerNameBar.value);
+        let layer = MapEntityFactory.CreateDBMapLayer(this.layerNameBar.value);
         this.ToggleInterface(false);
         this.layerNameBar.value = "";
         
@@ -95,7 +94,7 @@ export class DBLayerBuilder {
             let input = res.children[0] as HTMLInputElement;
             if (input.checked) {
                 let resultInfoObject = this.elementInfo[parseInt(input.value)];
-                layer.AddMapRoad(new DBMultiMapRoad(resultInfoObject["id"]));
+                layer.AddMapRoad(MapEntityFactory.CreateDBMultiMapRoad(resultInfoObject["id"]));
                 input.checked = false;
             }
         });

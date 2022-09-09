@@ -1,4 +1,4 @@
-import * as L from "leaflet";
+import L from "leaflet";
 import {MapEntity} from "./mapentity";
 
 export class MapMarker extends MapEntity {
