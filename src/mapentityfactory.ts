@@ -39,6 +39,10 @@ export class MapEntityFactory {
         return new DBMultiMapRoad(dbID);
     }
 
+    public static CreateDBMultiMapRoadRail(dbID: number): DBMultiMapRoad {
+        return new DBMultiMapRoad(dbID, true);
+    }
+
     // Markers
     public static CreateMapMarker(
         point: L.LatLng,

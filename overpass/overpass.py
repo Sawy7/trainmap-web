@@ -14,7 +14,7 @@ class Rail:
 
     def insert_index(self, conn):
         cur = conn.cursor()
-        cur.execute("INSERT INTO osm_data_index (cislo, relcislo, nazev) VALUES (%s, %s, %s);", (self.num, self.relnum, self.name))
+        cur.execute("INSERT INTO osm_data_index (id, relcislo, nazev) VALUES (%s, %s, %s);", (self.num, self.relnum, self.name))
         conn.commit()
         cur.close()
 
@@ -79,8 +79,8 @@ def get_relation_ways(id):
 
 def create_table(conn):
     cur = conn.cursor()
-    cur.execute("CREATE TABLE IF NOT EXISTS osm_data_index (cislo integer PRIMARY KEY, relcislo integer, nazev varchar(200));")
-    cur.execute("CREATE TABLE IF NOT EXISTS osm_rails (id serial PRIMARY KEY, cislo integer, geom geometry('LINESTRING', 4326, 2), CONSTRAINT fk_cislo FOREIGN KEY(cislo) REFERENCES osm_data_index(cislo));")
+    cur.execute("CREATE TABLE IF NOT EXISTS osm_data_index (id integer PRIMARY KEY, relcislo integer, nazev varchar(200));") # TODO: Expand
+    cur.execute("CREATE TABLE IF NOT EXISTS osm_rails (id serial PRIMARY KEY, cislo integer, geom geometry('LINESTRING', 4326, 2), CONSTRAINT fk_cislo FOREIGN KEY(cislo) REFERENCES osm_data_index(id));")
     conn.commit()
     cur.close()
 

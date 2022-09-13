@@ -1,6 +1,7 @@
 import { Modal } from "bootstrap";
 import { ApiComms } from "./apicomms";
 import { App } from "./app";
+import { LogNotify } from "./lognotify";
 import { MapEntityFactory } from "./mapentityfactory";
 
 export class DBLayerBuilder {
@@ -35,15 +36,27 @@ export class DBLayerBuilder {
 
         console.log("Downloading from DB");
 
-        // let layers = JSON.parse(ApiComms.GetRequest(`${window.location.protocol}//${window.location.host}/listelements.php`));
-        let layers = JSON.parse(ApiComms.GetRequest("http://localhost:3000/listelements.php"));
-        for (let i = 0; i < layers["layers"].length; i++) {
-            const dbMapEntity = layers["layers"][i];
-            
-            this.CreateEntry(dbMapEntity["name"], i);
-            this.StashInfo(dbMapEntity);
-        }
-        this.elementsDownloaded = true;
+        LogNotify.ToggleThrobber();
+
+        setTimeout(() => {
+            // let layers = JSON.parse(ApiComms.GetRequest(`${window.location.protocol}//${window.location.host}/listelements.php`));
+            let layers = JSON.parse(ApiComms.GetRequest("http://localhost:3000/listelements.php"));
+            for (let i = 0; i < layers["layers"].length; i++) {
+                const dbMapEntity = layers["layers"][i];
+                
+                this.CreateEntry(dbMapEntity["name"], i);
+                this.StashInfo(dbMapEntity);
+            }
+            let rails = JSON.parse(ApiComms.GetRequest("http://localhost:3000/listrails.php"));
+            for (let i = layers["layers"].length; i < layers["layers"].length+rails["layers"].length; i++) {
+                const dbMapEntity = rails["layers"][i-layers["layers"].length];
+                
+                this.CreateEntry(dbMapEntity["name"], i);
+                this.StashInfo(dbMapEntity, true);
+            }
+            this.elementsDownloaded = true;
+            LogNotify.ToggleThrobber();
+        }, 0);
     }
 
     static CreateEntry(name: string, index: number) {
@@ -61,7 +74,8 @@ export class DBLayerBuilder {
         this.searchResults.appendChild(li);
     }
 
-    static StashInfo(infoObject: Object) {
+    static StashInfo(infoObject: Object, isRail: boolean = false) {
+        infoObject["isRail"] = isRail;
         this.elementInfo.push(infoObject);
     }
 
@@ -94,7 +108,10 @@ export class DBLayerBuilder {
             let input = res.children[0] as HTMLInputElement;
             if (input.checked) {
                 let resultInfoObject = this.elementInfo[parseInt(input.value)];
-                layer.AddMapRoad(MapEntityFactory.CreateDBMultiMapRoad(resultInfoObject["id"]));
+                if (resultInfoObject["isRail"])
+                    layer.AddMapRoad(MapEntityFactory.CreateDBMultiMapRoadRail(resultInfoObject["id"]));
+                else
+                    layer.AddMapRoad(MapEntityFactory.CreateDBMultiMapRoad(resultInfoObject["id"]));
                 input.checked = false;
             }
         });

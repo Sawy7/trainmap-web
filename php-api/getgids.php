@@ -6,7 +6,7 @@
  * Query a PostGIS table or view and return the results in GeoJSON format, suitable for use in OpenLayers, Leaflet, etc.
  * 
  * @param 		string		$id		    The PostGIS entity id *REQUIRED*
- * @return 		string					resulting geojson string
+ * @return 		string					resulting array
  */
 function escapeJsonString($value) { # list from www.json.org: (\b backspace, \f formfeed)
   $escapers = array("\\", "/", "\"", "\n", "\r", "\t", "\x08", "\x0c");

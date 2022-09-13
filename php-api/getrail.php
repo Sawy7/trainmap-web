@@ -6,7 +6,6 @@
  * Query a PostGIS table or view and return the results in GeoJSON format, suitable for use in OpenLayers, Leaflet, etc.
  * 
  * @param 		string		$id		    The PostGIS entity id *REQUIRED*
- * @param 		boolean		$rail	    Special rail mode boolean
  * @return 		string					resulting geojson string
  */
 function createJsonKey($name, $value, $isNumber=false) {
@@ -41,11 +40,6 @@ if (empty($_GET['id'])) {
 } else
     $id = $_GET['id'];
 
-$rail = false;
-if (!empty($_GET['rail'])) {
-    $rail = filter_var($_GET['rail'], FILTER_VALIDATE_BOOLEAN);
-}
-
 # Not parameters, hence no escaping
 $geomfield = "geom";
 $srid = "4326"; // WGS-84 (GPS)
@@ -58,21 +52,10 @@ if (!$conn) {
 }
 
 # Build SQL SELECT statement and return the geometry as a GeoJSON element in EPSG: 4326
-$sql = "";
-if ($rail) {
-    // $sql = "SELECT osm_data_index.*, ST_AsGeoJSON(ST_Collect(ST_Transform(map_routes." . $geomfield . ", " . $srid . ") ORDER BY gid ASC)) AS geojson
-    // FROM map_routes, osm_rails JOIN osm_data_index ON osm_data_index.id = osm_rails.cislo
-    // WHERE ST_DWithin(ST_Transform(map_routes." . $geomfield . ", " . $srid . "), osm_rails.geom, 0.0001) AND osm_rails.cislo = " . pg_escape_string($conn, $id) .
-    // "GROUP BY osm_data_index.id LIMIT 1";
-    $sql = "SELECT osm_data_index.*, ST_AsGeoJSON(ST_Collect(osm_rails." . $geomfield . ")) AS geojson
-    FROM osm_rails JOIN osm_data_index ON osm_data_index.id = osm_rails.cislo
-    WHERE osm_data_index.id = " . pg_escape_string($conn, $id) .
-    "GROUP BY osm_data_index.id LIMIT 1";
-} else {
-    $sql = "SELECT map_data_index.*, ST_AsGeoJSON(ST_Collect(ST_Transform(" . $geomfield . ", " . $srid . ") ORDER BY gid ASC)) AS geojson
-    FROM map_routes JOIN map_data_index ON map_data_index.id = map_routes.idtrasy WHERE idtrasy = " . pg_escape_string($conn, $id) .
-    "GROUP BY map_data_index.id LIMIT 1";
-}
+$sql = "SELECT osm_data_index.*, ST_AsGeoJSON(ST_Collect(ST_Transform(map_routes." . $geomfield . ", " . $srid . ") ORDER BY gid ASC)) AS geojson
+FROM map_routes, osm_rails JOIN osm_data_index ON osm_data_index.cislo = osm_rails.cislo
+WHERE ST_DWithin(ST_Transform(map_routes." . $geomfield . ", " . $srid . "), osm_rails.geom, 0.0001) AND osm_rails.cislo = " . pg_escape_string($conn, $id) .
+"GROUP BY osm_data_index.cislo LIMIT 1";
 // echo $sql;
 
 # Try query or error
@@ -89,7 +72,7 @@ $rowOutput = '';
 while ($row = pg_fetch_assoc($rs)) {
     $rowOutput = (strlen($rowOutput) > 0 ? ',' : '') . '{"type": "Feature", "geometry": ' . $row['geojson'] . ', "properties": {';
     $props = '';
-    $props .= createJsonKey("id", $row["id"], true);
+    $props .= createJsonKey("id", $row["cislo"], true);
     $props .= ', ' . createJsonKey("name", $row["nazevtrasy"]);
     $props .= ', ' . createJsonKey("color", $row["color"]);
     $props .= ', ' . createJsonKey("weight", $row["weight"], true);

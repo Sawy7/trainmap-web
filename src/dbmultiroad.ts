@@ -6,11 +6,11 @@ import { RoadGroup } from "./roadgroup";
 
 export class DBMultiMapRoad extends MultiMapRoad {
     readonly className: string;
-    readonly wasRemoved: boolean
+    readonly wasRemoved: boolean;
 
-    public constructor(dbID: number) {
+    public constructor(dbID: number, isRail: boolean = false) {
         // let geoJSON = JSON.parse(ApiComms.GetRequest(`${window.location.protocol}//${window.location.host}/getelement.php?id=${dbID}`));
-        let geoJSON = JSON.parse(ApiComms.GetRequest(`http://localhost:3000/getelement.php?id=${dbID}`));
+        let geoJSON = JSON.parse(ApiComms.GetRequest(`http://localhost:3000/getelement.php?id=${dbID}&rail=${isRail}`));
 
         if (geoJSON["status"] !== "ok") {
             super([], [], "");
