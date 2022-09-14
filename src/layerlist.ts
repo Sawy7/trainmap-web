@@ -75,8 +75,15 @@ export class LayerList {
         layersList.appendChild(accordion);
         layersList.appendChild(accordionCollapse);
 
-        if (mapLayer instanceof GhostDBMapLayer)
+        if (mapLayer instanceof GhostDBMapLayer) {
+            var badge = document.createElement("span");
+            var locateIcon = document.createElement("i");
+            locateIcon.setAttribute("class", "bi-cloud-arrow-down-fill")
+            badge.appendChild(locateIcon);
+            badge.setAttribute("class", "badge bg-primary rounded-pill");
+            accordion.appendChild(badge);
             mapLayer.PassPopulationMethod(this.PopulateLayerEntitesList.bind(this), accordionCollapse);
+        }
         else
             this.PopulateLayerEntitesList(mapLayer, accordionCollapse);
     }

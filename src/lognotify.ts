@@ -85,4 +85,15 @@ export class LogNotify {
         else
             throbberOverlay.style.display = "none";
     }
+
+    public static PlaceLoader(parentElement: HTMLElement, replace: boolean = false): HTMLElement {
+        let loader = document.createElement("div");
+        loader.setAttribute("class", "spinner-border spinner-border-sm");
+
+        if (replace)
+            parentElement.parentNode.replaceChild(loader, parentElement);
+        else
+            parentElement.appendChild(loader);
+        return loader;
+    }
 }

@@ -2,6 +2,7 @@ import L from "leaflet";
 import { DBMapLayer } from "./dblayer";
 import { DBMultiMapRoad } from "./dbmultiroad";
 import { DBSingleMapRoad } from "./dbsingleroad";
+import { LogNotify } from "./lognotify";
 import { MapEntityFactory } from "./mapentityfactory";
 
 export class GhostDBMapLayer extends DBMapLayer {
@@ -15,14 +16,32 @@ export class GhostDBMapLayer extends DBMapLayer {
         this.elementInfoObjects = elementInfoObjects;
     }
     
-    public GetLayerGroup(): L.LayerGroup {
+    public async GetLayerGroup(): Promise<L.LayerGroup> {
         // Download the thing before displaying
-        this.DownloadLayer();
+        if (!this.initialized) {
+            let loader = LogNotify.PlaceLoader(
+                this.collapseElement.previousElementSibling.getElementsByTagName("span")[0].childNodes[0] as HTMLElement,
+                true
+            );
 
-        return super.GetLayerGroup();
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    this.DownloadLayer();
+                    loader.parentNode.removeChild(loader);
+                    this.initialized = true;
+                    resolve(super.GetLayerGroup());
+                }, 0);
+            });
+        }
+        
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                resolve(super.GetLayerGroup());
+            }, 0);
+        });
     }
 
-    private DownloadLayer() {
+    private async DownloadLayer() {
         this.elementInfoObjects.forEach(e => {
             let road: DBSingleMapRoad | DBMultiMapRoad;
             if (e["type"] == "DBMultiMapRoad")

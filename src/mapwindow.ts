@@ -34,8 +34,12 @@ export class MapWindow {
     }
 
     public RenderMapLayer(mapLayer: MapLayer, render: boolean = true) {
-        if (render)
-            mapLayer.GetLayerGroup().addTo(this.map);
+        if (render) {
+            mapLayer.GetLayerGroup().then((layerGroup) => {
+                layerGroup.addTo(this.map);
+            });
+            // mapLayer.GetLayerGroup().addTo(this.map);
+        }
         else
             this.map.removeLayer(mapLayer.activeLayerGroup);
     }
