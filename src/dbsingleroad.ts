@@ -1,5 +1,5 @@
 import L from "leaflet";
-import { ApiComms } from "./apicomms";
+import { ApiMgr } from "./apimgr";
 import { DBMapEntity } from "./dbmapentity";
 import { Helper } from "./helper";
 import { SingleMapRoad } from "./singleroad";
@@ -20,8 +20,7 @@ export class DBSingleMapRoad extends SingleMapRoad {
     }
 
     constructor(dbID: number) {
-        // let geoJSON = JSON.parse(ApiComms.GetRequest(`${window.location.protocol}//${window.location.host}/getrail.php?relcislo=${dbID}`));
-        let geoJSON = JSON.parse(ApiComms.GetRequest(`http://localhost:3000/getrail.php?relcislo=${dbID}&rail=1`));
+        let geoJSON = ApiMgr.GetRail(dbID);
 
         if (geoJSON["status"] !== "ok") {
             super([], [], "");

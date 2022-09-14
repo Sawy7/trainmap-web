@@ -135,18 +135,7 @@ export class App {
 
         let storageList = JSON.parse(localStorage["dblayers"]);
         storageList.forEach(layerInfo => {
-            let layer = MapEntityFactory.CreateDBMapLayer(layerInfo["name"]);
-            layerInfo["elements"].forEach(e => {
-                let road: DBSingleMapRoad | DBMultiMapRoad;
-                if (e["type"] == "DBMultiMapRoad")
-                    road = MapEntityFactory.CreateDBMultiMapRoad(e["id"]);
-                else if (e["type"] == "DBSingleMapRoad")
-                    road = MapEntityFactory.CreateDBSingleMapRoad(e["id"]);
-
-                // TODO: Something more elegant (+ maybe user indication, that something's been yeeted)
-                if (!road.CheckRemoved())
-                    layer.AddMapRoad(road);
-            });
+            let layer = MapEntityFactory.CreateGhostDBMapLayer(layerInfo["name"], layerInfo["elements"]);
             this.AddMapLayer(layer, false);
         });
     }

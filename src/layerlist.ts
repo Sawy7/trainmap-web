@@ -1,4 +1,5 @@
 import { DBMapLayer } from "./dblayer";
+import { GhostDBMapLayer } from "./ghostdblayer";
 import { MapLayer } from "./maplayer";
 
 export class LayerList {
@@ -74,7 +75,10 @@ export class LayerList {
         layersList.appendChild(accordion);
         layersList.appendChild(accordionCollapse);
 
-        this.PopulateLayerEntitesList(mapLayer, accordionCollapse);
+        if (mapLayer instanceof GhostDBMapLayer)
+            mapLayer.PassPopulationMethod(this.PopulateLayerEntitesList.bind(this), accordionCollapse);
+        else
+            this.PopulateLayerEntitesList(mapLayer, accordionCollapse);
     }
 
     private PopulateLayerEntitesList(mapLayer: MapLayer, collapseElement: HTMLElement) {

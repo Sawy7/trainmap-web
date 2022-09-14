@@ -1,8 +1,10 @@
 import { LatLng } from "leaflet";
+import { DBMapEntityCache } from "./dbentitycache";
 
 import { DBMapLayer } from "./dblayer";
 import { DBMultiMapRoad } from "./dbmultiroad";
 import { DBSingleMapRoad } from "./dbsingleroad";
+import { GhostDBMapLayer } from "./ghostdblayer";
 import { MapArea } from "./maparea";
 import { MapLayer } from "./maplayer"
 import { MapMarker } from "./mapmarker";
@@ -15,8 +17,12 @@ export class MapEntityFactory {
         return new MapLayer(name);
     }
 
-    public static CreateDBMapLayer(name): DBMapLayer {
+    public static CreateDBMapLayer(name: string): DBMapLayer {
         return new DBMapLayer(name);
+    }
+
+    public static CreateGhostDBMapLayer(name: string, elementInfoObjects: object[]): DBMapLayer {
+        return new GhostDBMapLayer(name, elementInfoObjects);
     }
 
     // Roads
@@ -37,11 +43,11 @@ export class MapEntityFactory {
     }
 
     public static CreateDBMultiMapRoad(dbID: number): DBMultiMapRoad {
-        return new DBMultiMapRoad(dbID);
+        return DBMapEntityCache.Instance.GetDBMultiMapRoad(dbID);
     }
 
     public static CreateDBSingleMapRoad(dbID: number): DBSingleMapRoad {
-        return new DBSingleMapRoad(dbID);
+        return DBMapEntityCache.Instance.GetDBSingleMapRoad(dbID);
     }
 
     // Markers

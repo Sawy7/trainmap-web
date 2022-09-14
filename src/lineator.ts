@@ -1,4 +1,5 @@
 import { ApiComms } from "./apicomms";
+import { ApiMgr } from "./apimgr";
 import { RoadGroup } from "./roadgroup";
 import { SingleMapRoad } from "./singleroad";
 
@@ -204,7 +205,7 @@ export class Lineator {
 
     // NOTE: DB queries are ordered in a certain way that makes this work
     public InsertDBHierarchy(id: number) {
-        let lineatorJSON = JSON.parse(ApiComms.GetRequest(`http://localhost:3000/getlineator.php?id=${id}`));
+        let lineatorJSON = ApiMgr.GetLineator(id);
         let minGid = lineatorJSON["min_gid"];
         if (minGid === null)
             return;

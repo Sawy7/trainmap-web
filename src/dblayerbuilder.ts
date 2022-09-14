@@ -1,5 +1,5 @@
 import { Modal } from "bootstrap";
-import { ApiComms } from "./apicomms";
+import { ApiMgr } from "./apimgr";
 import { App } from "./app";
 import { LogNotify } from "./lognotify";
 import { MapEntityFactory } from "./mapentityfactory";
@@ -39,15 +39,14 @@ export class DBLayerBuilder {
         LogNotify.ToggleThrobber();
 
         setTimeout(() => {
-            // let layers = JSON.parse(ApiComms.GetRequest(`${window.location.protocol}//${window.location.host}/listelements.php`));
-            let layers = JSON.parse(ApiComms.GetRequest("http://localhost:3000/listelements.php"));
+            let layers = ApiMgr.ListElements();
             for (let i = 0; i < layers["layers"].length; i++) {
                 const dbMapEntity = layers["layers"][i];
                 
                 this.CreateEntry(dbMapEntity["name"], i);
                 this.StashInfo(dbMapEntity);
             }
-            let rails = JSON.parse(ApiComms.GetRequest("http://localhost:3000/listrails.php"));
+            let rails = ApiMgr.ListRails();
             for (let i = layers["layers"].length; i < layers["layers"].length+rails["layers"].length; i++) {
                 const dbMapEntity = rails["layers"][i-layers["layers"].length];
                 

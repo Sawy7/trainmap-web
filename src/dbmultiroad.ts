@@ -1,5 +1,5 @@
 import L from "leaflet";
-import { ApiComms } from "./apicomms";
+import { ApiMgr } from "./apimgr";
 import { App } from "./app";
 import { DBMapEntity } from "./dbmapentity";
 import { Helper } from "./helper";
@@ -30,8 +30,7 @@ export class DBMultiMapRoad extends MultiMapRoad {
     }
 
     public constructor(dbID: number) {
-        // let geoJSON = JSON.parse(ApiComms.GetRequest(`${window.location.protocol}//${window.location.host}/getelement.php?id=${dbID}`));
-        let geoJSON = JSON.parse(ApiComms.GetRequest(`http://localhost:3000/getelement.php?id=${dbID}`));
+        let geoJSON = ApiMgr.GetElement(dbID);
 
         if (geoJSON["status"] !== "ok") {
             super([], [], "");
@@ -66,8 +65,7 @@ export class DBMultiMapRoad extends MultiMapRoad {
         if (this.dbID === undefined)
             return;
         
-        // TODO: Add agnostic URL for API
-        let gidList = JSON.parse(ApiComms.GetRequest(`http://localhost:3000/getgids.php?id=${this.dbID}`));
+        let gidList = ApiMgr.GetGIDs(this.dbID);
         let roadGroups: RoadGroup[] = [];
         for (let i = 0; i < points.length; i++) {
             roadGroups.push(new RoadGroup(points[i], elevation[i], gidList["gids"][i]));
