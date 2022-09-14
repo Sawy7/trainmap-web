@@ -1,12 +1,12 @@
 export abstract class MapEntity {
     protected name: string = "Entita";
     readonly className: string;
-    readonly dbID: number;
+    // readonly dbID: number;
     protected dontSerializeList: string[] = [];
 
-    public constructor(dbID: number = undefined) {
-        this.dbID = dbID;
-    }
+    // public constructor(dbID: number = undefined) {
+    //     this.dbID = dbID;
+    // }
 
     public abstract GetMapEntity(): any;
     public abstract GetSignificantPoint(): L.LatLng;

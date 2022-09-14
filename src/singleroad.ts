@@ -13,15 +13,14 @@ export class SingleMapRoad extends MapRoad {
                 color: string = "red",
                 weight: number = 5,
                 opacity: number = 0.5,
-                smoothFactor: number = 1,
-                dbID: number = undefined
-                ) {
-        super(name, color, weight, opacity, smoothFactor, dbID);
+                smoothFactor: number = 1
+    ) {
+        super(name, color, weight, opacity, smoothFactor);
         this.points = points;
         this.elevation = elevation;
     }
 
-    public GetMapEntity(): L.Polyline {
+    public GetMapEntity(): any {
         this.polyLine = new L.Polyline(this.points, {
             color: this.color,
             weight: this.weight,

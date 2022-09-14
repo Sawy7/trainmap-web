@@ -15,16 +15,15 @@ export class MultiMapRoad extends MapRoad {
                 color: string = "red",
                 weight: number = 5,
                 opacity: number = 0.5,
-                smoothFactor: number = 1,
-                dbID: number = undefined
+                smoothFactor: number = 1
     ) {
-        super(name, color, weight, opacity, smoothFactor, dbID);
+        super(name, color, weight, opacity, smoothFactor);
         this.dontSerializeList.push("lineator");
         
         this.PrepareLineator(points, elevation);
     }
 
-    public GetMapEntity(): L.Polyline {
+    public GetMapEntity(): any {
         this.polyLine = new L.Polyline(this.lineator.GetPoints(), {
             color: this.color,
             weight: this.weight,
@@ -49,27 +48,11 @@ export class MultiMapRoad extends MapRoad {
             LogNotify.ToggleThrobber();
 
             this.SetElevationChartFromLineator();
-
-            // Don't create SQL script if not in DB (no id) - TODO: move
-            if (this.dbID === undefined)
-                return;
-    
-            LogNotify.PushAlert(
-                "Tato strategie není součástí globální databáze.",
-                "Stáhnout SQL skript?",
-                this.ExportLineatorToSQL.bind(this),
-                "success"
-            );
         }, 0);
     }
 
     public GetSignificantPoint(): L.LatLng {
         return this.lineator.GetSignificantPoint();
-    }
-
-    private ExportLineatorToSQL() {
-        let text = this.lineator.ExportToSQL(this.dbID);
-        App.Instance.SaveTextToDisk(text, "strategie.sql", "text/sql");
     }
 
     protected ClickSetElevationChart(event: L.LeafletEvent): L.LeafletMouseEventHandlerFn {
@@ -86,7 +69,7 @@ export class MultiMapRoad extends MapRoad {
         return;
     }
 
-    private SetElevationChartFromLineator() {
+    protected SetElevationChartFromLineator() {
         let chartPoints = this.lineator.GenerateChartPoints();
         App.Instance.SetElevationChart(chartPoints[0], chartPoints[1], this.layerID);
     }

@@ -13,10 +13,9 @@ export class MapMarker extends MapEntity {
         point: L.LatLng,
         popupMsg: string,
         name: string = "Bod",
-        useCustomIcon: boolean = false,
-        dbID: number = undefined
+        useCustomIcon: boolean = false
     ) {
-        super(dbID);
+        super();
         this.point = point;
         this.popupMsg = popupMsg;
         this.name = name;

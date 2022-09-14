@@ -10,6 +10,8 @@ import { FileLoader } from "./fileloader";
 import { MapEntityFactory } from "./mapentityfactory";
 import { LayerList } from "./layerlist";
 import { LogNotify } from "./lognotify";
+import { DBSingleMapRoad } from "./dbsingleroad";
+import { DBMultiMapRoad } from "./dbmultiroad";
 
 // TS Singleton: https://stackoverflow.com/questions/30174078/how-to-define-singleton-in-typescript
 export class App {
@@ -134,10 +136,15 @@ export class App {
         let storageList = JSON.parse(localStorage["dblayers"]);
         storageList.forEach(layerInfo => {
             let layer = MapEntityFactory.CreateDBMapLayer(layerInfo["name"]);
-            layerInfo["ids"].forEach(id => {
-                let road = MapEntityFactory.CreateDBMultiMapRoad(id);
+            layerInfo["elements"].forEach(e => {
+                let road: DBSingleMapRoad | DBMultiMapRoad;
+                if (e["type"] == "DBMultiMapRoad")
+                    road = MapEntityFactory.CreateDBMultiMapRoad(e["id"]);
+                else if (e["type"] == "DBSingleMapRoad")
+                    road = MapEntityFactory.CreateDBSingleMapRoad(e["id"]);
+
                 // TODO: Something more elegant (+ maybe user indication, that something's been yeeted)
-                if (!road.wasRemoved)
+                if (!road.CheckRemoved())
                     layer.AddMapRoad(road);
             });
             this.AddMapLayer(layer, false);

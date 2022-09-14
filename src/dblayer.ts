@@ -1,3 +1,6 @@
+import { DBMapEntity } from "./dbmapentity";
+import { DBMultiMapRoad } from "./dbmultiroad";
+import { DBSingleMapRoad } from "./dbsingleroad";
 import { MapLayer } from "./maplayer";
 
 export class DBMapLayer extends MapLayer {
@@ -13,17 +16,17 @@ export class DBMapLayer extends MapLayer {
         if (localStorage["dblayers"] !== undefined)
             storageList = JSON.parse(localStorage["dblayers"]);
 
-        let layerIDs: number[] = [];
+        let layerElements: object[] = [];
         this.layerEntities.forEach(e => {
-            if (e.dbID === undefined)
+            if (!(e instanceof DBMultiMapRoad) && !(e instanceof DBSingleMapRoad))
                 return;
-            
-            layerIDs.push(e.dbID);
+
+            layerElements.push((e as DBMapEntity).GetLocalStorageObject());
         });
         
         storageList.push({
             "name": this.layerName,
-            "ids": layerIDs
+            "elements": layerElements
         });
         localStorage["dblayers"] = JSON.stringify(storageList);
     }

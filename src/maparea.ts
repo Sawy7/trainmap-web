@@ -14,9 +14,8 @@ export class MapArea extends MapEntity {
         name: string = "Plocha",
         // color: string = "red",
         // opacity: number = 0.5,
-        dbID: number = undefined
     ) {
-        super(dbID);
+        super();
         this.points = points;
         this.popupMsg = popupMsg;
         this.name = name;

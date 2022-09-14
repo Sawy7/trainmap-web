@@ -1,12 +1,33 @@
 import L from "leaflet";
 import { ApiComms } from "./apicomms";
+import { App } from "./app";
+import { DBMapEntity } from "./dbmapentity";
+import { Helper } from "./helper";
 import { Lineator } from "./lineator";
+import { LogNotify } from "./lognotify";
 import { MultiMapRoad } from "./multiroad";
 import { RoadGroup } from "./roadgroup";
 
 export class DBMultiMapRoad extends MultiMapRoad {
     readonly className: string;
-    readonly wasRemoved: boolean;
+
+    private static ParseGeoJSON(geoJSON: object): [L.LatLng[][], number[][]] {
+        let lineStrings = geoJSON["geometry"]["coordinates"];
+        let mlPoints: L.LatLng[][] = [];
+        let mlElevation: number[][] = [];
+        lineStrings.forEach(ls => {
+            let lsPoints: L.LatLng[] = [];
+            let lsElevation: number[] = [];
+            ls.forEach(coords => {
+                lsPoints.push(new L.LatLng(coords[1], coords[0]));
+                lsElevation.push(coords[2]);
+            });
+            mlPoints.push(lsPoints);
+            mlElevation.push(lsElevation);
+        });
+
+        return [mlPoints, mlElevation];
+    }
 
     public constructor(dbID: number) {
         // let geoJSON = JSON.parse(ApiComms.GetRequest(`${window.location.protocol}//${window.location.host}/getelement.php?id=${dbID}`));
@@ -20,29 +41,21 @@ export class DBMultiMapRoad extends MultiMapRoad {
         }
         
         let type = geoJSON["geometry"]["type"];
-        console.log(type);
         if (type == "MultiLineString") {
-            let lineStrings = geoJSON["geometry"]["coordinates"];
             let mlPoints: L.LatLng[][] = [];
             let mlElevation: number[][] = [];
-            lineStrings.forEach(ls => {
-                let lsPoints: L.LatLng[] = [];
-                let lsElevation: number[] = [];
-                ls.forEach(coords => {
-                    lsPoints.push(new L.LatLng(coords[1], coords[0]));
-                    lsElevation.push(coords[2]);
-                });
-                mlPoints.push(lsPoints);
-                mlElevation.push(lsElevation);
-            });
+            [mlPoints, mlElevation] = DBMultiMapRoad.ParseGeoJSON(geoJSON);
+            
             super(
-                mlPoints, mlElevation, geoJSON["properties"]["name"],
+                [], [], geoJSON["properties"]["name"],
                 geoJSON["properties"]["color"], geoJSON["properties"]["weight"],
-                geoJSON["properties"]["opacity"], geoJSON["properties"]["smoothFactor"],
-                geoJSON["properties"]["id"]
+                geoJSON["properties"]["opacity"], geoJSON["properties"]["smoothFactor"]
             );
+            
             this.wasRemoved = false;
             this.className = "DBMultiMapRoad";
+            this.dbID = dbID;
+            this.PrepareLineator(mlPoints, mlElevation);
         } else {
             console.log("Unknown feature type!")
         }
@@ -53,7 +66,7 @@ export class DBMultiMapRoad extends MultiMapRoad {
         if (this.dbID === undefined)
             return;
         
-            // TODO: Add agnostic URL for API
+        // TODO: Add agnostic URL for API
         let gidList = JSON.parse(ApiComms.GetRequest(`http://localhost:3000/getgids.php?id=${this.dbID}`));
         let roadGroups: RoadGroup[] = [];
         for (let i = 0; i < points.length; i++) {
@@ -66,4 +79,25 @@ export class DBMultiMapRoad extends MultiMapRoad {
     public InsertDBLineatorHierarchy() {
         this.lineator.InsertDBHierarchy(this.dbID);
     }
+
+    protected SetElevationChartFromLineator() {
+        super.SetElevationChartFromLineator();
+
+        if (this.lineator.CheckFromDB())
+            return;
+        
+        LogNotify.PushAlert(
+            "Tato strategie není součástí globální databáze.",
+            "Stáhnout SQL skript?",
+            this.ExportLineatorToSQL.bind(this),
+            "success"
+        );
+    }
+
+    private ExportLineatorToSQL() {
+        let text = this.lineator.ExportToSQL(this.dbID);
+        App.Instance.SaveTextToDisk(text, "strategie.sql", "text/sql");
+    }
 }
+export interface DBMultiMapRoad extends DBMapEntity {};
+Helper.applyMixins(DBMultiMapRoad, [DBMapEntity]);

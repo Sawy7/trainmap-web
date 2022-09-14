@@ -17,10 +17,9 @@ export abstract class MapRoad extends MapEntity {
                 color: string = "red",
                 weight: number = 5,
                 opacity: number = 0.5,
-                smoothFactor: number = 1,
-                dbID: number = undefined
+                smoothFactor: number = 1
     ) {
-        super(dbID);
+        super();
         this.name = name;
         this.color = color;
         this.weight = weight;
@@ -31,7 +30,7 @@ export abstract class MapRoad extends MapEntity {
         ]
     }
 
-    public abstract GetMapEntity(): L.Polyline;
+    public abstract GetMapEntity(): any;
 
     public abstract GetSignificantPoint(): L.LatLng;
 

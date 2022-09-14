@@ -7,6 +7,7 @@ export class Lineator {
     private constructedRoads: SingleMapRoad[] = [];
     private rootGroup: RoadGroup;
     private isInitialized: boolean = false;
+    private fromDB: boolean = false;
     static lineatorDBTable: string = "map_lineators";
     static indexDBTable: string = "map_data_index";
 
@@ -53,6 +54,10 @@ export class Lineator {
 
     public CheckInit(): boolean {
         return this.isInitialized;
+    }
+
+    public CheckFromDB(): boolean {
+        return this.fromDB;
     }
 
     public GetPoints(): L.LatLng[][] {
@@ -228,5 +233,6 @@ export class Lineator {
         });
 
         this.isInitialized = true;
+        this.fromDB = true;
     }
 }

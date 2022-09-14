@@ -25,7 +25,7 @@ export class MapEntityFactory {
         name?: string, color?: string, weight?: number,
         opacity?: number, smoothFactor?: number, dbID?: number
     ): SingleMapRoad {
-        return new SingleMapRoad(points, elevation, name, color, weight, opacity, smoothFactor, dbID);
+        return new SingleMapRoad(points, elevation, name, color, weight, opacity, smoothFactor);
     }
 
     public static CreateMultiMapRoad(
@@ -33,7 +33,7 @@ export class MapEntityFactory {
         name?: string, color?: string, weight?: number,
         opacity?: number, smoothFactor?: number, dbID?: number
     ): MultiMapRoad {
-        return new MultiMapRoad(points, elevation, name, color, weight, opacity, smoothFactor, dbID);
+        return new MultiMapRoad(points, elevation, name, color, weight, opacity, smoothFactor);
     }
 
     public static CreateDBMultiMapRoad(dbID: number): DBMultiMapRoad {
@@ -52,7 +52,7 @@ export class MapEntityFactory {
         useCustomIcon: boolean = false,
         dbID: number = undefined
     ): MapMarker {
-        return new MapMarker(point, popupMsg, name, useCustomIcon, dbID);
+        return new MapMarker(point, popupMsg, name, useCustomIcon);
     }
 
     // Areas
@@ -62,6 +62,6 @@ export class MapEntityFactory {
         name: string = "Plocha",
         dbID: number = undefined
     ): MapArea {
-        return new MapArea(points, popupMsg, name, dbID);
+        return new MapArea(points, popupMsg, name);
     }
 }
