@@ -45,7 +45,7 @@ if (!$conn) {
 
 # Build SQL SELECT statement and return the geometry as a GeoJSON element in EPSG: 4326
 $sql = "SELECT DISTINCT osm_data_index.*
-FROM map_routes, osm_rails JOIN osm_data_index ON osm_data_index.id = osm_rails.cislo
+FROM map_routes, osm_rails JOIN osm_data_index ON osm_data_index.relcislo = osm_rails.relcislo
 WHERE ST_DWithin(ST_Transform(map_routes." . $geomfield . ", " . $srid . "), osm_rails.geom, 0.0001)";
 // echo $sql;
 
@@ -62,13 +62,13 @@ $rowOutput = '';
 
 while ($row = pg_fetch_assoc($rs)) {
     $rowOutput = (strlen($rowOutput) > 0 ? ', ' : '') . '{';
-    $rowOutput .= createJsonKey("id", $row["id"], true);
+    $rowOutput .= createJsonKey("relcislo", $row["relcislo"], true);
+    $rowOutput .= ', ' . createJsonKey("id", $row["id"]);
     $rowOutput .= ', ' . createJsonKey("name", $row["nazevtrasy"]);
     $rowOutput .= ', ' . createJsonKey("color", $row["color"]);
     $rowOutput .= ', ' . createJsonKey("weight", $row["weight"], true);
     $rowOutput .= ', ' . createJsonKey("opacity", $row["opacity"], true);
     $rowOutput .= ', ' . createJsonKey("smooth_factor", $row["smooth_factor"], true);
-    $rowOutput .= ', ' . createJsonKey("lineator", $row["lineator"], true);
     $rowOutput .= ', ' . createJsonKey("tags", $row["tags"]);
     $rowOutput .= '}';
     $output .= $rowOutput;

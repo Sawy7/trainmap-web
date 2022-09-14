@@ -2,6 +2,7 @@ import { LatLng } from "leaflet";
 
 import { DBMapLayer } from "./dblayer";
 import { DBMultiMapRoad } from "./dbmultiroad";
+import { DBSingleMapRoad } from "./dbsingleroad";
 import { MapArea } from "./maparea";
 import { MapLayer } from "./maplayer"
 import { MapMarker } from "./mapmarker";
@@ -39,8 +40,8 @@ export class MapEntityFactory {
         return new DBMultiMapRoad(dbID);
     }
 
-    public static CreateDBMultiMapRoadRail(dbID: number): DBMultiMapRoad {
-        return new DBMultiMapRoad(dbID, true);
+    public static CreateDBSingleMapRoad(dbID: number): DBSingleMapRoad {
+        return new DBSingleMapRoad(dbID);
     }
 
     // Markers

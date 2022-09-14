@@ -109,7 +109,7 @@ export class DBLayerBuilder {
             if (input.checked) {
                 let resultInfoObject = this.elementInfo[parseInt(input.value)];
                 if (resultInfoObject["isRail"])
-                    layer.AddMapRoad(MapEntityFactory.CreateDBMultiMapRoadRail(resultInfoObject["id"]));
+                    layer.AddMapRoad(MapEntityFactory.CreateDBSingleMapRoad(resultInfoObject["relcislo"]));
                 else
                     layer.AddMapRoad(MapEntityFactory.CreateDBMultiMapRoad(resultInfoObject["id"]));
                 input.checked = false;

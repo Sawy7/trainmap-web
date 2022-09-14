@@ -102,6 +102,10 @@ export class ElevationChart {
     public HideChart() {
         ElevationChart.offcanvas.hide();
     }
+
+    public CheckUIVisible(): boolean {
+        return ElevationChart.elevationChartElement.classList.contains("show");
+    }
     
     private RegisterChartClosing() {
         ElevationChart.elevationChartElement.addEventListener("hidden.bs.offcanvas", () => {

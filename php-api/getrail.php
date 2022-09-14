@@ -5,7 +5,7 @@
  * Modified by Sawy7
  * Query a PostGIS table or view and return the results in GeoJSON format, suitable for use in OpenLayers, Leaflet, etc.
  * 
- * @param 		string		$id		    The PostGIS entity id *REQUIRED*
+ * @param 		string		$relcislo	The OSM relation id *REQUIRED*
  * @return 		string					resulting geojson string
  */
 function createJsonKey($name, $value, $isNumber=false) {
@@ -34,11 +34,16 @@ header("Access-Control-Allow-Origin: *"); // NOTE: This can be configured in Apa
 header("Content-Type: application/json");
  
 # Retrive URL variables
-if (empty($_GET['id'])) {
-    echo '{"type": "MissingParameter", "name": "id"}';
+if (empty($_GET['relcislo'])) {
+    echo '{"type": "MissingParameter", "name": "relcislo"}';
     exit;
 } else
-    $id = $_GET['id'];
+    $relcislo = $_GET['relcislo'];
+
+$rail = false;
+if (!empty($_GET['rail'])) {
+    $rail = filter_var($_GET['rail'], FILTER_VALIDATE_BOOLEAN);
+}
 
 # Not parameters, hence no escaping
 $geomfield = "geom";
@@ -52,10 +57,19 @@ if (!$conn) {
 }
 
 # Build SQL SELECT statement and return the geometry as a GeoJSON element in EPSG: 4326
-$sql = "SELECT osm_data_index.*, ST_AsGeoJSON(ST_Collect(ST_Transform(map_routes." . $geomfield . ", " . $srid . ") ORDER BY gid ASC)) AS geojson
-FROM map_routes, osm_rails JOIN osm_data_index ON osm_data_index.cislo = osm_rails.cislo
-WHERE ST_DWithin(ST_Transform(map_routes." . $geomfield . ", " . $srid . "), osm_rails.geom, 0.0001) AND osm_rails.cislo = " . pg_escape_string($conn, $id) .
-"GROUP BY osm_data_index.cislo LIMIT 1";
+$sql = "SELECT ST_AsGeoJSON(ST_MakeLine(clos ORDER BY osmorder)) AS geojson, osm_data_index.* FROM
+(
+    SELECT
+        osm_rails.relcislo AS relcislo,
+        (ST_DumpPoints(ST_GeometryN(ST_LineMerge(ST_Collect(osm_rails." . $geomfield . ")), 1))).path[1] AS osmorder,
+    ST_3DClosestPoint((SELECT ST_Collect(ST_Transform(" . $geomfield . ", " . $srid . ")) FROM map_routes), (ST_DumpPoints(ST_GeometryN(ST_LineMerge(ST_Collect(osm_rails." . $geomfield . ")), 1))).geom) AS clos,
+    ST_Distance(ST_3DClosestPoint((SELECT ST_Collect(ST_Transform(geom, " . $srid . ")) FROM map_routes), (ST_DumpPoints(ST_GeometryN(ST_LineMerge(ST_Collect(osm_rails.geom)), 1))).geom), (ST_DumpPoints(ST_GeometryN(ST_LineMerge(ST_Collect(osm_rails.geom)), 1))).geom) AS dist
+    FROM osm_rails
+    WHERE osm_rails.relcislo = " . pg_escape_string($conn, $relcislo) . "
+    GROUP BY osm_rails.relcislo
+) AS cp JOIN osm_data_index ON cp.relcislo = osm_data_index.relcislo
+WHERE dist <= 0.0001
+GROUP BY osm_data_index.relcislo";
 // echo $sql;
 
 # Try query or error
@@ -72,13 +86,12 @@ $rowOutput = '';
 while ($row = pg_fetch_assoc($rs)) {
     $rowOutput = (strlen($rowOutput) > 0 ? ',' : '') . '{"type": "Feature", "geometry": ' . $row['geojson'] . ', "properties": {';
     $props = '';
-    $props .= createJsonKey("id", $row["cislo"], true);
+    $props .= createJsonKey("id", $row["id"], true);
     $props .= ', ' . createJsonKey("name", $row["nazevtrasy"]);
     $props .= ', ' . createJsonKey("color", $row["color"]);
     $props .= ', ' . createJsonKey("weight", $row["weight"], true);
     $props .= ', ' . createJsonKey("opacity", $row["opacity"], true);
     $props .= ', ' . createJsonKey("smooth_factor", $row["smooth_factor"], true);
-    $props .= ', ' . createJsonKey("lineator", $row["lineator"], true);
     $props .= ', ' . createJsonKey("tags", $row["tags"]);
     $rowOutput .= $props . '}';
     $rowOutput .= ', ' . createJsonKey("status", "ok");

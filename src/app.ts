@@ -96,7 +96,7 @@ export class App {
 
     public SetElevationChart(points: L.LatLng[], elevation: number[], layerID: number) {
         if (this.activeElevationChart !== undefined) {
-            if (this.activeElevationChart.layerID == layerID)
+            if (this.activeElevationChart.layerID == layerID && this.activeElevationChart.CheckUIVisible())
                 return;
             
             this.activeElevationChart.DestroyChart();

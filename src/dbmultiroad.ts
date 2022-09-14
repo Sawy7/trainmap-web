@@ -8,9 +8,9 @@ export class DBMultiMapRoad extends MultiMapRoad {
     readonly className: string;
     readonly wasRemoved: boolean;
 
-    public constructor(dbID: number, isRail: boolean = false) {
+    public constructor(dbID: number) {
         // let geoJSON = JSON.parse(ApiComms.GetRequest(`${window.location.protocol}//${window.location.host}/getelement.php?id=${dbID}`));
-        let geoJSON = JSON.parse(ApiComms.GetRequest(`http://localhost:3000/getelement.php?id=${dbID}&rail=${isRail}`));
+        let geoJSON = JSON.parse(ApiComms.GetRequest(`http://localhost:3000/getelement.php?id=${dbID}`));
 
         if (geoJSON["status"] !== "ok") {
             super([], [], "");
@@ -20,6 +20,7 @@ export class DBMultiMapRoad extends MultiMapRoad {
         }
         
         let type = geoJSON["geometry"]["type"];
+        console.log(type);
         if (type == "MultiLineString") {
             let lineStrings = geoJSON["geometry"]["coordinates"];
             let mlPoints: L.LatLng[][] = [];
