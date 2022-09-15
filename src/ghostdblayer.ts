@@ -11,8 +11,8 @@ export class GhostDBMapLayer extends DBMapLayer {
     private collapseElement: HTMLElement;
     private elementInfoObjects: object[];
 
-    public constructor(name: string, elementInfoObjects: object[]) {
-        super(name);
+    public constructor(name: string, elementInfoObjects: object[], color?: string) {
+        super(name, color);
         this.elementInfoObjects = elementInfoObjects;
     }
     
@@ -25,6 +25,7 @@ export class GhostDBMapLayer extends DBMapLayer {
             );
 
             return new Promise((resolve) => {
+                // TODO: Is setTimeout neccessary?
                 setTimeout(() => {
                     this.DownloadLayer();
                     loader.parentNode.removeChild(loader);
@@ -35,6 +36,7 @@ export class GhostDBMapLayer extends DBMapLayer {
         }
         
         return new Promise((resolve) => {
+            // TODO: Is setTimeout neccessary?
             setTimeout(() => {
                 resolve(super.GetLayerGroup());
             }, 0);

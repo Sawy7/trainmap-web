@@ -12,6 +12,7 @@ export class DBLayerBuilder {
     static createButton = document.getElementById("dbLayerBuilderModalCreateButton");
     static layerNameBar = document.getElementById("dbLayerBuilderName") as HTMLInputElement;
     static layerNameBarDiv = document.getElementById("dbLayerBuilderNameDiv");
+    static layerColorPicker = document.getElementById("dbLayerBuilderColor") as HTMLInputElement;
     static elementsDownloaded = false;
     static elementInfo: Object[] = [];
 
@@ -99,7 +100,7 @@ export class DBLayerBuilder {
         }
 
         let allResults = Array.from(this.searchResults.children);
-        let layer = MapEntityFactory.CreateDBMapLayer(this.layerNameBar.value);
+        let layer = MapEntityFactory.CreateDBMapLayer(this.layerNameBar.value, this.layerColorPicker.value);
         this.ToggleInterface(false);
         this.layerNameBar.value = "";
         

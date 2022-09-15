@@ -13,16 +13,16 @@ import { SingleMapRoad } from "./singleroad";
 
 export class MapEntityFactory {
     // Layers
-    public static CreateMapLayer(name: string): MapLayer {
-        return new MapLayer(name);
+    public static CreateMapLayer(name: string, color?: string): MapLayer {
+        return new MapLayer(name, color);
     }
 
-    public static CreateDBMapLayer(name: string): DBMapLayer {
-        return new DBMapLayer(name);
+    public static CreateDBMapLayer(name: string, color?: string): DBMapLayer {
+        return new DBMapLayer(name, color);
     }
 
-    public static CreateGhostDBMapLayer(name: string, elementInfoObjects: object[]): DBMapLayer {
-        return new GhostDBMapLayer(name, elementInfoObjects);
+    public static CreateGhostDBMapLayer(name: string, elementInfoObjects: object[], color?: string): DBMapLayer {
+        return new GhostDBMapLayer(name, elementInfoObjects, color);
     }
 
     // Roads

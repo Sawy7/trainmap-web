@@ -30,8 +30,14 @@ body {
     padding: 1rem 1.25rem !important;
 }
 
-#dbLayerBuilderNameDiv {
+#dbLayerBuilderColorDiv {
     margin-left: 30%;
+}
+
+.form-control-color {
+    /* width: 100% !important; */
+    margin-left: auto !important;
+    margin-right: 0 !important;
 }
 
 #throbberOverlay {

@@ -44,7 +44,7 @@ export class DBMultiMapRoad extends MultiMapRoad {
             let mlPoints: L.LatLng[][] = [];
             let mlElevation: number[][] = [];
             [mlPoints, mlElevation] = DBMultiMapRoad.ParseGeoJSON(geoJSON);
-            
+
             super(
                 [], [], geoJSON["properties"]["name"],
                 geoJSON["properties"]["color"], geoJSON["properties"]["weight"],

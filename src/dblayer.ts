@@ -4,8 +4,8 @@ import { MapLayer } from "./maplayer";
 export class DBMapLayer extends MapLayer {
     readonly className: string = "DBMapLayer";
 
-    public constructor(name: string) {
-        super(name);
+    public constructor(name: string, color?: string) {
+        super(name, color);
     }
 
     public SaveToLocalStorage() {
@@ -24,6 +24,7 @@ export class DBMapLayer extends MapLayer {
         
         storageList.push({
             "name": this.layerName,
+            "color": this.layerColor,
             "elements": layerElements
         });
         localStorage["dblayers"] = JSON.stringify(storageList);

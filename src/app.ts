@@ -135,7 +135,7 @@ export class App {
 
         let storageList = JSON.parse(localStorage["dblayers"]);
         storageList.forEach(layerInfo => {
-            let layer = MapEntityFactory.CreateGhostDBMapLayer(layerInfo["name"], layerInfo["elements"]);
+            let layer = MapEntityFactory.CreateGhostDBMapLayer(layerInfo["name"], layerInfo["elements"], layerInfo["color"]);
             this.AddMapLayer(layer, false);
         });
     }
