@@ -7,56 +7,29 @@
  * 
  * @return 		string					resulting array
  */
-function createJsonKey($name, $value, $isNumber=false) {
-    $result = '"' . $name . '": ';
 
-    if (is_null($value))
-    {
-        $value = "null";
-        $isNumber = true;
-    } else if ($value == "f") {
-        $value = "false";
-        $isNumber = true;
-    } else if ($value == "t") {
-        $value = "true";
-        $isNumber = true;
-    }
+include "base.php";
 
-    if ($isNumber) {
-        $result .= $value;
-    } else {
-        $result .= '"' . $value . '"';
-    }
-    return $result;
-}
-header("Access-Control-Allow-Origin: *"); // NOTE: This can be configured in Apache
-header("Content-Type: application/json");
- 
-# Not parameters, hence no escaping
-$geomfield = "geom";
-$srid = "4326"; // WGS-84 (GPS)
-	
-# Connect to PostgreSQL database
-$conn = @pg_connect("dbname='map_data' user='postgres' password='mysecretpassword' host='localhost'");
+// Check DB Connection
 if (!$conn) {
     echo '{"type": "RailList", "railnums": [ ], "status": "dboff" }';
     exit;
 }
 
-# Build SQL SELECT statement and return the geometry as a GeoJSON element in EPSG: 4326
+// Build SQL SELECT statement and return the geometry as a GeoJSON element in EPSG: 4326
 $sql = "SELECT DISTINCT osm_data_index.*
 FROM map_routes, osm_rails JOIN osm_data_index ON osm_data_index.relcislo = osm_rails.relcislo
 WHERE ST_DWithin(ST_Transform(map_routes." . $geomfield . ", " . $srid . "), osm_rails.geom, 0.0001)";
 // echo $sql;
 
-# Try query or error
+// Try query or error
 $rs = @pg_query($conn, $sql);
 if (!$rs) {
     echo '{"type": "RailList", "layers": [ ], "status": "sqlerror" }';
     exit;
 }
 
-# Build GeoJSON
+// Build GeoJSON
 $output    = '';
 $rowOutput = '';
 

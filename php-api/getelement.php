@@ -6,83 +6,38 @@
  * Query a PostGIS table or view and return the results in GeoJSON format, suitable for use in OpenLayers, Leaflet, etc.
  * 
  * @param 		string		$id		    The PostGIS entity id *REQUIRED*
- * @param 		boolean		$rail	    Special rail mode boolean
  * @return 		string					resulting geojson string
  */
-function createJsonKey($name, $value, $isNumber=false) {
-    $result = '"' . $name . '": ';
-
-    if (is_null($value))
-    {
-        $value = "null";
-        $isNumber = true;
-    } else if ($value == "f") {
-        $value = "false";
-        $isNumber = true;
-    } else if ($value == "t") {
-        $value = "true";
-        $isNumber = true;
-    }
-
-    if ($isNumber) {
-        $result .= $value;
-    } else {
-        $result .= '"' . $value . '"';
-    }
-    return $result;
-}
-header("Access-Control-Allow-Origin: *"); // NOTE: This can be configured in Apache
-header("Content-Type: application/json");
  
-# Retrive URL variables
+// Retrive URL variables
 if (empty($_GET['id'])) {
     echo '{"type": "MissingParameter", "name": "id"}';
     exit;
 } else
     $id = $_GET['id'];
 
-$rail = false;
-if (!empty($_GET['rail'])) {
-    $rail = filter_var($_GET['rail'], FILTER_VALIDATE_BOOLEAN);
-}
+include "base.php";
 
-# Not parameters, hence no escaping
-$geomfield = "geom";
-$srid = "4326"; // WGS-84 (GPS)
-	
-# Connect to PostgreSQL database
-$conn = @pg_connect("dbname='map_data' user='postgres' password='mysecretpassword' host='localhost'");
+// Check DB Connection
 if (!$conn) {
     echo '{ "type": "Feature", "geometry": null, "properties": null, "status": "dboff" }';
     exit;
 }
 
-# Build SQL SELECT statement and return the geometry as a GeoJSON element in EPSG: 4326
-$sql = "";
-if ($rail) {
-    // $sql = "SELECT osm_data_index.*, ST_AsGeoJSON(ST_Collect(ST_Transform(map_routes." . $geomfield . ", " . $srid . ") ORDER BY gid ASC)) AS geojson
-    // FROM map_routes, osm_rails JOIN osm_data_index ON osm_data_index.id = osm_rails.cislo
-    // WHERE ST_DWithin(ST_Transform(map_routes." . $geomfield . ", " . $srid . "), osm_rails.geom, 0.0001) AND osm_rails.cislo = " . pg_escape_string($conn, $id) .
-    // "GROUP BY osm_data_index.id LIMIT 1";
-    $sql = "SELECT osm_data_index.*, ST_AsGeoJSON(ST_Collect(osm_rails." . $geomfield . ")) AS geojson
-    FROM osm_rails JOIN osm_data_index ON osm_data_index.id = osm_rails.cislo
-    WHERE osm_data_index.id = " . pg_escape_string($conn, $id) .
-    "GROUP BY osm_data_index.id LIMIT 1";
-} else {
-    $sql = "SELECT map_data_index.*, ST_AsGeoJSON(ST_Collect(ST_Transform(" . $geomfield . ", " . $srid . ") ORDER BY gid ASC)) AS geojson
-    FROM map_routes JOIN map_data_index ON map_data_index.id = map_routes.idtrasy WHERE idtrasy = " . pg_escape_string($conn, $id) .
-    "GROUP BY map_data_index.id LIMIT 1";
-}
+// Build SQL SELECT statement and return the geometry as a GeoJSON element in EPSG: 4326
+$sql = "SELECT map_data_index.*, ST_AsGeoJSON(ST_Collect(ST_Transform(" . $geomfield . ", " . $srid . ") ORDER BY gid ASC)) AS geojson
+FROM map_routes JOIN map_data_index ON map_data_index.id = map_routes.idtrasy WHERE idtrasy = " . pg_escape_string($conn, $id) .
+"GROUP BY map_data_index.id LIMIT 1";
 // echo $sql;
 
-# Try query or error
+// Try query or error
 $rs = @pg_query($conn, $sql);
 if (!$rs) {
     echo '{ "type": "Feature", "geometry": null, "properties": null, "status": "sqlerror" }';
     exit;
 }
 
-# Build GeoJSON
+// Build GeoJSON
 $output    = '';
 $rowOutput = '';
 

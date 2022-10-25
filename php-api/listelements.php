@@ -5,33 +5,10 @@
  * 
  * @return 		string					resulting json string
  */
-function createJsonKey($name, $value, $isNumber=false) {
-    $result = '"' . $name . '": ';
 
-    if (is_null($value))
-    {
-        $value = "null";
-        $isNumber = true;
-    } else if ($value == "f") {
-        $value = "false";
-        $isNumber = true;
-    } else if ($value == "t") {
-        $value = "true";
-        $isNumber = true;
-    }
-
-    if ($isNumber) {
-        $result .= $value;
-    } else {
-        $result .= '"' . $value . '"';
-    }
-    return $result;
-}
-header("Access-Control-Allow-Origin: *"); // NOTE: This can be configured in Apache
-header("Content-Type: application/json");
+include "base.php";
  
-# Connect to PostgreSQL database
-$conn = @pg_connect("dbname='map_data' user='postgres' password='mysecretpassword' host='localhost'");
+// Check DB Connection
 if (!$conn) {
     echo '{ "type": "LayerList", "layers": [ ], "status": "dboff" }';
     exit;

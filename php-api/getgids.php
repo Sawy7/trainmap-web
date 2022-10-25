@@ -8,15 +8,7 @@
  * @param 		string		$id		    The PostGIS entity id *REQUIRED*
  * @return 		string					resulting array
  */
-function escapeJsonString($value) { # list from www.json.org: (\b backspace, \f formfeed)
-  $escapers = array("\\", "/", "\"", "\n", "\r", "\t", "\x08", "\x0c");
-  $replacements = array("\\\\", "\\/", "\\\"", "\\n", "\\r", "\\t", "\\f", "\\b");
-  $result = str_replace($escapers, $replacements, $value);
-  return $result;
-}
-header("Access-Control-Allow-Origin: *"); // NOTE: This can be configured in Apache
-header("Content-Type: application/json");
- 
+
 # Retrive URL variables
 if (empty($_GET['id'])) {
     echo '{"type": "MissingParameter", "name": "id"}';
@@ -24,29 +16,29 @@ if (empty($_GET['id'])) {
 } else
     $id = $_GET['id'];
 
-$geomfield = "geom";
-$srid = "4326"; // WGS-84 (GPS)
-$routes_table = "map_routes";
+
+include "base.php";
 	
-# Connect to PostgreSQL database
-$conn = @pg_connect("dbname='map_data' user='postgres' password='mysecretpassword' host='localhost'");
+// Check DB Connection
 if (!$conn) {
     echo '{"type": "GidList", "gids":  [ ], "status": "dboff" }';
     exit;
 }
 
-# Build SQL SELECT statement and return the geometry as a GeoJSON element in EPSG: 4326
+$routes_table = "map_routes";
+
+// Build SQL SELECT statement and return the geometry as a GeoJSON element in EPSG: 4326
 $sql = "SELECT gid FROM " . pg_escape_string($conn, $routes_table) . " WHERE idtrasy = " . pg_escape_string($conn, $id) . " ORDER BY gid ASC";
 // echo $sql;
 
-# Try query or error
+// Try query or error
 $rs = pg_query($conn, $sql);
 if (!$rs) {
     echo '{"type": "GidList", "gids":  [ ], "status": "sqlerror" }';
     exit;
 }
 
-# Build GeoJSON
+// Build GeoJSON
 $output    = '';
 $rowOutput = '';
 
