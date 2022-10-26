@@ -26,3 +26,11 @@ SELECT myid AS idtrasy, (dump).geom AS geom FROM
 ) AS linestring_dump;
 CREATE INDEX ON "processed_routes" USING GIST ("geom");
 END $$
+
+ALTER TABLE IF EXISTS processed_routes
+    ADD COLUMN relcislo integer;
+
+ALTER TABLE IF EXISTS processed_routes
+    ADD CONSTRAINT fk_relcislo
+	FOREIGN KEY(relcislo)
+	REFERENCES osm_data_index(relcislo)

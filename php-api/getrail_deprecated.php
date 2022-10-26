@@ -25,9 +25,19 @@ if (!$conn) {
 }
 
 // Build SQL SELECT statement and return the geometry as a GeoJSON element in EPSG: 4326
-$sql = "SELECT ST_AsGeoJSON(ST_Transform(" . $geomfield . ", " . $srid . ")) AS geojson, osm_data_index.*
-FROM processed_routes JOIN osm_data_index ON processed_routes.relcislo = osm_data_index.relcislo
-WHERE osm_data_index.relcislo =  " . pg_escape_string($conn, $relcislo) . "";
+$sql = "SELECT ST_AsGeoJSON(ST_MakeLine(clos ORDER BY osmorder)) AS geojson, osm_data_index.* FROM
+(
+    SELECT
+        osm_rails.relcislo AS relcislo,
+        (ST_DumpPoints(ST_GeometryN(ST_LineMerge(ST_Collect(osm_rails." . $geomfield . ")), 1))).path[1] AS osmorder,
+    ST_3DClosestPoint((SELECT ST_Collect(ST_Transform(" . $geomfield . ", " . $srid . ")) FROM map_routes), (ST_DumpPoints(ST_GeometryN(ST_LineMerge(ST_Collect(osm_rails." . $geomfield . ")), 1))).geom) AS clos,
+    ST_Distance(ST_3DClosestPoint((SELECT ST_Collect(ST_Transform(geom, " . $srid . ")) FROM map_routes), (ST_DumpPoints(ST_GeometryN(ST_LineMerge(ST_Collect(osm_rails.geom)), 1))).geom), (ST_DumpPoints(ST_GeometryN(ST_LineMerge(ST_Collect(osm_rails.geom)), 1))).geom) AS dist
+    FROM osm_rails
+    WHERE osm_rails.relcislo = " . pg_escape_string($conn, $relcislo) . "
+    GROUP BY osm_rails.relcislo
+) AS cp JOIN osm_data_index ON cp.relcislo = osm_data_index.relcislo
+WHERE dist <= 0.0001
+GROUP BY osm_data_index.relcislo";
 // echo $sql;
 
 // Try query or error

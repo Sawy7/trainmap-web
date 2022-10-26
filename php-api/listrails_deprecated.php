@@ -18,7 +18,8 @@ if (!$conn) {
 
 // Build SQL SELECT statement and return the geometry as a GeoJSON element in EPSG: 4326
 $sql = "SELECT DISTINCT osm_data_index.*
-FROM processed_routes JOIN osm_data_index ON processed_routes.relcislo = osm_data_index.relcislo";
+FROM map_routes, osm_rails JOIN osm_data_index ON osm_data_index.relcislo = osm_rails.relcislo
+WHERE ST_DWithin(ST_Transform(map_routes." . $geomfield . ", " . $srid . "), osm_rails.geom, 0.0001)";
 // echo $sql;
 
 // Try query or error
