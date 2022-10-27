@@ -13,6 +13,7 @@ export class DBLayerBuilder {
     static layerNameBar = document.getElementById("dbLayerBuilderName") as HTMLInputElement;
     static layerNameBarDiv = document.getElementById("dbLayerBuilderNameDiv");
     static layerColorPicker = document.getElementById("dbLayerBuilderColor") as HTMLInputElement;
+    static checkAll = document.getElementById("dbLayerBuilderCheckAll") as HTMLInputElement;
     static elementsDownloaded = false;
     static elementInfo: Object[] = [];
 
@@ -29,11 +30,17 @@ export class DBLayerBuilder {
         this.createButton.onclick = () => {
             this.BuildLayer();
         };
+
+        this.checkAll.onclick = () => {
+            this.CheckAllVisible();
+        };
     }
 
     static GetElementsFromDB() {
         if (this.elementsDownloaded)
             return;
+
+        this.ClearBoxes();
 
         console.log("Downloading from DB");
 
@@ -44,14 +51,14 @@ export class DBLayerBuilder {
             for (let i = 0; i < layers["layers"].length; i++) {
                 const dbMapEntity = layers["layers"][i];
                 
-                this.CreateEntry(dbMapEntity["name"], i);
+                this.CreateEntry(dbMapEntity, i);
                 this.StashInfo(dbMapEntity);
             }
             let rails = ApiMgr.ListRails();
             for (let i = layers["layers"].length; i < layers["layers"].length+rails["layers"].length; i++) {
                 const dbMapEntity = rails["layers"][i-layers["layers"].length];
                 
-                this.CreateEntry(dbMapEntity["name"], i);
+                this.CreateEntry(dbMapEntity, i);
                 this.StashInfo(dbMapEntity, true);
             }
             this.elementsDownloaded = true;
@@ -59,19 +66,34 @@ export class DBLayerBuilder {
         }, 0);
     }
 
-    static CreateEntry(name: string, index: number) {
+    static ParseTags(tags: string) {
+        return tags.replace(/;/g, " • ");
+    }
+
+    static CreateEntry(infoObject: Object, index: number) {
         let li = document.createElement("li");
         li.setAttribute("class", "list-group-item list-group-item-dark");
+
+        let contentDiv = document.createElement("div");
+        contentDiv.setAttribute("class", "fw-bold");
         
         let input = document.createElement("input");
         input.setAttribute("class", "form-check-input me-1");
         input.setAttribute("type", "checkbox");
         input.setAttribute("value", index.toString());
 
-        li.appendChild(input);
-        li.innerHTML += "\n" + name;
+        contentDiv.appendChild(input);
+        contentDiv.innerHTML += "\n" + infoObject["name"];
+
+        li.appendChild(contentDiv);
+
+        if (infoObject["tags"] != null)
+            li.innerHTML += "\n" + this.ParseTags(infoObject["tags"]);
 
         this.searchResults.appendChild(li);
+        li.onclick = () => {
+            this.LocalSearch();
+        };
     }
 
     static StashInfo(infoObject: Object, isRail: boolean = false) {
@@ -92,6 +114,10 @@ export class DBLayerBuilder {
         }
     }
 
+    static IsInputChecked(entity: HTMLElement) {
+        return (entity.children[0] as HTMLInputElement).checked;
+    }
+
     static BuildLayer() {
         if (!this.layerNameBar.checkValidity())
         {
@@ -105,7 +131,7 @@ export class DBLayerBuilder {
         this.layerNameBar.value = "";
         
         allResults.forEach(res => {
-            let input = res.children[0] as HTMLInputElement;
+            let input = res.children[0].children[0] as HTMLInputElement;
             if (input.checked) {
                 let resultInfoObject = this.elementInfo[parseInt(input.value)];
                 if (resultInfoObject["isRail"])
@@ -119,20 +145,71 @@ export class DBLayerBuilder {
         App.Instance.AddMapLayer(layer);
     }
 
+    static ClearBoxes() {
+        // This is done elsewhere
+        // let allResults = Array.from(this.searchResults.children);
+        // allResults.forEach(res => {
+        //     let input = res.children[0].children[0] as HTMLInputElement;
+        //     input.checked = false;
+        // });
+
+        this.searchBar.value = "";
+        this.LocalSearch();
+        this.layerNameBar.value = "";
+        this.checkAll.checked = false;
+    }
+
+    // TODO: Add message about non-visible, but still checked
+    static CheckAllVisible() {
+        let checkAllStatus = this.checkAll.checked;
+        
+        let allResults = Array.from(this.searchResults.children);
+        allResults.forEach(res => {
+            let result = res as HTMLElement;
+            if (result.style.display != "none") {
+                let input = res.children[0].children[0] as HTMLInputElement;
+                input.checked = checkAllStatus;
+            }
+        });
+    }
+
+    static CheckAllVisibleChecked() {
+        let allResults = Array.from(this.searchResults.children);
+
+        let everythingChecked = true;
+        allResults.forEach(res => {
+            let result = res as HTMLElement;
+            let input = res.children[0].children[0] as HTMLInputElement;
+            if (result.style.display != "none" && !input.checked) {
+                everythingChecked = false;
+                return
+            }
+        });
+
+        this.checkAll.checked = everythingChecked;
+    }
+
     // https://www.w3schools.com/howto/howto_js_filter_lists.asp
     static LocalSearch() {
         let filter, li, txtValue;
-        filter = this.searchBar.value.toUpperCase();
+        filter = this.searchBar.value.toUpperCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
         li = this.searchResults.getElementsByTagName("li");
 
         for (let i = 0; i < li.length; i++) {
             txtValue = li[i].textContent.trim();
 
-            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+            if (txtValue.toUpperCase().normalize("NFD").replace(/\p{Diacritic}/gu, "").indexOf(filter) > -1) {
+                li[i].setAttribute("class", "list-group-item list-group-item-dark top-item");
+                li[i].style.display = "";
+            } else if (li[i].children[0].children[0].checked) {
+                console.log("fire");
+                li[i].setAttribute("class", "list-group-item list-group-item-warning bottom-item");
                 li[i].style.display = "";
             } else {
                 li[i].style.display = "none";
             }
         }
+
+        this.CheckAllVisibleChecked();
     }
 }

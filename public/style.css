@@ -30,6 +30,18 @@ body {
     padding: 1rem 1.25rem !important;
 }
 
+.list-group-item {
+    user-select: none;
+}
+
+.top-item {
+    order: 1;
+}
+
+.bottom-item {
+    order: 2;
+}
+
 #dbLayerBuilderColorDiv {
     margin-left: 30%;
 }
