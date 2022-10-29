@@ -1,6 +1,15 @@
 import requests
 import psycopg2
 
+##############################################################
+# CONFIG
+##############################################################
+DBNAME="map_data"
+USER="postgres"
+PASSWORD="mysecretpassword"
+HOST="localhost"
+##############################################################
+
 class Rail:
     def __init__(self, num, relnum, name, ml):
         self.num = num
@@ -110,7 +119,7 @@ def create_index(conn):
     cur.close()
 
 if __name__ == "__main__":
-    conn = psycopg2.connect("dbname='map_data' user='postgres' password='mysecretpassword' host='localhost'")
+    conn = psycopg2.connect(f"dbname={DBNAME} user={USER} password={PASSWORD} host={HOST}")
     create_table(conn)
     
     # Getting the parent relation

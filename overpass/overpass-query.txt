@@ -1,8 +1,0 @@
-https://lz4.overpass-api.de/api/interpreter
-
-[out:json][timeout:25];
-(
-  // query part for: “route=tracks”
-  relation["route"="tracks"]["ref"=321](49.87331472904064,18.14207553863525,49.89905753082207,18.18185806274414);
-);
-out body;
