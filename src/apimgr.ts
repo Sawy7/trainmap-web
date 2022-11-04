@@ -1,8 +1,8 @@
 import { ApiComms } from "./apicomms";
 
 export class ApiMgr {
-    // private static rootUrl: string = "http://localhost:3000";
-    private static rootUrl: string = "/api";
+    private static rootUrl: string = "http://localhost:3000";
+    // private static rootUrl: string = "/api";
 
     public static ListElements(): object {
         return JSON.parse(ApiComms.GetRequest(`${this.rootUrl}/listelements.php`));
@@ -12,12 +12,28 @@ export class ApiMgr {
         return JSON.parse(ApiComms.GetRequest(`${this.rootUrl}/listrails.php`));
     }
 
+    public static ListOSMRails(): object {
+        return JSON.parse(ApiComms.GetRequest(`${this.rootUrl}/listosmrails.php`));
+    }
+
     public static GetElement(dbID: number): object {
         return JSON.parse(ApiComms.GetRequest(`${this.rootUrl}/getelement.php?id=${dbID}`));
     }
 
     public static GetRail(dbID: number): object {
         return JSON.parse(ApiComms.GetRequest(`${this.rootUrl}/getrail.php?relcislo=${dbID}`));
+    }
+
+    public static GetOSMRail(dbID: number): object {
+        return JSON.parse(ApiComms.GetRequest(`${this.rootUrl}/getosmrail.php?relcislo=${dbID}`));
+    }
+
+    public static GetOSMRails(dbIDs: number[]): object {
+        let requestJSON = {"relcisla": dbIDs};
+        return JSON.parse(ApiComms.PostRequest(
+            `${this.rootUrl}/getosmrails.php`,
+            JSON.stringify(requestJSON)
+        ));
     }
 
     public static GetGIDs(dbID: number): object {

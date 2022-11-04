@@ -1,8 +1,10 @@
 import { DBMultiMapRoad } from "./dbmultiroad";
+import { DBOSMMapRoad } from "./dbosmroad";
 import { DBSingleMapRoad } from "./dbsingleroad";
 
 export class DBMapEntityCache {
     private DBMultiMapRoadCache: object = {};
+    private DBOSMMapRoadCache: object = {};
     private DBSingleMapRoadCache: object = {};
     private static _instance: DBMapEntityCache;
 
@@ -17,6 +19,13 @@ export class DBMapEntityCache {
             this.DBMultiMapRoadCache[dbID] = new DBMultiMapRoad(dbID);
 
         return this.DBMultiMapRoadCache[dbID];
+    }
+
+    public GetOSMMapRoad(dbID: number, geoJSON?: object): DBOSMMapRoad {
+        if (this.DBOSMMapRoadCache[dbID] === undefined)
+            this.DBOSMMapRoadCache[dbID] = new DBOSMMapRoad(dbID, geoJSON);
+
+        return this.DBOSMMapRoadCache[dbID];
     }
 
     public GetDBSingleMapRoad(dbID: number): DBSingleMapRoad {

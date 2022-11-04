@@ -79,11 +79,18 @@ export class LogNotify {
 
     public static ToggleThrobber() {
         let throbberOverlay = document.getElementById("throbberOverlay");
+        let throbberMsg = document.getElementById("throbberMessage");
         if (throbberOverlay.style.display != "") {
             throbberOverlay.style.display = "";
         }
         else
             throbberOverlay.style.display = "none";
+            throbberMsg.innerHTML = "";
+    }
+
+    public static UpdateThrobberMessage(message: string) {
+        let throbberMsg = document.getElementById("throbberMessage");
+        throbberMsg.innerHTML = message;
     }
 
     public static PlaceLoader(parentElement: HTMLElement, replace: boolean = false): HTMLElement {

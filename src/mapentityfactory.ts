@@ -3,6 +3,7 @@ import { DBMapEntityCache } from "./dbentitycache";
 
 import { DBMapLayer } from "./dblayer";
 import { DBMultiMapRoad } from "./dbmultiroad";
+import { DBOSMMapRoad } from "./dbosmroad";
 import { DBSingleMapRoad } from "./dbsingleroad";
 import { GhostDBMapLayer } from "./ghostdblayer";
 import { MapArea } from "./maparea";
@@ -44,6 +45,10 @@ export class MapEntityFactory {
 
     public static CreateDBMultiMapRoad(dbID: number): DBMultiMapRoad {
         return DBMapEntityCache.Instance.GetDBMultiMapRoad(dbID);
+    }
+
+    public static CreateDBOSMMapRoad(dbID: number, geoJSON?: object): DBOSMMapRoad {
+        return DBMapEntityCache.Instance.GetOSMMapRoad(dbID, geoJSON);
     }
 
     public static CreateDBSingleMapRoad(dbID: number): DBSingleMapRoad {

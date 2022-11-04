@@ -5,16 +5,19 @@
  * Modified by Sawy7
  * Query a PostGIS table or view and return the results in GeoJSON format, suitable for use in OpenLayers, Leaflet, etc.
  * 
- * @param 		string		$relcislo	The OSM relation id *REQUIRED*
+ * @param 		string		$relcisla	The OSM relation id *REQUIRED*
  * @return 		string					resulting geojson string
  */
 
-// Retrive URL variables
-if (empty($_GET['relcislo'])) {
-    echo '{"type": "MissingParameter", "name": "relcislo"}';
+// Retrive JSON variables
+$data = json_decode(file_get_contents('php://input'), true);
+if (empty($data['relcisla'])) {
+    echo '{"type": "MissingParameter", "name": "relcisla"}';
     exit;
 } else
-    $relcislo = $_GET['relcislo'];
+    $relcisla = $data['relcisla'];
+
+$relcisla_str = implode(",", $relcisla);
 
 include "base.php";
 
@@ -25,18 +28,10 @@ if (!$conn) {
 }
 
 // Build SQL SELECT statement and return the geometry as a GeoJSON element in EPSG: 4326
-$sql = "SELECT ST_AsGeoJSON(ST_Transform(" . $geomfield . ", " . $srid . ")) AS geojson, osm_data_index.*
-FROM processed_routes JOIN osm_data_index ON processed_routes.relcislo = osm_data_index.relcislo
-WHERE osm_data_index.relcislo =  " . pg_escape_string($conn, $relcislo);
-// $sql = "SELECT ST_AsGeoJSON(ST_Transform(" . $geomfield . ", " . $srid . ")) AS geojson, osm_data_index.*
-// FROM processed_routes JOIN osm_data_index ON processed_routes.relcislo = osm_data_index.relcislo
-// WHERE osm_data_index.relcislo = " . pg_escape_string($conn, $relcislo) ."
-// UNION
-// SELECT ST_AsGeoJSON(ST_LineMerge(ST_Collect(ST_Force3D(" . $geomfield . ", 0)))) AS geojson, osm_data_index.*
-// FROM osm_rails JOIN osm_data_index ON osm_rails.relcislo = osm_data_index.relcislo
-// WHERE osm_data_index.relcislo =" . pg_escape_string($conn, $relcislo) ."
-// GROUP BY osm_data_index.relcislo
-// LIMIT 1";
+$sql = "SELECT ST_AsGeoJSON(ST_Multi(ST_LineMerge(ST_Collect(" . $geomfield . ")))) AS geojson, osm_data_index.*
+FROM osm_rails JOIN osm_data_index ON osm_rails.relcislo = osm_data_index.relcislo
+WHERE osm_data_index.relcislo IN (" . pg_escape_string($conn, $relcisla_str) . ")
+GROUP BY osm_data_index.relcislo";
 // echo $sql;
 
 // Try query or error
@@ -68,7 +63,9 @@ while ($row = pg_fetch_assoc($rs)) {
 }
 
 if (empty($output)) {
-    $output = '{ "type": "Feature", "geometry": null, "properties": null, "status": "nodata" }';
+    $output = '{ "type": "FeatureCollection", "features": null, "status": "nodata" }';
+} else {
+    $output = '{"type": "FeatureCollection", "features": [ ' . $output . ' ], "status": "ok" }';
+    echo $output;
 }
-echo $output;
 ?>

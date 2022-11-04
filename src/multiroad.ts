@@ -8,14 +8,16 @@ import { LogNotify } from "./lognotify";
 export class MultiMapRoad extends MapRoad {
     public lineator: Lineator;
     readonly className: string = "MultiMapRoad";
+    private sourceType: string;
 
-    public constructor(points: L.LatLng[][],
-                elevation: number[][],
-                name: string = "Cesta",
-                color: string = "red",
-                weight: number = 5,
-                opacity: number = 0.5,
-                smoothFactor: number = 1
+    public constructor(
+        points: L.LatLng[][],
+        elevation: number[][],
+        name: string = "Cesta",
+        color: string = "red",
+        weight: number = 5,
+        opacity: number = 0.5,
+        smoothFactor: number = 1
     ) {
         super(name, color, weight, opacity, smoothFactor);
         this.dontSerializeList.push("lineator");
@@ -31,6 +33,14 @@ export class MultiMapRoad extends MapRoad {
             smoothFactor: this.smoothFactor
         });
         return this.polyLine;
+    }
+
+    public SetSourceType(type: string) {
+        this.sourceType = type;
+    }
+
+    public GetSourceType(): string {
+        return this.sourceType;
     }
 
     protected PrepareLineator(points: L.LatLng[][], elevation: number[][]) {

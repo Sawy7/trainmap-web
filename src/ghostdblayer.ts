@@ -1,7 +1,9 @@
 import L from "leaflet";
 import { DBMapLayer } from "./dblayer";
 import { DBMultiMapRoad } from "./dbmultiroad";
+import { DBOSMMapRoad } from "./dbosmroad";
 import { DBSingleMapRoad } from "./dbsingleroad";
+import { GeoGetter } from "./GeoGetter";
 import { LogNotify } from "./lognotify";
 import { MapEntityFactory } from "./mapentityfactory";
 
@@ -44,17 +46,31 @@ export class GhostDBMapLayer extends DBMapLayer {
     }
 
     private async DownloadLayer() {
+        let dbOSMRails: number[] = [];
+
         this.elementInfoObjects.forEach(e => {
-            let road: DBSingleMapRoad | DBMultiMapRoad;
+            let road: DBSingleMapRoad | DBMultiMapRoad | DBOSMMapRoad;
             if (e["type"] == "DBMultiMapRoad")
                 road = MapEntityFactory.CreateDBMultiMapRoad(e["id"]);
             else if (e["type"] == "DBSingleMapRoad")
                 road = MapEntityFactory.CreateDBSingleMapRoad(e["id"]);
+            else if (e["type"] == "DBOSMMapRoad")
+            {
+                dbOSMRails.push(e["id"]);
+                return; // This is continue - I LOVE JS
+                // road = MapEntityFactory.CreateDBOSMMapRoad(e["id"]);
+            }
 
             // TODO: Something more elegant (+ maybe user indication, that something's been yeeted)
             if (!road.CheckRemoved())
                 this.AddMapRoad(road);
         });
+
+        GeoGetter.GetOSMRails(dbOSMRails).forEach(road => {
+            if (!road.CheckRemoved())
+                this.AddMapRoad(road);
+        });
+
         this.populationMethod(this, this.collapseElement);
     }
 

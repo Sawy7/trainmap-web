@@ -1,6 +1,7 @@
 import { Modal } from "bootstrap";
 import { ApiMgr } from "./apimgr";
 import { App } from "./app";
+import { GeoGetter } from "./GeoGetter";
 import { LogNotify } from "./lognotify";
 import { MapEntityFactory } from "./mapentityfactory";
 
@@ -52,14 +53,23 @@ export class DBLayerBuilder {
                 const dbMapEntity = layers["layers"][i];
                 
                 this.CreateEntry(dbMapEntity, i);
-                this.StashInfo(dbMapEntity);
+                this.StashInfo(dbMapEntity, "maproad_legacy");
             }
+            let offset = layers["layers"].length;
             let rails = ApiMgr.ListRails();
-            for (let i = layers["layers"].length; i < layers["layers"].length+rails["layers"].length; i++) {
-                const dbMapEntity = rails["layers"][i-layers["layers"].length];
+            for (let i = offset; i < offset+rails["layers"].length; i++) {
+                const dbMapEntity = rails["layers"][i-offset];
                 
                 this.CreateEntry(dbMapEntity, i);
-                this.StashInfo(dbMapEntity, true);
+                this.StashInfo(dbMapEntity, "rail");
+            }
+            offset += rails["layers"].length;
+            let osmRails = ApiMgr.ListOSMRails();
+            for (let i = offset; i < offset+osmRails["layers"].length; i++) {
+                const dbMapEntity = osmRails["layers"][i-offset];
+                
+                this.CreateEntry(dbMapEntity, i);
+                this.StashInfo(dbMapEntity, "osmrail");
             }
             this.elementsDownloaded = true;
             LogNotify.ToggleThrobber();
@@ -96,8 +106,8 @@ export class DBLayerBuilder {
         };
     }
 
-    static StashInfo(infoObject: Object, isRail: boolean = false) {
-        infoObject["isRail"] = isRail;
+    static StashInfo(infoObject: Object, type: string) {
+        infoObject["type"] = type;
         this.elementInfo.push(infoObject);
     }
 
@@ -129,18 +139,33 @@ export class DBLayerBuilder {
         let layer = MapEntityFactory.CreateDBMapLayer(this.layerNameBar.value, this.layerColorPicker.value);
         this.ToggleInterface(false);
         this.layerNameBar.value = "";
+
+        // let dbSingleRoads: number[] = [];
+        // let dbMultiRoads: number[] = [];
+        let dbOSMRails: number[] = [];
         
+        LogNotify.ToggleThrobber();
+        let inputIndex = 1;
         allResults.forEach(res => {
             let input = res.children[0].children[0] as HTMLInputElement;
             if (input.checked) {
+                LogNotify.UpdateThrobberMessage(`Získávání ${inputIndex++}`);
                 let resultInfoObject = this.elementInfo[parseInt(input.value)];
-                if (resultInfoObject["isRail"])
+                if (resultInfoObject["type"] == "rail")
                     layer.AddMapRoad(MapEntityFactory.CreateDBSingleMapRoad(resultInfoObject["relcislo"]));
-                else
+                else if (resultInfoObject["type"] == "maproad_legacy")
                     layer.AddMapRoad(MapEntityFactory.CreateDBMultiMapRoad(resultInfoObject["id"]));
+                else if (resultInfoObject["type"] == "osmrail")
+                    dbOSMRails.push(resultInfoObject["relcislo"]);
+                    // layer.AddMapRoad(MapEntityFactory.CreateDBOSMMapRoad(resultInfoObject["relcislo"]));
                 input.checked = false;
             }
         });
+        
+        GeoGetter.GetOSMRails(dbOSMRails).forEach(road => {
+            layer.AddMapRoad(road);
+        });
+        LogNotify.ToggleThrobber();
 
         App.Instance.AddMapLayer(layer);
     }
@@ -159,7 +184,6 @@ export class DBLayerBuilder {
         this.checkAll.checked = false;
     }
 
-    // TODO: Add message about non-visible, but still checked
     static CheckAllVisible() {
         let checkAllStatus = this.checkAll.checked;
         
@@ -202,7 +226,6 @@ export class DBLayerBuilder {
                 li[i].setAttribute("class", "list-group-item list-group-item-dark top-item");
                 li[i].style.display = "";
             } else if (li[i].children[0].children[0].checked) {
-                console.log("fire");
                 li[i].setAttribute("class", "list-group-item list-group-item-warning bottom-item");
                 li[i].style.display = "";
             } else {
