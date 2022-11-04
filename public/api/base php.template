@@ -3,10 +3,10 @@ header("Access-Control-Allow-Origin: *"); // NOTE: This can be configured in Apa
 header("Content-Type: application/json");
 
 // DB Connection Params
-$DB_DBNAME = "map_data";
-$DB_USER = "postgres";
-$DB_PASSWORD = "mysecretpassword";
-$DB_HOST = "localhost";
+$DB_DBNAME = "INSERT_HERE";
+$DB_USER = "INSERT_HERE";
+$DB_PASSWORD = "INSERT_HERE";
+$DB_HOST = "INSERT_HERE";
 
 // Common Constants
 $geomfield = "geom";
