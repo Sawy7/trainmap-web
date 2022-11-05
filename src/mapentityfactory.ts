@@ -43,16 +43,16 @@ export class MapEntityFactory {
         return new MultiMapRoad(points, elevation, name, color, weight, opacity, smoothFactor);
     }
 
-    public static CreateDBMultiMapRoad(dbID: number): DBMultiMapRoad {
-        return DBMapEntityCache.Instance.GetDBMultiMapRoad(dbID);
+    public static CreateDBMultiMapRoad(dbID: number, geoJSON?: object): DBMultiMapRoad {
+        return DBMapEntityCache.Instance.GetDBMultiMapRoad(dbID, geoJSON);
     }
 
     public static CreateDBOSMMapRoad(dbID: number, geoJSON?: object): DBOSMMapRoad {
         return DBMapEntityCache.Instance.GetOSMMapRoad(dbID, geoJSON);
     }
 
-    public static CreateDBSingleMapRoad(dbID: number): DBSingleMapRoad {
-        return DBMapEntityCache.Instance.GetDBSingleMapRoad(dbID);
+    public static CreateDBSingleMapRoad(dbID: number, geoJSON?: object): DBSingleMapRoad {
+        return DBMapEntityCache.Instance.GetDBSingleMapRoad(dbID, geoJSON);
     }
 
     // Markers

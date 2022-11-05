@@ -46,26 +46,29 @@ export class GhostDBMapLayer extends DBMapLayer {
     }
 
     private async DownloadLayer() {
+        let dbRails: number[] = [];
+        let dbElements: number[] = [];
         let dbOSMRails: number[] = [];
 
         this.elementInfoObjects.forEach(e => {
-            let road: DBSingleMapRoad | DBMultiMapRoad | DBOSMMapRoad;
             if (e["type"] == "DBMultiMapRoad")
-                road = MapEntityFactory.CreateDBMultiMapRoad(e["id"]);
+                dbElements.push(e["id"]);
             else if (e["type"] == "DBSingleMapRoad")
-                road = MapEntityFactory.CreateDBSingleMapRoad(e["id"]);
+                dbRails.push(e["id"]);
             else if (e["type"] == "DBOSMMapRoad")
-            {
                 dbOSMRails.push(e["id"]);
-                return; // This is continue - I LOVE JS
-                // road = MapEntityFactory.CreateDBOSMMapRoad(e["id"]);
-            }
+        });
 
-            // TODO: Something more elegant (+ maybe user indication, that something's been yeeted)
+        // TODO: Removal check - Something more elegant (+ maybe user indication, that something's been yeeted)
+
+        GeoGetter.GetRails(dbRails).forEach(road => {
             if (!road.CheckRemoved())
                 this.AddMapRoad(road);
         });
-
+        GeoGetter.GetElements(dbElements).forEach(road => {
+            if (!road.CheckRemoved())
+                this.AddMapRoad(road);
+        });
         GeoGetter.GetOSMRails(dbOSMRails).forEach(road => {
             if (!road.CheckRemoved())
                 this.AddMapRoad(road);

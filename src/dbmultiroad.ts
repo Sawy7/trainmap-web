@@ -29,8 +29,9 @@ export class DBMultiMapRoad extends MultiMapRoad {
         return [mlPoints, mlElevation];
     }
 
-    public constructor(dbID: number) {
-        let geoJSON = ApiMgr.GetElement(dbID);
+    public constructor(dbID: number, geoJSON?: object) {
+        if (geoJSON === undefined)
+            geoJSON = ApiMgr.GetElement(dbID);
 
         if (geoJSON["status"] !== "ok") {
             super([], [], "");

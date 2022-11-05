@@ -19,8 +19,9 @@ export class DBSingleMapRoad extends SingleMapRoad {
         return [lsPoints, lsElevation];
     }
 
-    constructor(dbID: number) {
-        let geoJSON = ApiMgr.GetRail(dbID);
+    constructor(dbID: number, geoJSON?: object) {
+        if (geoJSON === undefined)
+            geoJSON = ApiMgr.GetRail(dbID);
 
         if (geoJSON["status"] !== "ok") {
             super([], [], "");

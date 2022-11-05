@@ -14,23 +14,41 @@ export class DBMapEntityCache {
         return this._instance || (this._instance = new this());
     }
 
-    public GetDBMultiMapRoad(dbID: number): DBMultiMapRoad {
+    public CheckDBMultiMapRoad(dbID: number): boolean {
         if (this.DBMultiMapRoadCache[dbID] === undefined)
-            this.DBMultiMapRoadCache[dbID] = new DBMultiMapRoad(dbID);
+            return false;
+        return true;
+    }
+
+    public GetDBMultiMapRoad(dbID: number, geoJSON?: object): DBMultiMapRoad {
+        if (!this.CheckDBMultiMapRoad(dbID))
+            this.DBMultiMapRoadCache[dbID] = new DBMultiMapRoad(dbID, geoJSON);
 
         return this.DBMultiMapRoadCache[dbID];
     }
 
-    public GetOSMMapRoad(dbID: number, geoJSON?: object): DBOSMMapRoad {
+    public CheckOSMMapRoad(dbID: number): boolean {
         if (this.DBOSMMapRoadCache[dbID] === undefined)
+            return false;
+        return true;
+    }
+
+    public GetOSMMapRoad(dbID: number, geoJSON?: object): DBOSMMapRoad {
+        if (!this.CheckOSMMapRoad(dbID))
             this.DBOSMMapRoadCache[dbID] = new DBOSMMapRoad(dbID, geoJSON);
 
         return this.DBOSMMapRoadCache[dbID];
     }
 
-    public GetDBSingleMapRoad(dbID: number): DBSingleMapRoad {
+    public CheckDBSingleMapRoad(dbID: number): boolean {
         if (this.DBSingleMapRoadCache[dbID] === undefined)
-            this.DBSingleMapRoadCache[dbID] = new DBSingleMapRoad(dbID);
+            return false;
+        return true;
+    }
+
+    public GetDBSingleMapRoad(dbID: number, geoJSON?: object): DBSingleMapRoad {
+        if (!this.CheckDBSingleMapRoad(dbID))
+            this.DBSingleMapRoadCache[dbID] = new DBSingleMapRoad(dbID, geoJSON);
 
         return this.DBSingleMapRoadCache[dbID];
     }

@@ -28,7 +28,7 @@ if (!$conn) {
 }
 
 // Build SQL SELECT statement and return the geometry as a GeoJSON element in EPSG: 4326
-$sql = "SELECT ST_AsGeoJSON(ST_ReducePrecision(ST_Transform(" . $geomfield . ", " . $srid . "), 0.001)) AS geojson, osm_data_index.*
+$sql = "SELECT ST_AsGeoJSON(ST_Simplify(ST_Transform(" . $geomfield . ", " . $srid . "), 0.000001)) AS geojson, osm_data_index.*
 FROM processed_routes JOIN osm_data_index ON processed_routes.relcislo = osm_data_index.relcislo
 WHERE osm_data_index.relcislo IN (" . pg_escape_string($conn, $relcisla_str) . ")";
 // echo $sql;
@@ -56,6 +56,7 @@ while ($row = pg_fetch_assoc($rs)) {
     $props .= ', ' . createJsonKey("smooth_factor", $row["smooth_factor"], true);
     $props .= ', ' . createJsonKey("tags", $row["tags"]);
     $rowOutput .= $props . '}';
+    $rowOutput .= ', ' . createJsonKey("status", "ok");
     $rowOutput .= "}";
     $output .= $rowOutput;
 }

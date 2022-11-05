@@ -57,6 +57,7 @@ while ($row = pg_fetch_assoc($rs)) {
     $props .= ', ' . createJsonKey("smooth_factor", $row["smooth_factor"], true);
     $props .= ', ' . createJsonKey("tags", $row["tags"]);
     $rowOutput .= $props . '}';
+    $rowOutput .= ', ' . createJsonKey("status", "ok");
     $rowOutput .= "}";
     $output .= $rowOutput;
 }

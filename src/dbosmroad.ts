@@ -29,7 +29,7 @@ export class DBOSMMapRoad extends MultiMapRoad {
     public constructor(dbID: number, geoJSON?: object) {
         if (geoJSON === undefined)
             geoJSON = ApiMgr.GetOSMRail(dbID);
-
+        
         if (geoJSON["status"] !== "ok") {
             super([], [], "");
             this.wasRemoved = true;

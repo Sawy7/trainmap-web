@@ -25,7 +25,7 @@ if (!$conn) {
 }
 
 // Build SQL SELECT statement and return the geometry as a GeoJSON element in EPSG: 4326
-$sql = "SELECT map_data_index.*, ST_AsGeoJSON(ST_ReducePrecision(ST_Collect(ST_Transform(" . $geomfield . ", " . $srid . ") ORDER BY gid ASC), 0.001)) AS geojson
+$sql = "SELECT map_data_index.*, ST_AsGeoJSON(ST_Simplify(ST_Collect(ST_Transform(" . $geomfield . ", " . $srid . ") ORDER BY gid ASC), 0.000001)) AS geojson
 FROM map_routes JOIN map_data_index ON map_data_index.id = map_routes.idtrasy WHERE idtrasy = " . pg_escape_string($conn, $id) .
 "GROUP BY map_data_index.id LIMIT 1";
 // echo $sql;
