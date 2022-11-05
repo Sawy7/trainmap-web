@@ -23,7 +23,7 @@ include "base.php";
 
 // Check DB Connection
 if (!$conn) {
-    echo '{ "type": "Feature", "geometry": null, "properties": null, "status": "dboff" }';
+    echo '{ "type": "FeatureCollection", "features": null, "properties": null, "status": "dboff" }';
     exit;
 }
 
@@ -37,7 +37,7 @@ GROUP BY osm_data_index.relcislo";
 // Try query or error
 $rs = @pg_query($conn, $sql);
 if (!$rs) {
-    echo '{ "type": "Feature", "geometry": null, "properties": null, "status": "sqlerror" }';
+    echo '{ "type": "FeatureCollection", "features": null, "properties": null, "status": "sqlerror" }';
     exit;
 }
 
@@ -57,7 +57,6 @@ while ($row = pg_fetch_assoc($rs)) {
     $props .= ', ' . createJsonKey("smooth_factor", $row["smooth_factor"], true);
     $props .= ', ' . createJsonKey("tags", $row["tags"]);
     $rowOutput .= $props . '}';
-    $rowOutput .= ', ' . createJsonKey("status", "ok");
     $rowOutput .= "}";
     $output .= $rowOutput;
 }
@@ -66,6 +65,6 @@ if (empty($output)) {
     $output = '{ "type": "FeatureCollection", "features": null, "status": "nodata" }';
 } else {
     $output = '{"type": "FeatureCollection", "features": [ ' . $output . ' ], "status": "ok" }';
-    echo $output;
 }
+echo $output;
 ?>

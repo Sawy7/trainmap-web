@@ -140,8 +140,8 @@ export class DBLayerBuilder {
         this.ToggleInterface(false);
         this.layerNameBar.value = "";
 
-        // let dbSingleRoads: number[] = [];
-        // let dbMultiRoads: number[] = [];
+        let dbRails: number[] = [];
+        let dbElements: number[] = [];
         let dbOSMRails: number[] = [];
         
         LogNotify.ToggleThrobber();
@@ -152,19 +152,26 @@ export class DBLayerBuilder {
                 LogNotify.UpdateThrobberMessage(`Získávání ${inputIndex++}`);
                 let resultInfoObject = this.elementInfo[parseInt(input.value)];
                 if (resultInfoObject["type"] == "rail")
-                    layer.AddMapRoad(MapEntityFactory.CreateDBSingleMapRoad(resultInfoObject["relcislo"]));
+                    dbRails.push(resultInfoObject["relcislo"]);
                 else if (resultInfoObject["type"] == "maproad_legacy")
-                    layer.AddMapRoad(MapEntityFactory.CreateDBMultiMapRoad(resultInfoObject["id"]));
+                    dbElements.push(resultInfoObject["id"]);
                 else if (resultInfoObject["type"] == "osmrail")
                     dbOSMRails.push(resultInfoObject["relcislo"]);
-                    // layer.AddMapRoad(MapEntityFactory.CreateDBOSMMapRoad(resultInfoObject["relcislo"]));
                 input.checked = false;
             }
         });
         
+        // Call for all categories at once
+        GeoGetter.GetRails(dbRails).forEach(road => {
+            layer.AddMapRoad(road);
+        });
+        GeoGetter.GetElements(dbElements).forEach(road => {
+            layer.AddMapRoad(road);
+        });
         GeoGetter.GetOSMRails(dbOSMRails).forEach(road => {
             layer.AddMapRoad(road);
         });
+
         LogNotify.ToggleThrobber();
 
         App.Instance.AddMapLayer(layer);

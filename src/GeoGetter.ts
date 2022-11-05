@@ -19,6 +19,22 @@ export class GeoGetter {
         return mapRoads;
     }
 
+    public static GetRails(dbIDs: number[]): DBOSMMapRoad[] {
+        return GeoGetter.GetGeneric(
+            dbIDs,
+            ApiMgr.GetRails.bind(ApiMgr),
+            MapEntityFactory.CreateDBSingleMapRoad.bind(MapEntityFactory)
+        );
+    }
+
+    public static GetElements(dbIDs: number[]): DBOSMMapRoad[] {
+        return GeoGetter.GetGeneric(
+            dbIDs,
+            ApiMgr.GetElements.bind(ApiMgr),
+            MapEntityFactory.CreateDBMultiMapRoad.bind(MapEntityFactory)
+        );
+    }
+
     public static GetOSMRails(dbIDs: number[]): DBOSMMapRoad[] {
         return GeoGetter.GetGeneric(
             dbIDs,

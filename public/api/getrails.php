@@ -5,35 +5,38 @@
  * Modified by Sawy7
  * Query a PostGIS table or view and return the results in GeoJSON format, suitable for use in OpenLayers, Leaflet, etc.
  * 
- * @param 		string		$id		    The PostGIS entity id *REQUIRED*
+ * @param 		string		$relcisla	The OSM relation id *REQUIRED*
  * @return 		string					resulting geojson string
  */
- 
-// Retrive URL variables
-if (empty($_GET['id'])) {
-    echo '{"type": "MissingParameter", "name": "id"}';
+
+// Retrive JSON variables
+$data = json_decode(file_get_contents('php://input'), true);
+if (empty($data['relcisla'])) {
+    echo '{"type": "MissingParameter", "name": "relcisla"}';
     exit;
 } else
-    $id = $_GET['id'];
+    $relcisla = $data['relcisla'];
+
+$relcisla_str = implode(",", $relcisla);
 
 include "base.php";
 
 // Check DB Connection
 if (!$conn) {
-    echo '{ "type": "Feature", "geometry": null, "properties": null, "status": "dboff" }';
+    echo '{ "type": "FeatureCollection", "features": null, "properties": null, "status": "dboff" }';
     exit;
 }
 
 // Build SQL SELECT statement and return the geometry as a GeoJSON element in EPSG: 4326
-$sql = "SELECT map_data_index.*, ST_AsGeoJSON(ST_ReducePrecision(ST_Collect(ST_Transform(" . $geomfield . ", " . $srid . ") ORDER BY gid ASC), 0.001)) AS geojson
-FROM map_routes JOIN map_data_index ON map_data_index.id = map_routes.idtrasy WHERE idtrasy = " . pg_escape_string($conn, $id) .
-"GROUP BY map_data_index.id LIMIT 1";
+$sql = "SELECT ST_AsGeoJSON(ST_ReducePrecision(ST_Transform(" . $geomfield . ", " . $srid . "), 0.001)) AS geojson, osm_data_index.*
+FROM processed_routes JOIN osm_data_index ON processed_routes.relcislo = osm_data_index.relcislo
+WHERE osm_data_index.relcislo IN (" . pg_escape_string($conn, $relcisla_str) . ")";
 // echo $sql;
 
 // Try query or error
 $rs = @pg_query($conn, $sql);
 if (!$rs) {
-    echo '{ "type": "Feature", "geometry": null, "properties": null, "status": "sqlerror" }';
+    echo '{ "type": "FeatureCollection", "features": null, "properties": null, "status": "sqlerror" }';
     exit;
 }
 
@@ -44,22 +47,23 @@ $rowOutput = '';
 while ($row = pg_fetch_assoc($rs)) {
     $rowOutput = (strlen($rowOutput) > 0 ? ',' : '') . '{"type": "Feature", "geometry": ' . $row['geojson'] . ', "properties": {';
     $props = '';
-    $props .= createJsonKey("id", $row["id"], true);
+    $props .= createJsonKey("relcislo", $row["relcislo"], true);
+    $props .= ', ' . createJsonKey("id", $row["id"]);
     $props .= ', ' . createJsonKey("name", $row["nazevtrasy"]);
     $props .= ', ' . createJsonKey("color", $row["color"]);
     $props .= ', ' . createJsonKey("weight", $row["weight"], true);
     $props .= ', ' . createJsonKey("opacity", $row["opacity"], true);
     $props .= ', ' . createJsonKey("smooth_factor", $row["smooth_factor"], true);
-    $props .= ', ' . createJsonKey("lineator", $row["lineator"], true);
     $props .= ', ' . createJsonKey("tags", $row["tags"]);
     $rowOutput .= $props . '}';
-    $rowOutput .= ', ' . createJsonKey("status", "ok");
     $rowOutput .= "}";
     $output .= $rowOutput;
 }
 
 if (empty($output)) {
-    $output = '{ "type": "Feature", "geometry": null, "properties": null, "status": "nodata" }';
+    $output = '{ "type": "FeatureCollection", "features": null, "status": "nodata" }';
+} else {
+    $output = '{"type": "FeatureCollection", "features": [ ' . $output . ' ], "status": "ok" }';
 }
 echo $output;
 ?>

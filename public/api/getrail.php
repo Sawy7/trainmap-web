@@ -25,18 +25,9 @@ if (!$conn) {
 }
 
 // Build SQL SELECT statement and return the geometry as a GeoJSON element in EPSG: 4326
-$sql = "SELECT ST_AsGeoJSON(ST_Transform(" . $geomfield . ", " . $srid . ")) AS geojson, osm_data_index.*
+$sql = "SELECT ST_AsGeoJSON(ST_ReducePrecision(ST_Transform(" . $geomfield . ", " . $srid . "), 0.001)) AS geojson, osm_data_index.*
 FROM processed_routes JOIN osm_data_index ON processed_routes.relcislo = osm_data_index.relcislo
 WHERE osm_data_index.relcislo =  " . pg_escape_string($conn, $relcislo);
-// $sql = "SELECT ST_AsGeoJSON(ST_Transform(" . $geomfield . ", " . $srid . ")) AS geojson, osm_data_index.*
-// FROM processed_routes JOIN osm_data_index ON processed_routes.relcislo = osm_data_index.relcislo
-// WHERE osm_data_index.relcislo = " . pg_escape_string($conn, $relcislo) ."
-// UNION
-// SELECT ST_AsGeoJSON(ST_LineMerge(ST_Collect(ST_Force3D(" . $geomfield . ", 0)))) AS geojson, osm_data_index.*
-// FROM osm_rails JOIN osm_data_index ON osm_rails.relcislo = osm_data_index.relcislo
-// WHERE osm_data_index.relcislo =" . pg_escape_string($conn, $relcislo) ."
-// GROUP BY osm_data_index.relcislo
-// LIMIT 1";
 // echo $sql;
 
 // Try query or error
