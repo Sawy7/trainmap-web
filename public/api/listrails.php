@@ -8,6 +8,9 @@
  * @return 		string					resulting array
  */
 
+header("Access-Control-Allow-Origin: *"); // NOTE: This can be configured in Apache
+header("Content-Type: application/json");
+
 include "base.php";
 
 // Check DB Connection

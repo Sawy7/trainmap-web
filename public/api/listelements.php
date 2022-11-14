@@ -6,6 +6,9 @@
  * @return 		string					resulting json string
  */
 
+header("Access-Control-Allow-Origin: *"); // NOTE: This can be configured in Apache
+header("Content-Type: application/json");
+
 include "base.php";
  
 // Check DB Connection

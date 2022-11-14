@@ -42,6 +42,14 @@ body {
     order: 2;
 }
 
+#dbLayerBuilderModalLabel {
+    width: 100%;
+}
+
+#dbLayerBuilderSearch {
+    margin-right: 1%;
+}
+
 #dbLayerBuilderColorDiv {
     margin-left: 30%;
 }

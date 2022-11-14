@@ -29,7 +29,7 @@ export class ElevationChart {
             datasets: [{
                 label: "Výška", // Name the series
                 data: this.elevation, // Specify the data values array
-                fill: true,
+                fill: false,
                 borderColor: "#2196f3", // Add custom color border (Line)
                 backgroundColor: "#2196f3", // Add custom color background (Points and Fill)
                 borderWidth: 1 // Specify bar border width
@@ -43,9 +43,17 @@ export class ElevationChart {
                 normalized: true,
                 responsive: true,
                 maintainAspectRatio: false,
+                elements: {
+                    point: {
+                        radius: 0
+                    }
+                },
                 scales: {
                     x: {
                         display: false
+                    },
+                    y: {
+                        ticks: { color: "white" }
                     }
                 },
                 plugins: {

@@ -44,10 +44,12 @@
                 <div class="offcanvas-body">
                     <div class="list-group" id="layersList"></div>
                     <br>
-                    <a class="list-group-item list-group-item-primary text-center" href="#" id="layerBuilderButton">
-                        <i class="bi-hammer"></i>
-                        <i class="bi-layers-half"></i>
-                    </a>
+                    <div class="list-group">
+                        <a class="list-group-item list-group-item-primary text-center" href="#" id="layerBuilderButton">
+                            <i class="bi-hammer"></i>
+                            <i class="bi-layers-half"></i>
+                        </a>
+                    </div>
                     <br><br>
                     <div id="gpxFileForm">
                         <h5>Nahrát vrstvu ze souboru GPX</h5>
@@ -104,20 +106,22 @@
 
     <!-- DBLayerBuilder Modal -->
     <div class="modal fade" id="dbLayerBuilderModal" tabindex="-1" aria-labelledby="dbLayerBuilderModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content text-bg-dark bg-dark text-light">
             <div class="modal-header">
                 <h5 class="modal-title" id="dbLayerBuilderModalLabel">Sestavení nové vrstvy</h5>
+                <input type="text" class="form-control" id="dbLayerBuilderSearch" placeholder="Filtrovat...">
                 <button type="button" class="btn-close btn-close-white text-reset" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" id="dbLayerBuilderModalBody">
-                <input type="text" class="form-control" id="dbLayerBuilderSearch" placeholder="Filtrovat...">
+                <br>
+                <ul class="list-group">
+                    <li class="list-group-item list-group-item-primary"><input class="form-check-input me-1" type="checkbox" id="dbLayerBuilderCheckAll">
+                        Přidat do výběru zobrazené    
+                    </li>
+                </ul>
                 <br>
                 <ul class="list-group" id="dbLayerBuilderResults"></ul>
-                <br>
-                <li class="list-group-item list-group-item-primary"><input class="form-check-input me-1" type="checkbox" id="dbLayerBuilderCheckAll">
-                    Přidat do výběru zobrazené    
-                </li>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zavřít</button>
