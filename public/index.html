@@ -77,11 +77,48 @@
     <!-- Histogram area -->
     <div class="offcanvas offcanvas-bottom text-bg-dark bg-dark text-light" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="offcanvasElevation" aria-labelledby="offcanvasElevationLabel">
         <div class="offcanvas-header">
-            <h5 class="offcanvas-title" id="offcanvasElevationLabel">Výška</h5>
+            <h5 class="offcanvas-title" id="offcanvasElevationLabel">Informace o trati</h5>
             <button type="button" class="btn-close btn-close-white text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body">
-            <canvas id="elevationChart"></canvas>
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-10" id="elevationChartDiv">
+                        <h6>Graf</h6>
+                        <div id="elevationChartWrapperDiv">
+                            <canvas id="elevationChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="col-2" id="elevationDataDiv">
+                        <!-- <h6>Data</h6> -->
+                            <!-- <li class="list-group-item list-group-item-dark">Hmotnost: 2300 kg</li>
+                            <li class="list-group-item list-group-item-dark">Spotřeba: 220 KWh</li> -->
+                        <div class="list-group">
+                            <a href="#" class="list-group-item list-group-item-dark list-group-item-action flex-column align-items-start">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1">Data</h5>
+                                </div>
+                                <div class="justify-content-between align-items-center">
+                                </div>
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-dark list-group-item-action d-flex justify-content-between align-items-center">
+                                <span class="badge bg-primary">Výška <i class="bi-rulers"></i></span> 100-200 m
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-dark list-group-item-action d-flex justify-content-between align-items-center">
+                                <span class="badge bg-danger">Hmotnost <i class="bi-train-front-fill"></i></span> 2300 kg
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-dark list-group-item-action d-flex justify-content-between align-items-center">
+                                <span class="badge bg-danger">Spotřeba <i class="bi-fuel-pump-fill"></i></span> 220 KWh
+                            </a>
+                        </div>
+                        <div class="list-group">
+                            <a class="list-group-item list-group-item-primary text-center" href="#">
+                                <i class="bi-pencil-fill"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <!-- <button type="button" class="btn-dark">VLAK</button> -->
         </div>
     </div>

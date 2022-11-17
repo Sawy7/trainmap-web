@@ -24,16 +24,26 @@ export class ElevationChart {
     }
 
     private RenderChart() {
+        let consumption = this.CalculateConsumption();
+
         this.data = {
             labels: this.elevation,
-            datasets: [{
-                label: "Výška", // Name the series
-                data: this.elevation, // Specify the data values array
-                fill: false,
-                borderColor: "#2196f3", // Add custom color border (Line)
-                backgroundColor: "#2196f3", // Add custom color background (Points and Fill)
-                borderWidth: 1 // Specify bar border width
-            }]
+            datasets: [
+                {
+                    label: "Výška (m)", // Name the series
+                    data: this.elevation, // Specify the data values array
+                    fill: false,
+                    borderColor: "#2196f3", // Add custom color border (Line)
+                    borderWidth: 3 // Specify bar border width
+                },
+                {
+                    label: "Spotřeba (kW)",
+                    data: consumption,
+                    fill: false,
+                    borderColor: "#dc3545",
+                    borderWidth: 3
+                }
+            ]
         }
 
         this.chart = new Chart(ElevationChart.ctx, {
@@ -123,5 +133,14 @@ export class ElevationChart {
     
     public DestroyChart() {
         this.chart.destroy();
+    }
+
+    private CalculateConsumption(): number[] {
+        // TODO: This is a stub
+        let con: number[] = [];
+        this.elevation.forEach(element => {
+            con.push(element-80);
+        });
+        return con;
     }
 }

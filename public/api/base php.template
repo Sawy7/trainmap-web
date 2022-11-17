@@ -1,7 +1,4 @@
 <?php
-header("Access-Control-Allow-Origin: *"); // NOTE: This can be configured in Apache
-header("Content-Type: application/json");
-
 // DB Connection Params
 $DB_DBNAME = "INSERT_HERE";
 $DB_USER = "INSERT_HERE";
