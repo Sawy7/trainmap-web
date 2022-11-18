@@ -31,4 +31,4 @@ points.forEach(element => {
         new L.LatLng(element.lat, element.lng)
     );
 });
-// App.Instance.SetElevationChart(pointsParsed, elevation, 0);
+App.Instance.SetElevationChart(pointsParsed, elevation, 0);

@@ -224,7 +224,7 @@ export class DBLayerBuilder {
     static LocalSearch() {
         let filter, li, txtValue;
         filter = this.searchBar.value.toUpperCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
-        li = this.searchResults.getElementsByTagName("li");
+        li = this.searchResults.getElementsByTagName("label");
 
         for (let i = 0; i < li.length; i++) {
             txtValue = li[i].textContent.trim();

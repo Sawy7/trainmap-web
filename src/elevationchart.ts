@@ -1,6 +1,6 @@
 import Chart from 'chart.js/auto';
 import { getRelativePosition } from 'chart.js/helpers';
-import { Offcanvas } from 'bootstrap';
+import { Offcanvas, Tab } from 'bootstrap';
 import L from "leaflet";
 import { App } from './app';
 
@@ -8,6 +8,7 @@ export class ElevationChart {
     private static ctx: HTMLCanvasElement = <HTMLCanvasElement> document.getElementById("elevationChart");
     private static elevationChartElement = document.getElementById("offcanvasElevation");
     private static offcanvas: Offcanvas = new Offcanvas(document.getElementById("offcanvasElevation"));
+    private static visualTab: Tab = new Tab(document.getElementById("elevationVisualTab"));
     private points: L.LatLng[];
     private elevation: number[];
     private data;
@@ -18,6 +19,7 @@ export class ElevationChart {
         this.points = points;
         this.elevation = elevation;
         this.layerID = layerID;
+        ElevationChart.visualTab.show();
         this.RenderChart();
         this.ShowChart();
         this.RegisterChartClosing();
