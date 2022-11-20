@@ -1,5 +1,7 @@
 import requests
 import psycopg2
+from osm2geojson import json2geojson
+import json
 
 ##############################################################
 # CONFIG
@@ -8,6 +10,9 @@ DBNAME="map_data"
 USER="postgres"
 PASSWORD="mysecretpassword"
 HOST="localhost"
+
+BOTTOM_LEFT = (48.552500, 12.091389)
+TOP_RIGHT = (51.0556594, 18.858889)
 ##############################################################
 
 class Rail:
@@ -118,7 +123,7 @@ def create_index(conn):
     conn.commit()
     cur.close()
 
-if __name__ == "__main__":
+def all_rails_to_db():
     conn = psycopg2.connect(f"dbname={DBNAME} user={USER} password={PASSWORD} host={HOST}")
     create_table(conn)
     
@@ -148,3 +153,27 @@ if __name__ == "__main__":
     update_data_defaults(conn)
     create_index(conn)
     conn.close()
+
+def get_stations():
+    query = f"""
+        [out:json];
+        node
+          ["railway"="station"]
+          ({BOTTOM_LEFT[0]},{BOTTOM_LEFT[1]}, {TOP_RIGHT[0]}, {TOP_RIGHT[1]});
+        out; 
+    """
+    response = requests.post(url=overpass_api, data=query)
+    if response.status_code == 200:
+        geojson = json2geojson(response.json())
+        for element in geojson["features"]:
+            tags_dict = element["properties"]["tags"]
+            del element["properties"]["tags"]
+            element["properties"] |= tags_dict
+        with open("all_stations.geojson", "w") as f:
+            f.writelines(json.dumps(geojson))
+    else:
+        return get_relation_ways(id)
+
+if __name__ == "__main__":
+    # all_rails_to_db()
+    get_stations()
