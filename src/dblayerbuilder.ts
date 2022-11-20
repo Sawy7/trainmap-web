@@ -81,8 +81,8 @@ export class DBLayerBuilder {
     }
 
     static CreateEntry(infoObject: Object, index: number) {
-        let li = document.createElement("li");
-        li.setAttribute("class", "list-group-item list-group-item-dark");
+        let label = document.createElement("label");
+        label.setAttribute("class", "list-group-item list-group-item-dark");
 
         let contentDiv = document.createElement("div");
         contentDiv.setAttribute("class", "fw-bold");
@@ -95,13 +95,13 @@ export class DBLayerBuilder {
         contentDiv.appendChild(input);
         contentDiv.innerHTML += "\n" + infoObject["name"];
 
-        li.appendChild(contentDiv);
+        label.appendChild(contentDiv);
 
         if (infoObject["tags"] != null)
-            li.innerHTML += "\n" + this.ParseTags(infoObject["tags"]);
+            label.innerHTML += "\n" + this.ParseTags(infoObject["tags"]);
 
-        this.searchResults.appendChild(li);
-        li.onclick = () => {
+        this.searchResults.appendChild(label);
+        label.onclick = () => {
             this.LocalSearch();
         };
     }
@@ -224,7 +224,7 @@ export class DBLayerBuilder {
     static LocalSearch() {
         let filter, li, txtValue;
         filter = this.searchBar.value.toUpperCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
-        li = this.searchResults.getElementsByTagName("li");
+        li = this.searchResults.getElementsByTagName("label");
 
         for (let i = 0; i < li.length; i++) {
             txtValue = li[i].textContent.trim();
