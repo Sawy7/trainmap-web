@@ -27,9 +27,21 @@ export class ElevationChart {
 
     private RenderChart() {
         let consumption = this.CalculateConsumption();
+        let labels: string[] = [];
+        let radius: number[] = [];
+        for (let i = 0; i < this.elevation.length; i++) {
+            if (i % 50 == 0) {
+                labels.push("Stanice: " + i.toString());
+                radius.push(2);
+            }
+            else {
+                labels.push("");
+                radius.push(0);
+            }
+        }
 
         this.data = {
-            labels: this.elevation,
+            labels: labels,
             datasets: [
                 {
                     label: "Výška (m)", // Name the series
@@ -57,7 +69,7 @@ export class ElevationChart {
                 maintainAspectRatio: false,
                 elements: {
                     point: {
-                        radius: 0
+                        radius: radius
                     }
                 },
                 scales: {
@@ -69,12 +81,12 @@ export class ElevationChart {
                     }
                 },
                 plugins: {
-                    tooltip: {
-                        enabled: true,
-                        callbacks: {
-                            title: (items) => {return ""}
-                        }
-                    },
+                    // tooltip: {
+                    //     enabled: true,
+                    //     callbacks: {
+                    //         title: (items) => {return ""}
+                    //     }
+                    // },
                     legend: {
                         display: false
                     }

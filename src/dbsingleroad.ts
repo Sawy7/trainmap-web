@@ -21,7 +21,7 @@ export class DBSingleMapRoad extends SingleMapRoad {
 
     constructor(dbID: number, geoJSON?: object) {
         if (geoJSON === undefined)
-            geoJSON = ApiMgr.GetRail(dbID);
+            geoJSON = ApiMgr.GetRails([dbID]);
 
         if (geoJSON["status"] !== "ok") {
             super([], [], "");

@@ -1,7 +1,7 @@
 import { Modal } from "bootstrap";
 import { ApiMgr } from "./apimgr";
 import { App } from "./app";
-import { GeoGetter } from "./GeoGetter";
+import { GeoGetter } from "./geogetter";
 import { LogNotify } from "./lognotify";
 import { MapEntityFactory } from "./mapentityfactory";
 

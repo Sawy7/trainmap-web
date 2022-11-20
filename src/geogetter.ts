@@ -23,12 +23,12 @@ export class GeoGetter {
                 dbIDs[i] = undefined;
             }
             else
-            {
                 dbIDsToFetch.push(dbIDs[i]);
-            }
         }
 
-        let features = get(dbIDsToFetch)["features"];
+        let features: object[] = [];
+        if (dbIDsToFetch.length > 0)
+            features = get(dbIDsToFetch)["features"];
         for (let i = 0; i < dbIDs.length; i++) {
             if (dbIDs[i] === undefined) {
                 mapRoads.push(cacheRoads.shift());
@@ -38,7 +38,6 @@ export class GeoGetter {
                     features.shift()
                 ));
             }
-
         }
 
         return mapRoads;

@@ -154,13 +154,16 @@ def all_rails_to_db():
     create_index(conn)
     conn.close()
 
-def get_stations():
+def get_stations():   
     query = f"""
         [out:json];
         node
           ["railway"="station"]
           ({BOTTOM_LEFT[0]},{BOTTOM_LEFT[1]}, {TOP_RIGHT[0]}, {TOP_RIGHT[1]});
-        out; 
+        node
+          ["railway"="halt"]
+          ({BOTTOM_LEFT[0]},{BOTTOM_LEFT[1]}, {TOP_RIGHT[0]}, {TOP_RIGHT[1]});
+        out;
     """
     response = requests.post(url=overpass_api, data=query)
     if response.status_code == 200:

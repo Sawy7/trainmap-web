@@ -1,11 +1,7 @@
 import L from "leaflet";
 import { DBMapLayer } from "./dblayer";
-import { DBMultiMapRoad } from "./dbmultiroad";
-import { DBOSMMapRoad } from "./dbosmroad";
-import { DBSingleMapRoad } from "./dbsingleroad";
-import { GeoGetter } from "./GeoGetter";
+import { GeoGetter } from "./geogetter";
 import { LogNotify } from "./lognotify";
-import { MapEntityFactory } from "./mapentityfactory";
 
 export class GhostDBMapLayer extends DBMapLayer {
     private initialized: boolean = false;

@@ -28,20 +28,12 @@ export class ApiMgr {
         ));
     }
 
-    public static GetRail(dbID: number): object {
-        return JSON.parse(ApiComms.GetRequest(`${this.rootUrl}/getrail.php?relcislo=${dbID}`));
-    }
-
     public static GetRails(dbIDs: number[]): object {
         let requestJSON = {"relcisla": dbIDs};
         return JSON.parse(ApiComms.PostRequest(
             `${this.rootUrl}/getrails.php`,
             JSON.stringify(requestJSON)
         ));
-    }
-
-    public static GetOSMRail(dbID: number): object {
-        return JSON.parse(ApiComms.GetRequest(`${this.rootUrl}/getosmrail.php?relcislo=${dbID}`));
     }
 
     public static GetOSMRails(dbIDs: number[]): object {
