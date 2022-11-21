@@ -24,7 +24,7 @@ $sql = "SELECT *
 FROM osm_data_index
 WHERE relcislo NOT IN
 (
-	SELECT relcislo FROM processed_routes WHERE relcislo IS NOT NULL
+	SELECT relcislo FROM processed_routes_line
 )";
 // echo $sql;
 

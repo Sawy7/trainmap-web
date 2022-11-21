@@ -17,7 +17,13 @@ export class ElevationChart {
 
     public constructor(points: L.LatLng[], elevation: number[], layerID: number) {
         this.points = points;
-        this.elevation = elevation;
+        // Fix sudden dips (errors in data)
+        this.elevation = elevation.map((e) => {
+            if (e == 0)
+                return undefined;
+            else
+                return e;
+        });
         this.layerID = layerID;
         ElevationChart.visualTab.show();
         this.RenderChart();
@@ -30,7 +36,7 @@ export class ElevationChart {
         let labels: string[] = [];
         let radius: number[] = [];
         for (let i = 0; i < this.elevation.length; i++) {
-            if (i % 50 == 0) {
+            if (i % 100 == 0) {
                 labels.push("Stanice: " + i.toString());
                 radius.push(2);
             }
@@ -55,7 +61,8 @@ export class ElevationChart {
                     data: consumption,
                     fill: false,
                     borderColor: "#dc3545",
-                    borderWidth: 3
+                    borderWidth: 3,
+                    tension: 0.3
                 }
             ]
         }
@@ -64,6 +71,7 @@ export class ElevationChart {
             type: "line",
             data: this.data,
             options: {
+                spanGaps: true,
                 normalized: true,
                 responsive: true,
                 maintainAspectRatio: false,
@@ -152,9 +160,23 @@ export class ElevationChart {
     private CalculateConsumption(): number[] {
         // TODO: This is a stub
         let con: number[] = [];
-        this.elevation.forEach(element => {
-            con.push(element-80);
-        });
+        // this.elevation.forEach(element => {
+        //     con.push(element-80);
+        // });
+        con.push(0);
+        for (let i = 0; i < 10; i++) {
+            con.push(undefined);
+        }
+        con.push(100);
+        for (let i = 0; i < 76; i++) {
+            con.push(undefined);
+        }
+        con.push(100);
+        for (let i = 0; i < 10; i++) {
+            con.push(undefined);
+        }
+        con.push(0);
+        
         return con;
     }
 }
