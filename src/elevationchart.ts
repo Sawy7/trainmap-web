@@ -35,9 +35,14 @@ export class ElevationChart {
         let consumption = this.CalculateConsumption();
         let labels: string[] = [];
         let radius: number[] = [];
+        
+        // FOR DEMO ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        let stationIndexes = [0, 193, 329, 373, 430, 584, 682, 794, 942, this.points.length-1];
+        let stationNames = ["Opava Východ", "Opava Komárov", "Štítina", "Mokré Lazce", "Lhota u Opavy", "Háj ve Slezsku", "Jilešovice", "Děhylov", "Ostrava-Třebovice", "Ostrava-Svinov"];
+        let currentStation = 0;
         for (let i = 0; i < this.elevation.length; i++) {
-            if (i % 100 == 0) {
-                labels.push("Stanice: " + i.toString());
+            if (stationIndexes.includes(i)) {
+                labels.push("Stanice: " + stationNames[currentStation++]);
                 radius.push(2);
             }
             else {
@@ -45,6 +50,7 @@ export class ElevationChart {
                 radius.push(0);
             }
         }
+        // FOR DEMO ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         this.data = {
             labels: labels,
@@ -106,6 +112,7 @@ export class ElevationChart {
                 onHover: (e) => {
                     const canvasPosition = getRelativePosition(e, this.chart);
                     const index = this.chart.scales.x.getValueForPixel(canvasPosition.x);
+                    // console.log(index);
                     let elevationMarkerPos = this.points[index];
                     App.Instance.RenderElevationMarker(elevationMarkerPos);
                 }
@@ -159,24 +166,31 @@ export class ElevationChart {
 
     private CalculateConsumption(): number[] {
         // TODO: This is a stub
+        let stationIndexes = [0, 193, 329, 373, 430, 584, 682, 794, 942, this.points.length-1];
         let con: number[] = [];
-        // this.elevation.forEach(element => {
-        //     con.push(element-80);
-        // });
-        con.push(0);
-        for (let i = 0; i < 10; i++) {
-            con.push(undefined);
+        let jetOffset = 20;
+
+        let currentStation = 0;
+        for (let i = 0; i < this.points.length; i++) {
+            if (i == stationIndexes[currentStation]) {
+                if (i != stationIndexes[0]) {
+                    for (let j = 0; j < jetOffset; j++) {
+                        con.pop();
+                    }
+                    con = con.concat(new Array(jetOffset).fill(undefined));
+                    console.log("bonknknkk");
+                }
+                con.push(0);
+                if (i != stationIndexes[stationIndexes.length-1]) {
+                    con = con.concat(new Array(jetOffset).fill(undefined));
+                    i+=jetOffset;
+                }
+                currentStation++;
+            }
+            else {
+                con.push(this.elevation[i]-100);
+            } 
         }
-        con.push(100);
-        for (let i = 0; i < 76; i++) {
-            con.push(undefined);
-        }
-        con.push(100);
-        for (let i = 0; i < 10; i++) {
-            con.push(undefined);
-        }
-        con.push(0);
-        
         return con;
     }
 }
