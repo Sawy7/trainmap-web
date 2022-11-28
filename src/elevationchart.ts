@@ -17,7 +17,7 @@ export class ElevationChart {
 
     public constructor(points: L.LatLng[], elevation: number[], layerID: number) {
         this.points = points;
-        // Fix sudden dips (errors in data)
+        // Fix for sudden dips (errors in data)
         this.elevation = elevation.map((e) => {
             if (e == 0)
                 return undefined;
@@ -35,6 +35,7 @@ export class ElevationChart {
         let consumption = this.CalculateConsumption();
         let labels: string[] = [];
         let radius: number[] = [];
+        console.log("len", consumption.length, this.elevation.length);
         
         // FOR DEMO ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         let stationIndexes = [0, 193, 329, 373, 430, 584, 682, 794, 942, this.points.length-1];
@@ -168,27 +169,34 @@ export class ElevationChart {
         // TODO: This is a stub
         let stationIndexes = [0, 193, 329, 373, 430, 584, 682, 794, 942, this.points.length-1];
         let con: number[] = [];
-        let jetOffset = 20;
+        let jetOffset = 10;
 
         let currentStation = 0;
         for (let i = 0; i < this.points.length; i++) {
             if (i == stationIndexes[currentStation]) {
+                // going down
                 if (i != stationIndexes[0]) {
                     for (let j = 0; j < jetOffset; j++) {
                         con.pop();
                     }
-                    con = con.concat(new Array(jetOffset).fill(undefined));
-                    console.log("bonknknkk");
+                    let half = Math.floor(jetOffset/2);
+                    con = con.concat(new Array(half).fill(undefined));
+                    con.push(-20);
+                    con = con.concat(new Array(jetOffset-half-1).fill(undefined));
                 }
+                // going up
                 con.push(0);
                 if (i != stationIndexes[stationIndexes.length-1]) {
-                    con = con.concat(new Array(jetOffset).fill(undefined));
+                    let half = Math.floor(jetOffset/2);
+                    con = con.concat(new Array(half).fill(undefined));
+                    con.push(this.elevation[i]-100);
+                    con = con.concat(new Array(jetOffset-half-1).fill(undefined));
                     i+=jetOffset;
                 }
                 currentStation++;
             }
             else {
-                con.push(this.elevation[i]-100);
+                con.push(this.elevation[i]-190);
             } 
         }
         return con;
