@@ -157,12 +157,14 @@ def all_rails_to_db():
 def get_stations():   
     query = f"""
         [out:json];
-        node
-          ["railway"="station"]
-          ({BOTTOM_LEFT[0]},{BOTTOM_LEFT[1]}, {TOP_RIGHT[0]}, {TOP_RIGHT[1]});
-        node
-          ["railway"="halt"]
-          ({BOTTOM_LEFT[0]},{BOTTOM_LEFT[1]}, {TOP_RIGHT[0]}, {TOP_RIGHT[1]});
+        (
+            node
+            ["railway"="station"]
+            ({BOTTOM_LEFT[0]},{BOTTOM_LEFT[1]}, {TOP_RIGHT[0]}, {TOP_RIGHT[1]});
+            node
+            ["railway"="halt"]
+            ({BOTTOM_LEFT[0]},{BOTTOM_LEFT[1]}, {TOP_RIGHT[0]}, {TOP_RIGHT[1]});
+        );
         out;
     """
     response = requests.post(url=overpass_api, data=query)
