@@ -10,7 +10,7 @@ export class ElevationChart {
     private static offcanvas: Offcanvas = new Offcanvas(document.getElementById("offcanvasElevation"));
     private static visualTab: Tab = new Tab(document.getElementById("elevationVisualTab"));
     private points: L.LatLng[];
-    private elevation: number[];
+    private elevation: number[] = [];
     private data;
     private chart: Chart;
     readonly layerID: number;
@@ -18,12 +18,13 @@ export class ElevationChart {
     public constructor(points: L.LatLng[], elevation: number[], layerID: number) {
         this.points = points;
         // Fix for sudden dips (errors in data)
-        this.elevation = elevation.map((e) => {
-            if (e == 0)
-                return undefined;
-            else
-                return e;
-        });
+        // this.elevation = elevation.map((e) => {
+        //     if (e == 0)
+        //         return undefined;
+        //     else
+        //         return e;
+        // });
+        this.FilterDrops(elevation);
         this.layerID = layerID;
         ElevationChart.visualTab.show();
         this.RenderChart();
@@ -35,23 +36,27 @@ export class ElevationChart {
         let consumption = this.CalculateConsumption();
         let labels: string[] = [];
         let radius: number[] = [];
-        console.log("len", consumption.length, this.elevation.length);
-        
-        // FOR DEMO ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        let stationIndexes = [0, 193, 329, 373, 430, 584, 682, 794, 942, this.points.length-1];
-        let stationNames = ["Opava Východ", "Opava Komárov", "Štítina", "Mokré Lazce", "Lhota u Opavy", "Háj ve Slezsku", "Jilešovice", "Děhylov", "Ostrava-Třebovice", "Ostrava-Svinov"];
-        let currentStation = 0;
         for (let i = 0; i < this.elevation.length; i++) {
-            if (stationIndexes.includes(i)) {
-                labels.push("Stanice: " + stationNames[currentStation++]);
-                radius.push(2);
-            }
-            else {
-                labels.push("");
-                radius.push(0);
-            }
+            labels.push("");
+            radius.push(0);
         }
-        // FOR DEMO ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        // console.log("len", consumption.length, this.elevation.length);
+        // // FOR DEMO ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // let stationIndexes = [0, 193, 329, 373, 430, 584, 682, 794, 942, this.points.length-1];
+        // let stationNames = ["Opava Východ", "Opava Komárov", "Štítina", "Mokré Lazce", "Lhota u Opavy", "Háj ve Slezsku", "Jilešovice", "Děhylov", "Ostrava-Třebovice", "Ostrava-Svinov"];
+        // let currentStation = 0;
+        // for (let i = 0; i < this.elevation.length; i++) {
+        //     if (stationIndexes.includes(i)) {
+        //         labels.push("Stanice: " + stationNames[currentStation++]);
+        //         radius.push(2);
+        //     }
+        //     else {
+        //         labels.push("");
+        //         radius.push(0);
+        //     }
+        // }
+        // // FOR DEMO ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         this.data = {
             labels: labels,
@@ -163,6 +168,18 @@ export class ElevationChart {
     
     public DestroyChart() {
         this.chart.destroy();
+    }
+
+    private FilterDrops(elevation: number[]) {
+        this.elevation.push(elevation[0]);
+        for (let i = 1; i < elevation.length; i++) {
+            if (Math.abs(this.elevation[i-1] - elevation[i]) > 10) {
+                this.elevation.push(this.elevation[i-1]);
+                // console.log("bonk", Math.abs(this.elevation[i-1] - elevation[i]));
+            } else {
+                this.elevation.push(elevation[i]);
+            }
+        }
     }
 
     private CalculateConsumption(): number[] {

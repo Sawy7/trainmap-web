@@ -22,7 +22,7 @@ shp2pgsql \
   -a \
   -s $srid \
   -S \
-  $shapefileName \
+  "$shapefileName" \
   $routesTable \
   > $outputFile
 
