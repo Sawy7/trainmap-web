@@ -91,7 +91,23 @@ CREATE TABLE IF NOT EXISTS "processed_routes" (
             FOREIGN KEY(relcislo)
                 REFERENCES osm_data_index(relcislo)
 );
+
+CREATE TABLE IF NOT EXISTS "processed_routes_line" (
+    gid serial PRIMARY KEY,
+    geom geometry('LINESTRINGZ', 5514, 4),
+    relcislo int,
+    CONSTRAINT fk_relcislo_prline
+            FOREIGN KEY(relcislo)
+                REFERENCES osm_data_index(relcislo)
+);
 ```
+
+### Nastavení vlastnictví tabulek
+
+```sql
+ALTER TABLE nazev_tabulky OWNER TO railway_map;
+```
+
 ### Skripty pro naplnění daty
 
 - [Shellový skript pro navedení shapefile do DB](convert-postgis.sh)
