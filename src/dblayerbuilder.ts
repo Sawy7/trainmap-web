@@ -48,29 +48,32 @@ export class DBLayerBuilder {
         LogNotify.ToggleThrobber();
 
         setTimeout(() => {
-            let layers = ApiMgr.ListElements();
-            for (let i = 0; i < layers["layers"].length; i++) {
-                const dbMapEntity = layers["layers"][i];
+            // NOTE: Legacy rails (the whole SŽ file) deprecated
+            // let layers = ApiMgr.ListElements();
+            // for (let i = 0; i < layers["layers"].length; i++) {
+            //     const dbMapEntity = layers["layers"][i];
                 
-                this.CreateEntry(dbMapEntity, i);
-                this.StashInfo(dbMapEntity, "maproad_legacy");
-            }
-            let offset = layers["layers"].length;
+            //     this.CreateEntry(dbMapEntity, i);
+            //     this.StashInfo(dbMapEntity, "maproad_legacy");
+            // }
+
             let rails = ApiMgr.ListRails();
-            for (let i = offset; i < offset+rails["layers"].length; i++) {
-                const dbMapEntity = rails["layers"][i-offset];
+            for (let i = 0; i < rails["layers"].length; i++) {
+                const dbMapEntity = rails["layers"][i];
                 
                 this.CreateEntry(dbMapEntity, i);
                 this.StashInfo(dbMapEntity, "rail");
             }
-            offset += rails["layers"].length;
-            let osmRails = ApiMgr.ListOSMRails();
-            for (let i = offset; i < offset+osmRails["layers"].length; i++) {
-                const dbMapEntity = osmRails["layers"][i-offset];
+
+            // NOTE: OSM rails deprecated (only showing processed now)
+            // offset += rails["layers"].length;
+            // let osmRails = ApiMgr.ListOSMRails();
+            // for (let i = offset; i < offset+osmRails["layers"].length; i++) {
+            //     const dbMapEntity = osmRails["layers"][i-offset];
                 
-                this.CreateEntry(dbMapEntity, i);
-                this.StashInfo(dbMapEntity, "osmrail");
-            }
+            //     this.CreateEntry(dbMapEntity, i);
+            //     this.StashInfo(dbMapEntity, "osmrail");
+            // }
             this.elementsDownloaded = true;
             LogNotify.ToggleThrobber();
         }, 0);
@@ -165,12 +168,12 @@ export class DBLayerBuilder {
         GeoGetter.GetRails(dbRails).forEach(road => {
             layer.AddMapRoad(road);
         });
-        GeoGetter.GetElements(dbElements).forEach(road => {
-            layer.AddMapRoad(road);
-        });
-        GeoGetter.GetOSMRails(dbOSMRails).forEach(road => {
-            layer.AddMapRoad(road);
-        });
+        // GeoGetter.GetElements(dbElements).forEach(road => {
+        //     layer.AddMapRoad(road);
+        // });
+        // GeoGetter.GetOSMRails(dbOSMRails).forEach(road => {
+        //     layer.AddMapRoad(road);
+        // });
 
         LogNotify.ToggleThrobber();
 

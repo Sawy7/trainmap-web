@@ -44,6 +44,14 @@ export class ApiMgr {
         ));
     }
 
+    public static GetStations(dbIDs: number[]): object {
+        let requestJSON = {"relcisla": dbIDs};
+        return JSON.parse(ApiComms.PostRequest(
+            `${this.rootUrl}/getstations.php`,
+            JSON.stringify(requestJSON)
+        ));
+    }
+
     public static GetGIDs(dbID: number): object {
         return JSON.parse(ApiComms.GetRequest(`${this.rootUrl}/getgids.php?id=${dbID}`));
     }
