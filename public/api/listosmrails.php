@@ -48,7 +48,7 @@ while ($row = pg_fetch_assoc($rs)) {
     $rowOutput .= ', ' . createJsonKey("weight", $row["weight"], true);
     $rowOutput .= ', ' . createJsonKey("opacity", $row["opacity"], true);
     $rowOutput .= ', ' . createJsonKey("smooth_factor", $row["smooth_factor"], true);
-    $rowOutput .= ', ' . createJsonKey("tags", $row["tags"]);
+    $rowOutput .= ', ' . createJsonKey("tags", "OSM nezpracovaná;" . $row["tags"]);
     $rowOutput .= '}';
     $output .= $rowOutput;
 }

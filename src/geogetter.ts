@@ -1,6 +1,5 @@
 import { ApiMgr } from "./apimgr";
 import { DBMapEntityCache } from "./dbentitycache";
-import { DBMultiMapRoad } from "./dbmultiroad";
 import { DBOSMMapRoad } from "./dbosmroad";
 import { DBSingleMapRoad } from "./dbsingleroad";
 import { MapEntityFactory } from "./mapentityfactory";
@@ -49,15 +48,6 @@ export class GeoGetter {
             ApiMgr.GetRails.bind(ApiMgr),
             MapEntityFactory.CreateDBSingleMapRoad.bind(MapEntityFactory),
             DBMapEntityCache.Instance.CheckDBSingleMapRoad.bind(DBMapEntityCache.Instance)
-        );
-    }
-
-    public static GetElements(dbIDs: number[]): DBMultiMapRoad[] {
-        return GeoGetter.GetGeneric(
-            dbIDs,
-            ApiMgr.GetElements.bind(ApiMgr),
-            MapEntityFactory.CreateDBMultiMapRoad.bind(MapEntityFactory),
-            DBMapEntityCache.Instance.CheckDBMultiMapRoad.bind(DBMapEntityCache.Instance)
         );
     }
 

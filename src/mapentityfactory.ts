@@ -2,7 +2,6 @@ import { LatLng } from "leaflet";
 import { DBMapEntityCache } from "./dbentitycache";
 
 import { DBMapLayer } from "./dblayer";
-import { DBMultiMapRoad } from "./dbmultiroad";
 import { DBOSMMapRoad } from "./dbosmroad";
 import { DBSingleMapRoad } from "./dbsingleroad";
 import { GhostDBMapLayer } from "./ghostdblayer";
@@ -41,10 +40,6 @@ export class MapEntityFactory {
         opacity?: number, smoothFactor?: number, dbID?: number
     ): MultiMapRoad {
         return new MultiMapRoad(points, elevation, name, color, weight, opacity, smoothFactor);
-    }
-
-    public static CreateDBMultiMapRoad(dbID: number, geoJSON?: object): DBMultiMapRoad {
-        return DBMapEntityCache.Instance.GetDBMultiMapRoad(dbID, geoJSON);
     }
 
     public static CreateDBOSMMapRoad(dbID: number, geoJSON?: object): DBOSMMapRoad {

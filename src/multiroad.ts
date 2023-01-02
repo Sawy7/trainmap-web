@@ -1,32 +1,42 @@
-import L from "leaflet";
-import { Lineator } from "./lineator";
+import L, { LeafletEventHandlerFn } from "leaflet";
 import { MapRoad } from "./maproad";
-import { RoadGroup } from "./roadgroup";
-import { App } from "./app";
 import { LogNotify } from "./lognotify";
 
 export class MultiMapRoad extends MapRoad {
-    public lineator: Lineator;
+    protected color: string;
+    protected weight: number;
+    protected opacity: number;
+    protected smoothFactor: number;
+    protected polyLine: L.Polyline;
+    protected layerID: number;
+    protected points: L.LatLng[][];
+    protected elevation: number[][];
     readonly className: string = "MultiMapRoad";
-    private sourceType: string;
 
     public constructor(
-        points: L.LatLng[][],
-        elevation: number[][],
-        name: string = "Cesta",
-        color: string = "red",
-        weight: number = 5,
-        opacity: number = 0.5,
-        smoothFactor: number = 1
+                points: L.LatLng[][],
+                elevation: number[][],
+                name: string = "Cesta",
+                color: string = "red",
+                weight: number = 5,
+                opacity: number = 0.5,
+                smoothFactor: number = 1
     ) {
-        super(name, color, weight, opacity, smoothFactor);
-        this.dontSerializeList.push("lineator");
-        
-        this.PrepareLineator(points, elevation);
+        super();
+        this.name = name;
+        this.color = color;
+        this.weight = weight;
+        this.opacity = opacity;
+        this.smoothFactor = smoothFactor;
+        this.dontSerializeList = [
+            "polyLine"
+        ]
+        this.points = points;
+        this.elevation = elevation;
     }
 
     public GetMapEntity(): any {
-        this.polyLine = new L.Polyline(this.lineator.GetPoints(), {
+        this.polyLine = new L.Polyline(this.points, {
             color: this.color,
             weight: this.weight,
             opacity: this.opacity,
@@ -35,52 +45,20 @@ export class MultiMapRoad extends MapRoad {
         return this.polyLine;
     }
 
-    public SetSourceType(type: string) {
-        this.sourceType = type;
-    }
-
-    public GetSourceType(): string {
-        return this.sourceType;
-    }
-
-    protected PrepareLineator(points: L.LatLng[][], elevation: number[][]) {
-        let roadGroups: RoadGroup[] = [];
-        for (let i = 0; i < points.length; i++) {
-            roadGroups.push(new RoadGroup(points[i], elevation[i]));
-        }
-        this.lineator = new Lineator(roadGroups);
-    }
-
-    private EngageLineator() {
-        LogNotify.ToggleThrobber();
-        setTimeout(() => {
-            this.lineator.Init();
-            LogNotify.ToggleThrobber();
-
-            this.SetElevationChartFromLineator();
-        }, 0);
-    }
-
     public GetSignificantPoint(): L.LatLng {
-        return this.lineator.GetSignificantPoint();
+        return this.points[0][0];
+    }
+    
+    public SetupInteractivity(layerID: number, customFunction?: LeafletEventHandlerFn) {
+        this.layerID = layerID;
+        if (customFunction !== undefined)
+            this.polyLine.on("click", customFunction);
+        else
+            this.polyLine.on("click", this.ClickSetElevationChart.bind(this));
     }
 
     protected ClickSetElevationChart(event: L.LeafletEvent): L.LeafletMouseEventHandlerFn {
-        // TODO: Maybe don't let the user spam this, if it is already open?
-        if (!this.lineator.CheckInit()) {
-            LogNotify.PushAlert(
-                "Pro tuto trasu nebyla vytvořena interní strategie výškového průchodu.",
-                "Vytvořit nyní?",
-                this.EngageLineator.bind(this)
-            );
-        } else {
-            this.SetElevationChartFromLineator();
-        }
+        LogNotify.PushAlert("Tato trasa není lineární a není pro ní dostupný pokročilý náhled.");
         return;
-    }
-
-    protected SetElevationChartFromLineator() {
-        let chartPoints = this.lineator.GenerateChartPoints();
-        App.Instance.SetElevationChart(chartPoints[0], chartPoints[1], this.layerID);
     }
 }

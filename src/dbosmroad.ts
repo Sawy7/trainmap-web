@@ -3,10 +3,12 @@ import { ApiMgr } from "./apimgr";
 import { DBMapEntity } from "./dbmapentity";
 import { Helper } from "./helper";
 import { LogNotify } from "./lognotify";
+import { MapRoad } from "./maproad";
 import { MultiMapRoad } from "./multiroad";
 
-export class DBOSMMapRoad extends MultiMapRoad {
-    readonly className: string;
+export class DBOSMMapRoad extends MapRoad {
+    private delegate: MultiMapRoad;
+    readonly className: string = "DBOSMMapRoad";
 
     private static ParseGeoJSON(geoJSON: object): [L.LatLng[][], number[][]] {
         let lineStrings = geoJSON["geometry"]["coordinates"];
@@ -27,13 +29,13 @@ export class DBOSMMapRoad extends MultiMapRoad {
     }
 
     public constructor(dbID: number, geoJSON?: object) {
+        super();
         if (geoJSON === undefined)
             geoJSON = ApiMgr.GetOSMRails([dbID]);
         
         if (geoJSON["status"] !== "ok") {
-            super([], [], "");
+            // TODO: Add method check
             this.wasRemoved = true;
-            this.className = "DBOSMMapRoad";
             return;
         }
         
@@ -43,19 +45,29 @@ export class DBOSMMapRoad extends MultiMapRoad {
             let mlElevation: number[][] = [];
             [mlPoints, mlElevation] = DBOSMMapRoad.ParseGeoJSON(geoJSON);
 
-            super(
-                [], [], geoJSON["properties"]["name"],
+            this.delegate = new MultiMapRoad(mlPoints, mlElevation, geoJSON["properties"]["name"],
                 geoJSON["properties"]["color"], geoJSON["properties"]["weight"],
                 geoJSON["properties"]["opacity"], geoJSON["properties"]["smoothFactor"]
             );
+            this.name = geoJSON["properties"]["name"];
             
             this.wasRemoved = false;
-            this.className = "DBOSMMapRoad";
             this.dbID = dbID;
-            this.PrepareLineator(mlPoints, mlElevation);
         } else {
             console.log("Unknown feature type!");
         }
+    }
+
+    public GetMapEntity(): any {
+        return this.delegate.GetMapEntity();
+    }
+
+    public GetSignificantPoint(): L.LatLng {
+        return this.delegate.GetSignificantPoint();
+    }
+
+    public SetupInteractivity(layerID: number) {
+        this.delegate.SetupInteractivity(layerID, this.ClickSetElevationChart);
     }
 
     // Don't create lineators for OSM

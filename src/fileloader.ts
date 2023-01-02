@@ -3,7 +3,7 @@ import * as shp from "shpjs";
 import { App } from "./app";
 import { LogNotify } from "./lognotify";
 import { MapEntityFactory } from "./mapentityfactory";
-import { MultiMapRoad } from "./multiroad";
+import { SingleMapRoad } from "./singleroad";
 
 export class FileLoader {
     // https://stackoverflow.com/questions/3582671/how-to-open-a-local-disk-file-with-javascript
@@ -77,7 +77,10 @@ export class FileLoader {
 
                     let addFunction = (name: string) => {
                         let shapefileLayer = MapEntityFactory.CreateMapLayer(name);
-                        shapefileLayer.AddMapRoad(new MultiMapRoad(multiPointsArr, multiElevArr, "Cesta", "blue"));
+                        // shapefileLayer.AddMapRoad(new SingleMapRoad(multiPointsArr, multiElevArr, "Cesta", "blue"));
+                        for (let i = 0; i < multiPointsArr.length; i++) {
+                            shapefileLayer.AddMapRoad(new SingleMapRoad(multiPointsArr[i], multiElevArr[i], "Cesta", "blue"));
+                        }
                         App.Instance.AddMapLayer(shapefileLayer);
                         // this.SaveLayersToLocalStorage();
                     }

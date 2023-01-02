@@ -1,4 +1,3 @@
-import { DBMultiMapRoad } from "./dbmultiroad";
 import { DBOSMMapRoad } from "./dbosmroad";
 import { DBSingleMapRoad } from "./dbsingleroad";
 
@@ -18,13 +17,6 @@ export class DBMapEntityCache {
         if (this.DBMultiMapRoadCache[dbID] === undefined)
             return false;
         return true;
-    }
-
-    public GetDBMultiMapRoad(dbID: number, geoJSON?: object): DBMultiMapRoad {
-        if (!this.CheckDBMultiMapRoad(dbID))
-            this.DBMultiMapRoadCache[dbID] = new DBMultiMapRoad(dbID, geoJSON);
-
-        return this.DBMultiMapRoadCache[dbID];
     }
 
     public CheckOSMMapRoad(dbID: number): boolean {

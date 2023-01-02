@@ -61,14 +61,10 @@ export class GhostDBMapLayer extends DBMapLayer {
             if (!road.CheckRemoved())
                 this.AddMapRoad(road);
         });
-        // GeoGetter.GetElements(dbElements).forEach(road => {
-        //     if (!road.CheckRemoved())
-        //         this.AddMapRoad(road);
-        // });
-        // GeoGetter.GetOSMRails(dbOSMRails).forEach(road => {
-        //     if (!road.CheckRemoved())
-        //         this.AddMapRoad(road);
-        // });
+        GeoGetter.GetOSMRails(dbOSMRails).forEach(road => {
+            if (!road.CheckRemoved())
+                this.AddMapRoad(road);
+        });
 
         this.populationMethod(this, this.collapseElement);
     }
