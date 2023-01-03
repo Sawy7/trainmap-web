@@ -2,11 +2,9 @@ import L from "leaflet";
 import { ApiMgr } from "./apimgr";
 import { DBMapEntity } from "./dbmapentity";
 import { Helper } from "./helper";
-import { MapRoad } from "./maproad";
 import { SingleMapRoad } from "./singleroad";
 
-export class DBSingleMapRoad extends MapRoad {
-    private delegate: SingleMapRoad;
+export class DBSingleMapRoad extends SingleMapRoad {
     readonly className: string = "DBSingleMapRoad";
 
     private static ParseGeoJSON(geoJSON: object): [L.LatLng[], number[]] {
@@ -38,29 +36,17 @@ export class DBSingleMapRoad extends MapRoad {
             let lsElevation: number[] = [];
             [lsPoints, lsElevation] = DBSingleMapRoad.ParseGeoJSON(geoJSON);
 
-            this.delegate = new SingleMapRoad(lsPoints, lsElevation, geoJSON["properties"]["name"],
+            this.Init(lsPoints, lsElevation, geoJSON["properties"]["name"],
                 geoJSON["properties"]["color"], geoJSON["properties"]["weight"],
                 geoJSON["properties"]["opacity"], geoJSON["properties"]["smoothFactor"]
             );
             this.name = geoJSON["properties"]["name"];
+            this.dbID = dbID;
 
             this.wasRemoved = false;
-            this.dbID = dbID;
         } else {
             console.log("Unknown feature type!")
         }
-    }
-
-    public GetMapEntity(): any {
-        return this.delegate.GetMapEntity();
-    }
-
-    public GetSignificantPoint(): L.LatLng {
-        return this.delegate.GetSignificantPoint();
-    }
-
-    public SetupInteractivity(layerID: number) {
-        this.delegate.SetupInteractivity(layerID);
     }
 }
 export interface DBSingleMapRoad extends DBMapEntity {};

@@ -10,7 +10,6 @@ import { FileLoader } from "./fileloader";
 import { MapEntityFactory } from "./mapentityfactory";
 import { LayerList } from "./layerlist";
 import { LogNotify } from "./lognotify";
-import { TrainPicker } from "./trainpicker";
 
 // TS Singleton: https://stackoverflow.com/questions/30174078/how-to-define-singleton-in-typescript
 export class App {
@@ -34,7 +33,6 @@ export class App {
         };
 
         DBLayerBuilder.SetInteraction();
-        TrainPicker.SetInteraction();
     }
 
     public Init(centerLat: number, centerLong: number, zoom: number) {

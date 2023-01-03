@@ -1,6 +1,5 @@
 import { LatLng } from "leaflet";
 import { DBMapEntityCache } from "./dbentitycache";
-
 import { DBMapLayer } from "./dblayer";
 import { DBOSMMapRoad } from "./dbosmroad";
 import { DBSingleMapRoad } from "./dbsingleroad";
@@ -10,6 +9,7 @@ import { MapLayer } from "./maplayer"
 import { MapMarker } from "./mapmarker";
 import { MultiMapRoad } from "./multiroad";
 import { SingleMapRoad } from "./singleroad";
+import { DBStationMapMarker } from "./dbstationmarker";
 
 export class MapEntityFactory {
     // Layers
@@ -59,6 +59,10 @@ export class MapEntityFactory {
         dbID: number = undefined
     ): MapMarker {
         return new MapMarker(point, popupMsg, name, useCustomIcon);
+    }
+
+    public static CreateDBStationMapMarker(geoJSON: object): DBStationMapMarker {
+        return new DBStationMapMarker(geoJSON);
     }
 
     // Areas

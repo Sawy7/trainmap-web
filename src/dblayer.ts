@@ -1,4 +1,6 @@
 import { DBMapEntity } from "./dbmapentity";
+import { DBOSMMapRoad } from "./dbosmroad";
+import { DBSingleMapRoad } from "./dbsingleroad";
 import { MapLayer } from "./maplayer";
 
 export class DBMapLayer extends MapLayer {
@@ -16,8 +18,8 @@ export class DBMapLayer extends MapLayer {
 
         let layerElements: object[] = [];
         this.layerEntities.forEach(e => {
-            // if (!(e instanceof DBMultiMapRoad) && !(e instanceof DBSingleMapRoad))
-            //     return;
+            if (!(e instanceof DBSingleMapRoad) && !(e instanceof DBOSMMapRoad))
+                return;
 
             layerElements.push((e as DBMapEntity).GetLocalStorageObject());
         });

@@ -1,8 +1,8 @@
 import { DBOSMMapRoad } from "./dbosmroad";
 import { DBSingleMapRoad } from "./dbsingleroad";
+import { DBStationMapMarker } from "./dbstationmarker";
 
 export class DBMapEntityCache {
-    private DBMultiMapRoadCache: object = {};
     private DBOSMMapRoadCache: object = {};
     private DBSingleMapRoadCache: object = {};
     private static _instance: DBMapEntityCache;
@@ -11,12 +11,6 @@ export class DBMapEntityCache {
 
     public static get Instance() {
         return this._instance || (this._instance = new this());
-    }
-
-    public CheckDBMultiMapRoad(dbID: number): boolean {
-        if (this.DBMultiMapRoadCache[dbID] === undefined)
-            return false;
-        return true;
     }
 
     public CheckOSMMapRoad(dbID: number): boolean {

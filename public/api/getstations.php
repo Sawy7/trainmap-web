@@ -26,24 +26,25 @@ include "base.php";
 
 // Check DB Connection
 if (!$conn) {
-    echo '{ "type": "FeatureCollection", "features": null, "properties": null, "status": "dboff" }';
+    echo '{ "type": "Stations", "Collections": null, "status": "dboff" }';
     exit;
 }
 
 // Build SQL SELECT statement and return the geometry as a GeoJSON element in EPSG: 4326
 $sql = "SELECT all_stations.name AS name, ST_AsGeoJSON(
 ST_ClosestPoint(ST_Transform((SELECT " . $geomfield . " FROM processed_routes_line WHERE relcislo = station_relation.relcislo)," . $srid . "), all_stations." . $geomfield . ")
-) AS " . $geomfield . ", station_relation.relcislo AS relcislo
+) AS " . $geomfield . ", station_relation.relcislo AS relcislo, all_stations.id AS stationid
 FROM all_stations
 JOIN station_relation ON all_stations.id = station_relation.station_id
 WHERE station_relation.relcislo IN (" . pg_escape_string($conn, $relcisla_str) . ")
-ORDER BY station_relation.relcislo";
+ORDER BY station_relation.relcislo,
+ST_Distance(geom, ST_StartPoint(ST_Transform((SELECT geom FROM processed_routes_line WHERE relcislo = station_relation.relcislo),4326)))";
 // echo $sql;
 
 // Try query or error
 $rs = @pg_query($conn, $sql);
 if (!$rs) {
-    echo '{ "type": "FeatureCollection", "features": null, "properties": null, "status": "sqlerror" }';
+    echo '{ "type": "Stations", "Collections": null, "status": "sqlerror" }';
     exit;
 }
 
@@ -53,7 +54,6 @@ $rowOutput = '';
 $relOutput = '';
 $prevRelcislo = NULL;
 
-// TODO: Categorize by relcislo (into JSON groups)
 while ($row = pg_fetch_assoc($rs)) {
     if ($prevRelcislo != NULL && $prevRelcislo != $row["relcislo"]) {
         $output .= '{"type": "FeatureCollection", "features": [ ' . $relOutput . ' ], "properties": {"relcislo": ' . $prevRelcislo . '}},';
@@ -64,7 +64,7 @@ while ($row = pg_fetch_assoc($rs)) {
     $rowOutput = (strlen($rowOutput) > 0 ? ',' : '') . '{"type": "Feature", "geometry": ' . $row[$geomfield] . ', "properties": {';
     $props = '';
     $props .= createJsonKey("name", $row["name"]);
-    // $props .= ', ' . createJsonKey("relcislo", $row["relcislo"], true);
+    $props .= ', ' . createJsonKey("id", $row["stationid"], true);
     $rowOutput .= $props . '}';
     $rowOutput .= "}";
     $relOutput .= $rowOutput;
@@ -72,7 +72,7 @@ while ($row = pg_fetch_assoc($rs)) {
 $output .= '{"type": "FeatureCollection", "features": [ ' . $relOutput . ' ], "properties": {"relcislo": ' . $prevRelcislo . '}}';
 
 if (empty($output)) {
-    $output = '{ "type": "FeatureCollection", "features": null, "status": "nodata" }';
+    $output = '{ "type": "Stations", "Collections": null, "status": "nodata" }';
 } else {
     $output = '{"type": "Stations", "Collections": [ ' . $output . ' ], "status": "ok" }';
 }

@@ -3,19 +3,27 @@ import {MapEntity} from "./mapentity";
 
 export class MapMarker extends MapEntity {
     private point: L.LatLng;
-    readonly name: string;
     private popupMsg: string;
     private customIcon: L.Icon;
     public activeMarker: L.Marker;
     readonly className: string = "MapMarker";
 
     public constructor(
+        point?: L.LatLng,
+        popupMsg?: string,
+        name?: string,
+        useCustomIcon?: boolean
+    ) {
+        super();
+        this.Init(point, popupMsg, name, useCustomIcon);
+    }
+
+    protected Init(
         point: L.LatLng,
         popupMsg: string,
         name: string = "Bod",
         useCustomIcon: boolean = false
     ) {
-        super();
         this.point = point;
         this.popupMsg = popupMsg;
         this.name = name;

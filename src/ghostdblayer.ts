@@ -58,12 +58,14 @@ export class GhostDBMapLayer extends DBMapLayer {
         // TODO: Removal check - Something more elegant (+ maybe user indication, that something's been yeeted)
 
         GeoGetter.GetRails(dbRails).forEach(road => {
-            if (!road.CheckRemoved())
-                this.AddMapRoad(road);
+            if (!road.CheckRemoved()) {
+                this.AddMapRoads(road);
+                this.AddMapMarkers(...road.GetAdjacentMapEntities());
+            }
         });
         GeoGetter.GetOSMRails(dbOSMRails).forEach(road => {
             if (!road.CheckRemoved())
-                this.AddMapRoad(road);
+                this.AddMapRoads(road);
         });
 
         this.populationMethod(this, this.collapseElement);

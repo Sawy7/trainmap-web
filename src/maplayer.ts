@@ -33,16 +33,16 @@ export class MapLayer {
         return !this.isActive;
     }
 
-    public AddMapMarker(marker: MapMarker) {
-        this.layerEntities.push(marker);
+    public AddMapMarkers(...marker: MapMarker[]) {
+        this.layerEntities.push(...marker);
     }
 
-    public AddMapRoad(road: MapRoad) {
-        this.layerEntities.push(road);
+    public AddMapRoads(...road: MapRoad[]) {
+        this.layerEntities.push(...road);
     }
 
-    public AddMapArea(area: MapArea) {
-        this.layerEntities.push(area);
+    public AddMapAreas(...area: MapArea[]) {
+        this.layerEntities.push(...area);
     }
 
     public CreateLayerGroup(): L.LayerGroup {
@@ -50,11 +50,12 @@ export class MapLayer {
 
         this.layerEntities.forEach(e => {
             let gotEntity = e.GetMapEntity();
-            if (this.layerColor !== undefined)
+            if (e instanceof MapRoad) {
                 gotEntity.setStyle({color: this.layerColor});
+                if (this.layerColor !== undefined)
+                    e.SetupInteractivity(this.id);
+            }
             activeMapEntities.push(gotEntity);
-            if (e instanceof MapRoad)
-                e.SetupInteractivity(this.id);
         });
 
         return L.layerGroup(activeMapEntities);

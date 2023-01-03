@@ -56,7 +56,6 @@ export class DBLayerBuilder {
                 this.StashInfo(dbMapEntity, "rail");
             }
 
-            // NOTE: OSM rails deprecated (only showing processed now)
             let offset = rails["layers"].length;
             let osmRails = ApiMgr.ListOSMRails();
             for (let i = offset; i < offset+osmRails["layers"].length; i++) {
@@ -157,10 +156,12 @@ export class DBLayerBuilder {
         
         // Call for all categories at once
         GeoGetter.GetRails(dbRails).forEach(road => {
-            layer.AddMapRoad(road);
+            layer.AddMapRoads(road);
+            console.log(road.className);
+            layer.AddMapMarkers(...road.GetAdjacentMapEntities());
         });
         GeoGetter.GetOSMRails(dbOSMRails).forEach(road => {
-            layer.AddMapRoad(road);
+            layer.AddMapRoads(road);
         });
 
         LogNotify.ToggleThrobber();

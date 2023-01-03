@@ -1,6 +1,7 @@
 import { DBMapLayer } from "./dblayer";
 import { GhostDBMapLayer } from "./ghostdblayer";
 import { MapLayer } from "./maplayer";
+import { MapRoad } from "./maproad";
 
 export class LayerList {
     private static _instance: LayerList;
@@ -99,6 +100,8 @@ export class LayerList {
             entityLink.setAttribute("href", "#");
             let significantPoint = ma.GetSignificantPoint();
             entityLink.innerHTML = `${ma.GetListInfo()} (${significantPoint.lat}, ${significantPoint.lng})`;
+            if (ma instanceof MapRoad)
+                entityLink.innerHTML = `<b>${entityLink.innerHTML}</b>`;
             entityLink.onclick = () => {
                 this.warpMethod(significantPoint);
             };
