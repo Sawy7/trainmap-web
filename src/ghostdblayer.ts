@@ -8,9 +8,10 @@ export class GhostDBMapLayer extends DBMapLayer {
     private populationMethod: Function;
     private collapseElement: HTMLElement;
     private elementInfoObjects: object[];
+    readonly className: string = "GhostDBMapLayer";
 
-    public constructor(name: string, elementInfoObjects: object[], color?: string) {
-        super(name, color);
+    public constructor(name: string, elementInfoObjects: object[], color: string, id: number) {
+        super(name, color, id);
         this.elementInfoObjects = elementInfoObjects;
     }
     
@@ -77,9 +78,10 @@ export class GhostDBMapLayer extends DBMapLayer {
     }
 
     public SaveToLocalStorage() {
-        if (this.initialized)
+        if (this.initialized) {
             super.SaveToLocalStorage();
-        else
-            console.log("Not expected: trying to save ghost layer");
+            return;
+        }
+        console.log("Not expected: trying to save ghost layer");
     }
 }

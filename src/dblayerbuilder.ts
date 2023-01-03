@@ -134,20 +134,16 @@ export class DBLayerBuilder {
         this.layerNameBar.value = "";
 
         let dbRails: number[] = [];
-        let dbElements: number[] = [];
         let dbOSMRails: number[] = [];
         
         LogNotify.ToggleThrobber();
-        let inputIndex = 1;
+        LogNotify.UpdateThrobberMessage(`Získávání ${allResults.length} tratí`);
         allResults.forEach(res => {
             let input = res.children[0].children[0] as HTMLInputElement;
             if (input.checked) {
-                LogNotify.UpdateThrobberMessage(`Získávání ${inputIndex++}`);
                 let resultInfoObject = this.elementInfo[parseInt(input.value)];
                 if (resultInfoObject["type"] == "rail")
                     dbRails.push(resultInfoObject["relcislo"]);
-                else if (resultInfoObject["type"] == "maproad_legacy")
-                    dbElements.push(resultInfoObject["id"]);
                 else if (resultInfoObject["type"] == "osmrail")
                     dbOSMRails.push(resultInfoObject["relcislo"]);
                 input.checked = false;
@@ -155,16 +151,17 @@ export class DBLayerBuilder {
         });
         
         // Call for all categories at once
-        GeoGetter.GetRails(dbRails).forEach(road => {
-            layer.AddMapRoads(road);
-            console.log(road.className);
-            layer.AddMapMarkers(...road.GetAdjacentMapEntities());
-        });
-        GeoGetter.GetOSMRails(dbOSMRails).forEach(road => {
-            layer.AddMapRoads(road);
-        });
+        setTimeout(() => {
+            GeoGetter.GetRails(dbRails).forEach(road => {
+                layer.AddMapRoads(road);
+                layer.AddMapMarkers(...road.GetAdjacentMapEntities());
+            });
+            GeoGetter.GetOSMRails(dbOSMRails).forEach(road => {
+                layer.AddMapRoads(road);
+            });
+            LogNotify.ToggleThrobber();
+        }, 0);
 
-        LogNotify.ToggleThrobber();
 
         App.Instance.AddMapLayer(layer);
     }

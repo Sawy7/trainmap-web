@@ -21,8 +21,8 @@ export class MapEntityFactory {
         return new DBMapLayer(name, color);
     }
 
-    public static CreateGhostDBMapLayer(name: string, elementInfoObjects: object[], color?: string): DBMapLayer {
-        return new GhostDBMapLayer(name, elementInfoObjects, color);
+    public static CreateGhostDBMapLayer(name: string, elementInfoObjects: object[], color: string, id: number): DBMapLayer {
+        return new GhostDBMapLayer(name, elementInfoObjects, color, id);
     }
 
     // Roads

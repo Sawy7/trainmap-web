@@ -31,8 +31,5 @@ export abstract class DBMapEntity extends MapEntity {
         if (this.POIs === undefined)
             return [];
         return this.POIs;
-        // return this.POIs.map((p) => {
-        //     return p.GetMapEntity();
-        // });
     }
 }

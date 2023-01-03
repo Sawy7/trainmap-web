@@ -14,11 +14,17 @@ export class MapLayer {
     readonly id: number;
     readonly className: string = "MapLayer";
 
-    public constructor(name: string, color?: string) {
+    public constructor(name: string, color?: string, id?: number) {
         this.layerName = name;
         this.layerColor = color;
-        this.id = ++MapLayer.globalIDGen;
+        if (id === undefined)
+            this.id = ++MapLayer.globalIDGen;
+        else {
+            this.id = id;
+            MapLayer.globalIDGen = Math.max(MapLayer.globalIDGen, id);
+        }
     }
+
     public Activate(state: boolean): boolean {
         this.isActive = state;
         return state;

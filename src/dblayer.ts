@@ -6,8 +6,8 @@ import { MapLayer } from "./maplayer";
 export class DBMapLayer extends MapLayer {
     readonly className: string = "DBMapLayer";
 
-    public constructor(name: string, color?: string) {
-        super(name, color);
+    public constructor(name: string, color: string, id?: number) {
+        super(name, color, id);
     }
 
     public SaveToLocalStorage() {
@@ -25,10 +25,24 @@ export class DBMapLayer extends MapLayer {
         });
         
         storageList.push({
+            "id": this.id,
             "name": this.layerName,
             "color": this.layerColor,
-            "elements": layerElements
+            "elements": layerElements,
         });
+        localStorage["dblayers"] = JSON.stringify(storageList);
+    }
+
+    public RemoveFromLocalStorage() {
+        let storageList = JSON.parse(localStorage["dblayers"]);
+
+        for (let i = 0; i < storageList.length; i++) {
+            if (storageList[i]["id"] == this.id) {
+                storageList.splice(i, 1);
+                break;
+            }
+        }
+
         localStorage["dblayers"] = JSON.stringify(storageList);
     }
 }

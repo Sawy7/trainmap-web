@@ -10,6 +10,7 @@ import { FileLoader } from "./fileloader";
 import { MapEntityFactory } from "./mapentityfactory";
 import { LayerList } from "./layerlist";
 import { LogNotify } from "./lognotify";
+import { GhostDBMapLayer } from "./ghostdblayer";
 
 // TS Singleton: https://stackoverflow.com/questions/30174078/how-to-define-singleton-in-typescript
 export class App {
@@ -50,7 +51,6 @@ export class App {
             this.ActivateMapLayer.bind(this),
             this.mapWindow.WarpToPoint.bind(this.mapWindow),
             this.RemoveMapLayer.bind(this),
-            this.RebuildLocalStorage.bind(this)
         );
     }
 
@@ -59,6 +59,9 @@ export class App {
         if (layerIndex != -1) {
             this.localLayers.splice(layerIndex, 1);
         }
+
+        if (mapLayer instanceof DBMapLayer)
+            mapLayer.RemoveFromLocalStorage();
     }
 
     public AddMapLayer(mapLayer: MapLayer, notFromStorage: boolean = true) {
@@ -105,48 +108,22 @@ export class App {
         this.activeElevationChart = new ElevationChart(points, elevation, layerID);
     }
 
-    // private SaveLayersToLocalStorage() {
-    //     let layersToSave: Object[] = [];
-    //     this.localLayers.forEach(mapLayer => {
-    //         if (mapLayer.className === "GeoJSONLayer")
-    //             return;
-    //         layersToSave.push(mapLayer.Serialize());
-    //     });
-    //     localStorage.setItem("savedLayers", JSON.stringify(layersToSave));
-    // }
-
-    // public LoadLayersFromLocalStorage() {
-    //     let storageLayers = localStorage.getItem("savedLayers");
-    //     if (storageLayers === null)
-    //         return;
-    //     let storageLayersParsed = JSON.parse(storageLayers);
-    //     this.FlushLayers();
-    //     storageLayersParsed.forEach(storageLayer => {
-    //         let deserializedLayer = MapLayer.Deserialize(storageLayer);
-    //         this.AddMapLayer(deserializedLayer);
-    //     });
-    // }
-
     public LoadFromLocalStorage() {
         if (localStorage["dblayers"] === undefined)
             return;
 
         let storageList = JSON.parse(localStorage["dblayers"]);
-        storageList.forEach(layerInfo => {
-            let layer = MapEntityFactory.CreateGhostDBMapLayer(layerInfo["name"], layerInfo["elements"], layerInfo["color"]);
+        for (let i = 0; i < storageList.length; i++) {
+            storageList[i]["id"] = i; // Refreshing indexes (so they always stay low)
+            let layer = MapEntityFactory.CreateGhostDBMapLayer(
+                storageList[i]["name"], storageList[i]["elements"],
+                storageList[i]["color"], storageList[i]["id"]
+            );
             this.AddMapLayer(layer, false);
-        });
+        }
+        
+        localStorage["dblayers"] = JSON.stringify(storageList); // Updating with refreshed indexes
     }
-
-    // Used after layer removal
-    private RebuildLocalStorage() {
-        localStorage.removeItem("dblayers");
-
-        this.localLayers.forEach(mapLayer => {
-            if (mapLayer instanceof DBMapLayer)
-                (mapLayer as DBMapLayer).SaveToLocalStorage();
-        });
-    } 
 
     public RenderElevationMarker(point?: L.LatLng) {
         App.Instance.mapWindow.RenderElevationMarker(point);

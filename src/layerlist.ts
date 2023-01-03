@@ -8,7 +8,6 @@ export class LayerList {
     private activationMethod: Function;
     private warpMethod: Function;
     private removalMethod: Function;
-    private rebuildMethod: Function;
 
     private constructor(){};
 
@@ -20,12 +19,10 @@ export class LayerList {
         activationMethod: Function,
         warpMethod: Function,
         removalMethod: Function,
-        rebuildMethod: Function
     ) {
         this.activationMethod = activationMethod;
         this.warpMethod = warpMethod;
         this.removalMethod = removalMethod;
-        this.rebuildMethod = rebuildMethod;
     }
 
     public AddLayer(mapLayer: MapLayer) {
@@ -129,7 +126,5 @@ export class LayerList {
         // Rebuild localStorage (if DBLayer)
         if (!(mapLayer instanceof DBMapLayer))
             return;
-
-        this.rebuildMethod();
     }
 }
