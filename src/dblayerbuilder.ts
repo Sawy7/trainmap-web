@@ -159,11 +159,9 @@ export class DBLayerBuilder {
             GeoGetter.GetOSMRails(dbOSMRails).forEach(road => {
                 layer.AddMapRoads(road);
             });
+            App.Instance.AddMapLayer(layer);
             LogNotify.ToggleThrobber();
         }, 0);
-
-
-        App.Instance.AddMapLayer(layer);
     }
 
     static ClearBoxes() {

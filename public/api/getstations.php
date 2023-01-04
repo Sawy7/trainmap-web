@@ -31,15 +31,11 @@ if (!$conn) {
 }
 
 // Build SQL SELECT statement and return the geometry as a GeoJSON element in EPSG: 4326
-$sql = "SELECT all_stations.name AS name,
-ST_AsGeoJSON(ST_ClosestPoint(ST_Transform(processed_routes_line.geom," . $srid . "), all_stations.geom)) AS " . $geomfield . ",
-processed_routes_line.relcislo AS relcislo,
-all_stations.id AS stationid
-FROM processed_routes_line, all_stations
-WHERE processed_routes_line.relcislo IN (" . pg_escape_string($conn, $relcisla_str) . ") AND
-ST_DWithin(ST_Transform(ST_Force2D(processed_routes_line.geom)," . $srid . "), all_stations." . $geomfield . ", 0.001)
-ORDER BY processed_routes_line.relcislo,
-ST_Distance(all_stations.geom, ST_StartPoint(ST_Transform(processed_routes_line.geom,4326)))";
+$sql = "SELECT all_stations.name AS name, ST_AsGeoJSON(station_relation." . $geomfield . ") AS geom, station_relation.relcislo AS relcislo, all_stations.id as station_id
+FROM station_relation JOIN
+all_stations ON station_relation.station_id = all_stations.id
+WHERE relcislo IN (" . pg_escape_string($conn, $relcisla_str) . ")
+ORDER BY station_relation.relcislo, station_order";
 // echo $sql;
 
 // Try query or error
@@ -65,7 +61,7 @@ while ($row = pg_fetch_assoc($rs)) {
     $rowOutput = (strlen($rowOutput) > 0 ? ',' : '') . '{"type": "Feature", "geometry": ' . $row[$geomfield] . ', "properties": {';
     $props = '';
     $props .= createJsonKey("name", $row["name"]);
-    $props .= ', ' . createJsonKey("id", $row["stationid"], true);
+    $props .= ', ' . createJsonKey("id", $row["station_id"], true);
     $rowOutput .= $props . '}';
     $rowOutput .= "}";
     $relOutput .= $rowOutput;
