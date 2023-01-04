@@ -54,7 +54,7 @@ export class MapWindow {
         }
 
         if (this.activeElevationMarker === undefined) {
-            this.activeElevationMarker = MapEntityFactory.CreateMapMarker(point, "", "E", true);
+            this.activeElevationMarker = MapEntityFactory.CreateElevationMarker(point);
             this.activeElevationMarker.GetMapEntity().addTo(this.map);
         }
         else {

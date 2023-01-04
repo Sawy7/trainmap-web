@@ -111,3 +111,7 @@ label {
 .card-gray-dark {
     background-color: var(--bs-gray-dark) !important;
 }
+
+.offcanvas-header {
+    align-items: unset !important;
+}

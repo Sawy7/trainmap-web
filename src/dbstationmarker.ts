@@ -10,7 +10,13 @@ export class DBStationMapMarker extends MapMarker {
         let type = geoJSON["geometry"]["type"];
         if (type == "Point") {
             let coords = geoJSON["geometry"]["coordinates"];
-            this.Init(new L.LatLng(coords[1], coords[0]), `Název: ${geoJSON["properties"]["name"]}`, geoJSON["properties"]["name"]);
+            this.Init(
+                new L.LatLng(coords[1], coords[0]),
+                `Název: ${geoJSON["properties"]["name"]}`,
+                geoJSON["properties"]["name"],
+                "custom-assets/station.svg",
+                20
+            );
         } else {
             console.log("Unknown feature type!")
         }

@@ -3,31 +3,30 @@ import { getRelativePosition } from 'chart.js/helpers';
 import { Offcanvas, Tab } from 'bootstrap';
 import L from "leaflet";
 import { App } from './app';
+import { MapRoad } from './maproad';
 
 export class ElevationChart {
     private static ctx: HTMLCanvasElement = <HTMLCanvasElement> document.getElementById("elevationChart");
     private static elevationChartElement = document.getElementById("offcanvasElevation");
     private static offcanvas: Offcanvas = new Offcanvas(document.getElementById("offcanvasElevation"));
     private static visualTab: Tab = new Tab(document.getElementById("elevationVisualTab"));
+    private static railName: HTMLElement = document.getElementById("offcanvasRailName");
+    private static dataHeight: HTMLElement = document.getElementById("dataHeight");
+    private mapRoad: MapRoad;
     private points: L.LatLng[];
     private elevation: number[] = [];
     private data;
     private chart: Chart;
     readonly layerID: number;
 
-    public constructor(points: L.LatLng[], elevation: number[], layerID: number) {
-        this.points = points;
-        // Fix for sudden dips (errors in data)
-        // this.elevation = elevation.map((e) => {
-        //     if (e == 0)
-        //         return undefined;
-        //     else
-        //         return e;
-        // });
-        this.FilterDrops(elevation);
-        this.layerID = layerID;
+    public constructor(mapRoad: MapRoad) {
+        this.mapRoad = mapRoad;
+        this.points = (this.mapRoad.GetPoints() as L.LatLng[]);
+        this.FilterDrops((this.mapRoad.GetElevation() as number[]));
+        this.layerID = this.mapRoad.GetLayerID();
         ElevationChart.visualTab.show();
         this.RenderChart();
+        this.AddContextualInfo();
         this.ShowChart();
         this.RegisterChartClosing();
     }
@@ -145,6 +144,11 @@ export class ElevationChart {
                 }
             }]
         });
+    }
+
+    private AddContextualInfo() {
+        ElevationChart.railName.innerHTML = this.mapRoad.GetListInfo();
+        ElevationChart.dataHeight.innerHTML = `${Math.round(Math.min(...this.elevation))}-${Math.round(Math.max(...this.elevation))} m`; 
     }
 
     private ShowChart() {

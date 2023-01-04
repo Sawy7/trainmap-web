@@ -55,10 +55,14 @@ export class MapEntityFactory {
         point: L.LatLng,
         popupMsg: string,
         name: string = "Bod",
-        useCustomIcon: boolean = false,
-        dbID: number = undefined
+        customIcon?: string,
+        customIconSize?: number
     ): MapMarker {
-        return new MapMarker(point, popupMsg, name, useCustomIcon);
+        return new MapMarker(point, popupMsg, name, customIcon, customIconSize);
+    }
+
+    public static CreateElevationMarker(point: L.LatLng): MapMarker {
+        return new MapMarker(point, "", "", "custom-assets/elevation-marker.svg", 14)
     }
 
     public static CreateDBStationMapMarker(geoJSON: object): DBStationMapMarker {

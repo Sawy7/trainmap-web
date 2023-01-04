@@ -31,7 +31,8 @@ if (!$conn) {
 }
 
 // Build SQL SELECT statement and return the geometry as a GeoJSON element in EPSG: 4326
-$sql = "SELECT all_stations.name AS name, ST_AsGeoJSON(station_relation." . $geomfield . ") AS geom, station_relation.relcislo AS relcislo, all_stations.id as station_id
+$sql = "SELECT all_stations.name AS name, ST_AsGeoJSON(station_relation." . $geomfield . ") AS geom,
+station_relation.relcislo AS relcislo, all_stations.id as station_id, station_relation.station_order
 FROM station_relation JOIN
 all_stations ON station_relation.station_id = all_stations.id
 WHERE relcislo IN (" . pg_escape_string($conn, $relcisla_str) . ")
@@ -62,6 +63,7 @@ while ($row = pg_fetch_assoc($rs)) {
     $props = '';
     $props .= createJsonKey("name", $row["name"]);
     $props .= ', ' . createJsonKey("id", $row["station_id"], true);
+    $props .= ', ' . createJsonKey("order", $row["station_order"], true);
     $rowOutput .= $props . '}';
     $rowOutput .= "}";
     $relOutput .= $rowOutput;

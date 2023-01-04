@@ -62,4 +62,16 @@ export abstract class MapRoad extends MapEntity {
     protected ClickSetElevationChart(event: L.LeafletEvent): L.LeafletMouseEventHandlerFn {
         return; // This is never used
     };
+
+    public GetPoints(): L.LatLng[] | L.LatLng[][] {
+        return this.points;
+    }
+
+    public GetElevation(): number[] | number[][] {
+        return this.elevation;
+    }
+
+    public GetLayerID(): number {
+        return this.layerID;
+    }
 }

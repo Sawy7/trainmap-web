@@ -21,7 +21,7 @@ export class SingleMapRoad extends MapRoad {
     }
 
     override ClickSetElevationChart(event: L.LeafletEvent): L.LeafletMouseEventHandlerFn {
-        App.Instance.SetElevationChart(this.points, this.elevation, this.layerID);
+        App.Instance.SetElevationChart(this);
         return;
     }
 }

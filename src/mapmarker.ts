@@ -12,17 +12,19 @@ export class MapMarker extends MapEntity {
         point?: L.LatLng,
         popupMsg?: string,
         name?: string,
-        useCustomIcon?: boolean
+        customIconPath?: string,
+        customIconSize?: number
     ) {
         super();
-        this.Init(point, popupMsg, name, useCustomIcon);
+        this.Init(point, popupMsg, name, customIconPath, customIconSize);
     }
 
     protected Init(
         point: L.LatLng,
         popupMsg: string,
         name: string = "Bod",
-        useCustomIcon: boolean = false
+        customIconPath?: string,
+        customIconSize?: number
     ) {
         this.point = point;
         this.popupMsg = popupMsg;
@@ -31,15 +33,15 @@ export class MapMarker extends MapEntity {
             "customIcon",
             "activeMarker"
         ]
-        if (useCustomIcon)
-            this.CreateCustomIcon();
+        if (customIconPath !== undefined)
+            this.CreateCustomIcon(customIconPath, customIconSize);
     }
 
-    private CreateCustomIcon() {
+    private CreateCustomIcon(customIconPath: string, customIconSize: number) {
         this.customIcon = L.icon({
-            iconUrl: "custom-assets/elevation-pointer.png",
-            iconSize: [14, 14],
-            iconAnchor: [7, 7]
+            iconUrl: customIconPath,
+            iconSize: [customIconSize, customIconSize],
+            iconAnchor: [customIconSize/2, customIconSize/2]
         });
     }
 
