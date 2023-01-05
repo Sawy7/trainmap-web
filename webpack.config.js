@@ -1,12 +1,15 @@
 const path = require("path")
-var webpack = require('webpack');
+var webpack = require("webpack");
 
 module.exports = {
-    entry: "./src/index.ts",
+    entry: {
+        "index": "./src/index.ts",
+        "offlinestoragesw": "./src/offlinestoragesw.ts"
+    },
     resolve: {
         extensions: [".ts", ".js"],
         fallback: {
-            buffer: require.resolve('buffer/'),
+            buffer: require.resolve("buffer/"),
         }
     },
     module: {
@@ -44,8 +47,7 @@ module.exports = {
     },
     output: {
         path: path.resolve(__dirname, "public"),
-        // publicPath: "public/",
-        filename: "index.js"
+        filename: "[name].js"
     },
     mode: "production",
     optimization: {
@@ -59,6 +61,6 @@ module.exports = {
     plugins: [
         new webpack.ProvidePlugin({
             Buffer: ['buffer', 'Buffer'],
-        }),
+        })
     ]
 }

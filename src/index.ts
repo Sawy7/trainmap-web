@@ -16,12 +16,24 @@ L.Icon.Default.mergeOptions({
 // Internal imports
 import { App } from "./app";
 import { MapEntityFactory } from './mapentityfactory';
+import { LocalEntityDB } from './localentitydb';
 
 let app = App.Instance;
 app.Init(49.86, 15.51, 9);
 
-// app.LoadLayersFromLocalStorage();
 app.LoadFromLocalStorage();
+
+// NOTE: Did not work very well for me (disabled for now)
+// // Offline storage for app assets
+// if ("serviceWorker" in navigator) {
+//     console.log("service worker available");
+//     navigator.serviceWorker.register("/offlinestoragesw.js")
+//         .then(() => console.log("Service Worker Registered"));
+// }
 
 // let ttrack = MapEntityFactory.CreateSingleMapRoad([], [], "Test Track");
 // app.SetElevationChart(ttrack);
+
+let db = LocalEntityDB.Instance;
+db.AddEntity();
+db.GetEntity();
