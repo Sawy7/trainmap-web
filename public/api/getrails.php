@@ -31,7 +31,12 @@ if (!$conn) {
 }
 
 // Build SQL SELECT statement and return the geometry as a GeoJSON element in EPSG: 4326
-$sql = "SELECT ST_AsGeoJSON(ST_SimplifyVW(ST_Transform(" . $geomfield . ", " . $srid . "), 0.0000001)) AS geojson, osm_data_index.*
+// $sql = "SELECT ST_AsGeoJSON(ST_SimplifyVW(ST_Transform(" . $geomfield . ", " . $srid . "), 0.0000001)) AS geojson, osm_data_index.*
+// FROM processed_routes_line JOIN osm_data_index ON processed_routes_line.relcislo = osm_data_index.relcislo
+// WHERE osm_data_index.relcislo IN (" . pg_escape_string($conn, $relcisla_str) . ")";
+
+// TODO: Simplify doesn't really work with station indexes (disabled for now)
+$sql = "SELECT ST_AsGeoJSON(ST_Transform(" . $geomfield . ", " . $srid . ")) AS geojson, osm_data_index.*
 FROM processed_routes_line JOIN osm_data_index ON processed_routes_line.relcislo = osm_data_index.relcislo
 WHERE osm_data_index.relcislo IN (" . pg_escape_string($conn, $relcisla_str) . ")";
 // echo $sql;

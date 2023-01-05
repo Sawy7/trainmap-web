@@ -1,10 +1,10 @@
+import { DBStationMapMarker } from "./dbstationmarker";
 import { MapEntity } from "./mapentity";
 import { MapEntityFactory } from "./mapentityfactory";
-import { MapMarker } from "./mapmarker";
 
 export abstract class DBMapEntity extends MapEntity {
     protected dbID: number;
-    private POIs: MapMarker[];
+    private POIs: DBStationMapMarker[];
     protected wasRemoved: boolean;
 
     public GetLocalStorageObject(): object {
@@ -31,5 +31,11 @@ export abstract class DBMapEntity extends MapEntity {
         if (this.POIs === undefined)
             return [];
         return this.POIs;
+    }
+    
+    public GetStationsInfo(): object[] {
+        return this.POIs.map((station) => {
+            return {"name": station.GetListInfo(), "order": station.GetOrderIndex()};
+        });
     }
 }

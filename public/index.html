@@ -88,6 +88,9 @@
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="trainPickerTab" data-bs-toggle="tab" data-bs-target="#trainPicker" type="button" role="tab" aria-controls="trainPicker" aria-selected="false">Vlaky</button>
                 </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="stationListTab" data-bs-toggle="tab" data-bs-target="#stationList" type="button" role="tab" aria-controls="stationList" aria-selected="false">Stanice</button>
+                </li>
             </ul>
             <button type="button" class="btn-close btn-close-white text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
@@ -175,6 +178,12 @@
                             </div>
                         </div>
                     </div>
+                </div>
+                <div class="tab-pane fade" id="stationList" role="tabpanel" aria-labelledby="stationListTab">
+                    <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb" class="text-light">
+                        <ol class="breadcrumb text-light" id="stationBreadcrumbs">
+                        </ol>
+                    </nav>
                 </div>
             </div>
         </div>

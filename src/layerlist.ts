@@ -96,15 +96,18 @@ export class LayerList {
             entityLink.setAttribute("class", "list-group-item list-group-item-dark d-flex justify-content-between align-items-center");
             entityLink.setAttribute("href", "#");
             let significantPoint = ma.GetSignificantPoint();
-            entityLink.innerHTML = `${ma.GetListInfo()} (${significantPoint.lat}, ${significantPoint.lng})`;
-            if (ma instanceof MapRoad)
+            entityLink.innerHTML = `${ma.GetListInfo()}`;
+            var locateIcon = document.createElement("i");
+            if (ma instanceof MapRoad) {
                 entityLink.innerHTML = `<b>${entityLink.innerHTML}</b>`;
+                locateIcon.setAttribute("class", "bi-bookshelf")
+            }
+            else
+                locateIcon.setAttribute("class", "bi-signpost-split-fill")
             entityLink.onclick = () => {
                 this.warpMethod(significantPoint);
             };
             var badge = document.createElement("span");
-            var locateIcon = document.createElement("i");
-            locateIcon.setAttribute("class", "bi-pin-map-fill")
             badge.appendChild(locateIcon);
             badge.setAttribute("class", "badge bg-primary rounded-pill");
             entityLink.appendChild(badge);

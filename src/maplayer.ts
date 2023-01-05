@@ -57,9 +57,9 @@ export class MapLayer {
         this.layerEntities.forEach(e => {
             let gotEntity = e.GetMapEntity();
             if (e instanceof MapRoad) {
-                gotEntity.setStyle({color: this.layerColor});
+                e.SetupInteractivity(this.id);
                 if (this.layerColor !== undefined)
-                    e.SetupInteractivity(this.id);
+                    gotEntity.setStyle({color: this.layerColor});
             }
             activeMapEntities.push(gotEntity);
         });
@@ -73,54 +73,9 @@ export class MapLayer {
         return new Promise((resolve) => {
             resolve(this.activeLayerGroup);
         });
-
-        // return this.activeLayerGroup;
     }
 
     public GetLayerEntities(): MapEntity[] {
         return this.layerEntities;
     }
-
-    // public Serialize(): Object {
-    //     let entitiesList: any[] = [];
-
-    //     this.layerEntities.forEach(e => {
-    //         entitiesList.push(e.Serialize());
-    //     });
-
-    //     return {
-    //         "entityName": this.className,
-    //         "name": this.layerName,
-    //         "subEntities": entitiesList
-    //     };
-    // }
-
-    // public static Deserialize(serializedLayer: Object) {
-    //     let deserializedLayer = MapEntityFactory.CreateMapLayer(serializedLayer["name"]);
-    //     serializedLayer["subEntities"].forEach(entity => {
-    //         if (entity["className"] == "SingleMapRoad") {
-    //             deserializedLayer.AddMapRoad(
-    //                 MapEntityFactory.CreateSingleMapRoad(entity["points"], entity["elevation"], entity["color"],
-    //                 entity["weight"], entity["opacity"], entity["smoothFactor"])
-    //             );
-    //         } else if (entity["className"] == "MultiMapRoad") {
-    //             let multiRoad = MapEntityFactory.CreateMultiMapRoad(entity["points"], entity["elevation"], entity["color"],
-    //             entity["weight"], entity["opacity"], entity["smoothFactor"]);
-    //             deserializedLayer.AddMapRoad(multiRoad);
-
-    //             // multiRoad.lineator.constructedRoads.forEach(cr => {
-    //             //     deserializedLayer.AddMapRoad(cr);
-    //             // });
-    //         } else if (entity["className"] == "MapMarker") {
-    //             deserializedLayer.AddMapMarker(
-    //                 MapEntityFactory.CreateMapMarker(entity["point"], entity["popupMsg"])
-    //             );
-    //         } else if (entity["className"] == "MapArea") {
-    //             deserializedLayer.AddMapArea(
-    //                 MapEntityFactory.CreateMapArea(entity["points"], entity["popupMsg"])
-    //             );
-    //         }
-    //     });
-    //     return deserializedLayer;
-    // }
 }

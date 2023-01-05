@@ -15,9 +15,13 @@ L.Icon.Default.mergeOptions({
 
 // Internal imports
 import { App } from "./app";
+import { MapEntityFactory } from './mapentityfactory';
 
 let app = App.Instance;
 app.Init(49.86, 15.51, 9);
 
 // app.LoadLayersFromLocalStorage();
 app.LoadFromLocalStorage();
+
+// let ttrack = MapEntityFactory.CreateSingleMapRoad([], [], "Test Track");
+// app.SetElevationChart(ttrack);

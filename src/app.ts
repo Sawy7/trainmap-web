@@ -10,8 +10,7 @@ import { FileLoader } from "./fileloader";
 import { MapEntityFactory } from "./mapentityfactory";
 import { LayerList } from "./layerlist";
 import { LogNotify } from "./lognotify";
-import { GhostDBMapLayer } from "./ghostdblayer";
-import { MapRoad } from "./maproad";
+import { SingleMapRoad } from "./singleroad";
 
 // TS Singleton: https://stackoverflow.com/questions/30174078/how-to-define-singleton-in-typescript
 export class App {
@@ -98,7 +97,7 @@ export class App {
         }, { once: true });
     }
 
-    public SetElevationChart(mapRoad: MapRoad) {
+    public SetElevationChart(mapRoad: SingleMapRoad) {
         if (this.activeElevationChart !== undefined) {
             if (this.activeElevationChart.layerID == mapRoad.GetLayerID() && this.activeElevationChart.CheckUIVisible())
                 return;

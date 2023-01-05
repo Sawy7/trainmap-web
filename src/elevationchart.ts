@@ -3,7 +3,8 @@ import { getRelativePosition } from 'chart.js/helpers';
 import { Offcanvas, Tab } from 'bootstrap';
 import L from "leaflet";
 import { App } from './app';
-import { MapRoad } from './maproad';
+import { DBSingleMapRoad } from './dbsingleroad';
+import { SingleMapRoad } from './singleroad';
 
 export class ElevationChart {
     private static ctx: HTMLCanvasElement = <HTMLCanvasElement> document.getElementById("elevationChart");
@@ -12,18 +13,23 @@ export class ElevationChart {
     private static visualTab: Tab = new Tab(document.getElementById("elevationVisualTab"));
     private static railName: HTMLElement = document.getElementById("offcanvasRailName");
     private static dataHeight: HTMLElement = document.getElementById("dataHeight");
-    private mapRoad: MapRoad;
+    private static stationListTabButton: HTMLButtonElement = <HTMLButtonElement> document.getElementById("stationListTab");
+    private static stationBreadcrumbs: HTMLElement = document.getElementById("stationBreadcrumbs");
+    private mapRoad: SingleMapRoad;
     private points: L.LatLng[];
     private elevation: number[] = [];
+    private stationInfo: object[];
     private data;
     private chart: Chart;
     readonly layerID: number;
 
-    public constructor(mapRoad: MapRoad) {
+    public constructor(mapRoad: SingleMapRoad) {
         this.mapRoad = mapRoad;
         this.points = (this.mapRoad.GetPoints() as L.LatLng[]);
         this.FilterDrops((this.mapRoad.GetElevation() as number[]));
         this.layerID = this.mapRoad.GetLayerID();
+        if (this.mapRoad instanceof DBSingleMapRoad)
+            this.stationInfo = this.mapRoad.GetStationsInfo();
         ElevationChart.visualTab.show();
         this.RenderChart();
         this.AddContextualInfo();
@@ -38,6 +44,13 @@ export class ElevationChart {
         for (let i = 0; i < this.elevation.length; i++) {
             labels.push("");
             radius.push(0);
+        }
+
+        if (this.stationInfo !== undefined) {
+            this.stationInfo.forEach(si => {
+                labels[si["order"]] = si["name"];
+                radius[si["order"]] = 5;
+            });
         }
 
         // console.log("len", consumption.length, this.elevation.length);
@@ -149,6 +162,20 @@ export class ElevationChart {
     private AddContextualInfo() {
         ElevationChart.railName.innerHTML = this.mapRoad.GetListInfo();
         ElevationChart.dataHeight.innerHTML = `${Math.round(Math.min(...this.elevation))}-${Math.round(Math.max(...this.elevation))} m`; 
+
+        if (this.mapRoad instanceof DBSingleMapRoad)
+            ElevationChart.stationListTabButton.setAttribute("style", "");
+        else {
+            ElevationChart.stationListTabButton.setAttribute("style", "display: none");
+            return;
+        }
+
+        this.stationInfo.forEach(si => {
+            let stationCrumb = document.createElement("li");
+            stationCrumb.setAttribute("class", "breadcrumb-item");
+            stationCrumb.innerHTML = `<i class="bi bi-train-front-fill"></i> ${si["name"]}`;
+            ElevationChart.stationBreadcrumbs.appendChild(stationCrumb);
+        });
     }
 
     private ShowChart() {

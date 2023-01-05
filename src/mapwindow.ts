@@ -38,7 +38,6 @@ export class MapWindow {
             mapLayer.GetLayerGroup().then((layerGroup) => {
                 layerGroup.addTo(this.map);
             });
-            // mapLayer.GetLayerGroup().addTo(this.map);
         }
         else
             this.map.removeLayer(mapLayer.activeLayerGroup);

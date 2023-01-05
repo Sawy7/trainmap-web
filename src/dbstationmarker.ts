@@ -2,6 +2,7 @@ import L from "leaflet";
 import { MapMarker } from "./mapmarker";
 
 export class DBStationMapMarker extends MapMarker {
+    private orderIndex: number;
     readonly className: string = "DBMapMarker";
 
     constructor(geoJSON: object) {
@@ -17,8 +18,13 @@ export class DBStationMapMarker extends MapMarker {
                 "custom-assets/station.svg",
                 20
             );
+            this.orderIndex = geoJSON["properties"]["order"];
         } else {
             console.log("Unknown feature type!")
         }
+    }
+
+    public GetOrderIndex(): number {
+        return this.orderIndex;
     }
 }
