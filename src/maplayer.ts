@@ -67,7 +67,7 @@ export class MapLayer {
         return L.layerGroup(activeMapEntities);
     }
 
-    public GetLayerGroup(): Promise<L.LayerGroup> {
+    public async GetLayerGroup(): Promise<L.LayerGroup> {
         this.activeLayerGroup = this.CreateLayerGroup();
 
         return new Promise((resolve) => {

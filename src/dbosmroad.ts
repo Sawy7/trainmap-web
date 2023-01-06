@@ -28,11 +28,8 @@ export class DBOSMMapRoad extends MapRoad {
         return [mlPoints, mlElevation];
     }
 
-    public constructor(dbID: number, geoJSON?: object) {
+    public constructor(geoJSON?: object) {
         super();
-        if (geoJSON === undefined)
-            geoJSON = ApiMgr.GetOSMRails([dbID]);
-        
         if (geoJSON["status"] !== "ok") {
             // TODO: Add method check
             this.wasRemoved = true;
@@ -52,7 +49,7 @@ export class DBOSMMapRoad extends MapRoad {
             this.name = geoJSON["properties"]["name"];
             
             this.wasRemoved = false;
-            this.dbID = dbID;
+            this.dbID = geoJSON["properties"]["relcislo"];
         } else {
             console.log("Unknown feature type!");
         }
@@ -74,6 +71,15 @@ export class DBOSMMapRoad extends MapRoad {
     protected ClickSetElevationChart(event: L.LeafletEvent): L.LeafletMouseEventHandlerFn {
         LogNotify.PushAlert("Tato trasa neobsahuje výškový profil. (Source: OSM)");
         return;
+    }
+
+    public GetEntityDBObject(): object {
+        return {
+            "type": this.className,
+            "id": this.dbID,
+            "points": this.points,
+            "elevation": this.elevation
+        }
     }
 }
 export interface DBOSMMapRoad extends DBMapEntity {};

@@ -11,6 +11,8 @@ import { MapEntityFactory } from "./mapentityfactory";
 import { LayerList } from "./layerlist";
 import { LogNotify } from "./lognotify";
 import { SingleMapRoad } from "./singleroad";
+import { LocalEntityDB } from "./localentitydb";
+import { ApiMgr } from "./apimgr";
 
 // TS Singleton: https://stackoverflow.com/questions/30174078/how-to-define-singleton-in-typescript
 export class App {
@@ -43,6 +45,7 @@ export class App {
         LogNotify.Init();
         FileLoader.SetupGPXLoader();
         FileLoader.SetupShapefileLoader();
+        this.OnlineDBCheck();
     }
 
     private InitLayerList() {
@@ -52,6 +55,25 @@ export class App {
             this.mapWindow.WarpToPoint.bind(this.mapWindow),
             this.RemoveMapLayer.bind(this),
         );
+    }
+
+    private OnlineDBCheck() {
+        // TODO: Flip to actual PHP script
+        // let onlineDBTimestamp = ApiMgr.OnlineDBCheck()["timestamp"];
+        let onlineDBTimestamp = JSON.parse('{ "type": "OnlineDBCheck", "timestamp": 1673036221764 }')["timestamp"];
+
+        let localStorageTimestamp;
+        if (localStorage["onlinedbtimestamp"] !== undefined)
+            localStorageTimestamp = JSON.parse(localStorage["onlinedbtimestamp"]);
+        else
+            localStorageTimestamp = 0;
+        
+        if (localStorageTimestamp < onlineDBTimestamp) {
+            LogNotify.PushAlert("<b>Aktualizace:</b> Databáze na serveru byla změněna. Byly resetovány lokální cache.")
+            LocalEntityDB.Instance.ClearRails();
+            LocalEntityDB.Instance.ClearStations();
+            localStorage["onlinedbtimestamp"] = onlineDBTimestamp;
+        }
     }
 
     private RemoveMapLayer(mapLayer: MapLayer) {
@@ -122,7 +144,8 @@ export class App {
             this.AddMapLayer(layer, false);
         }
         
-        localStorage["dblayers"] = JSON.stringify(storageList); // Updating with refreshed indexes
+        // NOTE: Maybe don't do this when using EntityDB (IDB)
+        // localStorage["dblayers"] = JSON.stringify(storageList); // Updating with refreshed indexes
     }
 
     public RenderElevationMarker(point?: L.LatLng) {
@@ -130,7 +153,7 @@ export class App {
     }
 
     public SaveTextToDisk(text: string, filename: string, type: string = "text/plain") {
-        let data = new Blob([text], {type: "text/plain"});
+        let data = new Blob([text], {type: type});
         let link = window.URL.createObjectURL(data);
         this.DownloadLink(link, filename);
         window.URL.revokeObjectURL(link);

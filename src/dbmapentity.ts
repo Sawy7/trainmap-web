@@ -1,6 +1,5 @@
 import { DBStationMapMarker } from "./dbstationmarker";
 import { MapEntity } from "./mapentity";
-import { MapEntityFactory } from "./mapentityfactory";
 
 export abstract class DBMapEntity extends MapEntity {
     protected dbID: number;
@@ -18,13 +17,15 @@ export abstract class DBMapEntity extends MapEntity {
         return this.wasRemoved;
     }
 
-    public AddStations(geoJSON: object[]) {
+    public AddStations(stations: DBStationMapMarker[]) {
         if (this.POIs === undefined)
             this.POIs = [];
 
-        geoJSON["features"].forEach(sf => {
-            this.POIs.push(MapEntityFactory.CreateDBStationMapMarker(sf));
-        });
+        this.POIs.push(...stations);
+        // TODO: Fix
+        // geoJSON["features"].forEach(sf => {
+        //     this.POIs.push(MapEntityFactory.CreateDBStationMapMarker(sf));
+        // });
     }
 
     public GetAdjacentMapEntities(): any {

@@ -17,6 +17,7 @@ L.Icon.Default.mergeOptions({
 import { App } from "./app";
 import { MapEntityFactory } from './mapentityfactory';
 import { LocalEntityDB } from './localentitydb';
+import { DBMapEntityCache } from './dbentitycache';
 
 let app = App.Instance;
 app.Init(49.86, 15.51, 9);
@@ -34,6 +35,12 @@ app.LoadFromLocalStorage();
 // let ttrack = MapEntityFactory.CreateSingleMapRoad([], [], "Test Track");
 // app.SetElevationChart(ttrack);
 
-let db = LocalEntityDB.Instance;
-db.AddEntity();
-db.GetEntity();
+// let db = LocalEntityDB.Instance;
+// async function test() {
+//     let ent = await db.GetStations(49010);
+//     console.log(ent);
+// }
+
+// test();
+
+// DBMapEntityCache.Instance.GetDBStationMapMarkers(49010);

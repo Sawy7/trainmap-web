@@ -42,11 +42,11 @@ export class MapEntityFactory {
         return new MultiMapRoad(points, elevation, name, color, weight, opacity, smoothFactor);
     }
 
-    public static CreateDBOSMMapRoad(dbID: number, geoJSON?: object): DBOSMMapRoad {
+    public static async CreateDBOSMMapRoad(dbID: number, geoJSON?: object): Promise<DBOSMMapRoad> {
         return DBMapEntityCache.Instance.GetOSMMapRoad(dbID, geoJSON);
     }
 
-    public static CreateDBSingleMapRoad(dbID: number, geoJSON?: object): DBSingleMapRoad {
+    public static async CreateDBSingleMapRoad(dbID: number, geoJSON?: object): Promise<DBSingleMapRoad> {
         return DBMapEntityCache.Instance.GetDBSingleMapRoad(dbID, geoJSON);
     }
 
@@ -65,8 +65,8 @@ export class MapEntityFactory {
         return new MapMarker(point, "", "", "custom-assets/elevation-marker.svg", 14)
     }
 
-    public static CreateDBStationMapMarker(geoJSON: object): DBStationMapMarker {
-        return new DBStationMapMarker(geoJSON);
+    public static async CreateDBStationMapMarkers(dbID: number, geoJSON?: object): Promise<DBStationMapMarker[]> {
+        return DBMapEntityCache.Instance.GetDBStationMapMarkers(dbID, geoJSON);
     }
 
     // Areas

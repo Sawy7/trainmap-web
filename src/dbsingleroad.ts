@@ -19,11 +19,8 @@ export class DBSingleMapRoad extends SingleMapRoad {
         return [lsPoints, lsElevation];
     }
 
-    constructor(dbID: number, geoJSON?: object) {
+    constructor(geoJSON?: object) {
         super();
-        if (geoJSON === undefined)
-            geoJSON = ApiMgr.GetRails([dbID]);
-
         if (geoJSON["status"] !== "ok") {
             // TODO: Add method check
             this.wasRemoved = true;
@@ -41,13 +38,48 @@ export class DBSingleMapRoad extends SingleMapRoad {
                 geoJSON["properties"]["opacity"], geoJSON["properties"]["smoothFactor"]
             );
             this.name = geoJSON["properties"]["name"];
-            this.dbID = dbID;
+            this.dbID = geoJSON["properties"]["relcislo"];
 
             this.wasRemoved = false;
         } else {
             console.log("Unknown feature type!")
         }
     }
+
+    public GetEntityDBObject(): object {
+        return {
+            "type": this.className,
+            "id": this.dbID,
+            "points": this.points,
+            "elevation": this.elevation
+        }
+    }
+
+    // public GetGeoJSON(): object {
+    //     let coords: number[][];
+    //     for (let i = 0; i < this.points.length; i++) {
+    //         const p = this.points[i];
+    //         const e = this.elevation[i];
+    //         coords.push([p.lat, p.lng, e]);
+    //     }
+    //     return {
+    //         "type": "Feature",
+    //         "geometry": {
+    //             "type": "LineString",
+    //             "coordinates": coords 
+    //         },
+    //         "properties": {
+    //             "relcislo": this.dbID,
+    //             "name": this.name,
+    //             "color": this.color,
+    //             "weight": this.weight,
+    //             "opacity": this.opacity,
+    //             "smooth_factor": this.smoothFactor,
+    //             // TODO: Missing id and tags
+    //         },
+    //         "status": "ok"
+    //     }
+    // }
 }
 export interface DBSingleMapRoad extends DBMapEntity {};
 Helper.applyMixins(DBSingleMapRoad, [DBMapEntity]);

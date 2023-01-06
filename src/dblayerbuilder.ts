@@ -121,7 +121,7 @@ export class DBLayerBuilder {
         return (entity.children[0] as HTMLInputElement).checked;
     }
 
-    static BuildLayer() {
+    static async BuildLayer() {
         if (!this.layerNameBar.checkValidity())
         {
             this.layerNameBarDiv.classList.add("was-validated");
@@ -151,17 +151,17 @@ export class DBLayerBuilder {
         });
         
         // Call for all categories at once
-        setTimeout(() => {
-            GeoGetter.GetRails(dbRails).forEach(road => {
-                layer.AddMapRoads(road);
-                layer.AddMapMarkers(...road.GetAdjacentMapEntities());
-            });
-            GeoGetter.GetOSMRails(dbOSMRails).forEach(road => {
-                layer.AddMapRoads(road);
-            });
-            App.Instance.AddMapLayer(layer);
-            LogNotify.ToggleThrobber();
-        }, 0);
+        let fetchedRails = await GeoGetter.GetRails(dbRails);
+        fetchedRails.forEach(road => {
+            layer.AddMapRoads(road);
+            layer.AddMapMarkers(...road.GetAdjacentMapEntities());
+        });
+        let fetchedOSMRails = await GeoGetter.GetOSMRails(dbOSMRails);
+        fetchedOSMRails.forEach(road => {
+            layer.AddMapRoads(road);
+        });
+        App.Instance.AddMapLayer(layer);
+        LogNotify.ToggleThrobber();
     }
 
     static ClearBoxes() {

@@ -23,34 +23,25 @@ export class GhostDBMapLayer extends DBMapLayer {
                 true
             );
 
+            await this.DownloadLayer();
             return new Promise((resolve) => {
-                // TODO: Is setTimeout neccessary?
-                setTimeout(() => {
-                    this.DownloadLayer();
-                    loader.parentNode.removeChild(loader);
-                    this.initialized = true;
-                    resolve(super.GetLayerGroup());
-                }, 0);
+                loader.parentNode.removeChild(loader);
+                this.initialized = true;
+                resolve(super.GetLayerGroup());
             });
         }
         
         return new Promise((resolve) => {
-            // TODO: Is setTimeout neccessary?
-            setTimeout(() => {
-                resolve(super.GetLayerGroup());
-            }, 0);
+            resolve(super.GetLayerGroup());
         });
     }
 
     private async DownloadLayer() {
         let dbRails: number[] = [];
-        let dbElements: number[] = [];
         let dbOSMRails: number[] = [];
 
         this.elementInfoObjects.forEach(e => {
-            if (e["type"] == "DBMultiMapRoad")
-                dbElements.push(e["id"]);
-            else if (e["type"] == "DBSingleMapRoad")
+            if (e["type"] == "DBSingleMapRoad")
                 dbRails.push(e["id"]);
             else if (e["type"] == "DBOSMMapRoad")
                 dbOSMRails.push(e["id"]);
@@ -58,13 +49,15 @@ export class GhostDBMapLayer extends DBMapLayer {
 
         // TODO: Removal check - Something more elegant (+ maybe user indication, that something's been yeeted)
 
-        GeoGetter.GetRails(dbRails).forEach(road => {
+        let fetchedRails = await GeoGetter.GetRails(dbRails);
+        fetchedRails.forEach(road => {
             if (!road.CheckRemoved()) {
                 this.AddMapRoads(road);
                 this.AddMapMarkers(...road.GetAdjacentMapEntities());
             }
         });
-        GeoGetter.GetOSMRails(dbOSMRails).forEach(road => {
+        let fetchedOSMRails = await GeoGetter.GetOSMRails(dbOSMRails);
+        fetchedOSMRails.forEach(road => {
             if (!road.CheckRemoved())
                 this.AddMapRoads(road);
         });
