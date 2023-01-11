@@ -80,14 +80,14 @@ export class ElevationChart {
                     borderColor: "#2196f3", // Add custom color border (Line)
                     borderWidth: 3 // Specify bar border width
                 },
-                {
-                    label: "Spotřeba (kW)",
-                    data: consumption,
-                    fill: false,
-                    borderColor: "#dc3545",
-                    borderWidth: 3,
-                    tension: 0.3
-                }
+                // {
+                //     label: "Spotřeba (kW)",
+                //     data: consumption,
+                //     fill: false,
+                //     borderColor: "#dc3545",
+                //     borderWidth: 3,
+                //     tension: 0.3
+                // }
             ]
         }
 

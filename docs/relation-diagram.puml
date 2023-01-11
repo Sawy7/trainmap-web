@@ -1,0 +1,62 @@
+@startuml
+
+hide circle
+hide empty members
+
+package "Mapster DB" {
+    entity all_stations {
+       * id: numeric
+       * name: char varying (254)
+       * geom: geometry
+       --
+       addr_* (multiple): char varying (254)
+       description: char varying (254)
+       ...
+       railway: char varying (254)
+    }
+
+    entity station_relation {
+       * relcislo: integer
+       * station_id: numeric
+       --
+       geom: geometry
+       station_order: integer
+    }
+
+    entity osm_data_index {
+       * relcislo: integer
+       * id: character varying (6)
+       * nazevtrasy: character varying (200)
+    }
+
+    entity processed_routes_line {
+       * gid: integer
+       * relcislo: integer
+       * geom: geometry
+    }
+
+    entity osm_rails {
+       * gid: integer
+       * relcislo: integer
+       * geom: geometry
+    }
+
+    all_stations ||--o{ station_relation
+    station_relation }o--o| osm_data_index
+    osm_data_index ||--|| osm_rails
+    osm_data_index ||--o| processed_routes_line
+}
+
+' ' zero or one
+' A |o--o| B
+
+' ' exactly one
+' C ||--|| D
+
+' ' zero or many
+' E }o--o{ F
+
+' ' one or many
+' G }|--|{ H
+
+@enduml

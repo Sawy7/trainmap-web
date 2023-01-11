@@ -1,0 +1,324 @@
+@startuml
+
+package "Mapster WebApp" {
+    class ApiComms {
+        +{static} GetRequest(url: string): string
+        +{static} GetRequestAsync(url: string, callback: Function): void
+        +{static} PostRequest(url: string, data: string): string
+    }
+    class ApiMgr {
+        -{static} rootUrl: string
+        +{static} OnlineDBCheck(): object
+        +{static} ListElements(): object
+        +{static} ListRails(): object
+        +{static} ListOSMRails(): object
+        +{static} GetElement(dbID: number): object
+        +{static} GetElements(dbIDs: number[]): object
+        +{static} GetRails(dbIDs: number[]): object
+        +{static} GetOSMRails(dbIDs: number[]): object
+        +{static} GetStations(dbIDs: number[]): object
+        +{static} GetGIDs(dbID: number): object
+        +{static} GetLineator(id: number): object
+    }
+    abstract class MapEntity {
+        #name: string
+        +className: string
+        #dontSerializeList: string[]
+        +{abstract} GetMapEntity(): any
+        +{abstract} GetSignificantPoint(): LatLng
+        +GetListInfo(): string
+        +Serialize(): Object
+    }
+    class MapMarker extends MapEntity {
+        -point: L.LatLng
+        -popupMsg: string
+        -customIcon: L.Icon<L.IconOptions>
+        +activeMarker: L.Marker<any>
+        +className: string
+        #Init(point: L.LatLng, popupMsg: string, name?: string, customIconPath?: string, customIconSize?: number): void
+        -CreateCustomIcon(customIconPath: string, customIconSize: number): void
+        +GetMapEntity(): L.Marker<any>
+        +GetSignificantPoint(): L.LatLng
+        +ChangeCoordinates(point: L.LatLng): void
+    }
+    class DBStationMapMarker extends MapMarker {
+        -orderIndex: number
+        +className: string
+        +GetOrderIndex(): number
+    }
+    abstract class DBMapEntity extends MapEntity {
+        #dbID: number
+        -POIs: DBStationMapMarker[]
+        #wasRemoved: boolean
+        +GetLocalStorageObject(): object
+        +CheckRemoved(): boolean
+        +AddStations(stations: DBStationMapMarker[]): void
+        +GetAdjacentMapEntities(): any
+        +GetStationsInfo(): object[]
+    }
+    class LogNotify {
+        +{static} Init(): void
+        +{static} ToggleLog(): void
+        +{static} PushToLog(text: string): void
+        -{static} SaveLogToDisk(): void
+        +{static} PushAlert(message: string, linkVerbage?: string, linkFunction?: Function, type?: string): void
+        +{static} ToggleThrobber(): void
+        +{static} UpdateThrobberMessage(message: string): void
+        +{static} PlaceLoader(parentElement: HTMLElement, replace?: boolean): HTMLElement
+    }
+    abstract class MapRoad extends MapEntity {
+        #color: string
+        #weight: number
+        #opacity: number
+        #smoothFactor: number
+        #polyLine: L.Polyline<LineString | MultiLineString, any>
+        #layerID: number
+        #points: L.LatLng[] | L.LatLng[][]
+        #elevation: number[] | number[][]
+        +className: string
+        #Init(points: L.LatLng[] | L.LatLng[][], elevation: number[] | number[][], name?: string, color?: string, weight?: number, opacity?: number, smoothFactor?: number): void
+        +GetMapEntity(): any
+        +GetSignificantPoint(): L.LatLng
+        +SetupInteractivity(layerID: number, customFunction?: L.LeafletEventHandlerFn): void
+        #ClickSetElevationChart(event: L.LeafletEvent): L.LeafletMouseEventHandlerFn
+        +GetPoints(): L.LatLng[] | L.LatLng[][]
+        +GetElevation(): number[] | number[][]
+        +GetLayerID(): number
+    }
+    class MultiMapRoad extends MapRoad {
+        #points: L.LatLng[][]
+        #elevation: number[][]
+        +className: string
+        #ClickSetElevationChart(event: L.LeafletEvent): L.LeafletMouseEventHandlerFn
+    }
+    class DBOSMMapRoad extends DBMapEntity {
+        -delegate: MultiMapRoad
+        +className: string
+        +GetMapEntity(): any
+        +GetSignificantPoint(): L.LatLng
+        +SetupInteractivity(layerID: number): void
+        #ClickSetElevationChart(event: L.LeafletEvent): L.LeafletMouseEventHandlerFn
+        +GetEntityDBObject(): object
+        -{static} ParseGeoJSON(geoJSON: object): [L.LatLng[][], number[][]]
+    }
+    class SingleMapRoad extends MapRoad {
+        #points: L.LatLng[]
+        #elevation: number[]
+        +className: string
+        +ClickSetElevationChart(event: L.LeafletEvent): L.LeafletMouseEventHandlerFn
+    }
+    class DBSingleMapRoad extends DBMapEntity {
+        +className: string
+        +GetEntityDBObject(): object
+        -{static} ParseGeoJSON(geoJSON: object): [L.LatLng[], number[]]
+    }
+    class LocalEntityDB {
+        -db: Promise<IDBDatabase>
+        -AddEntity(entity: object, store: string): Promise<void>
+        +AddRail(rail: object): Promise<void>
+        +AddStations(stations: object): Promise<void>
+        +CheckEntity(relcislo: number, store: string): Promise<boolean>
+        +CheckRail(relcislo: number): Promise<boolean>
+        +CheckStations(relcislo: number): Promise<boolean>
+        -GetEntity(relcislo: number, store: string): Promise<object>
+        +GetRail(relcislo: number): Promise<object>
+        +GetStations(relcislo: number): Promise<object>
+        -ClearAllEntities(store: string): Promise<boolean>
+        +ClearRails(): Promise<void>
+        +ClearStations(): Promise<void>
+        -{static} dbName: string
+        -{static} railStore: string
+        -{static} stationStore: string
+        -{static} _instance: LocalEntityDB
+        +{static} Instance: LocalEntityDB
+    }
+    class DBMapEntityCache {
+        +CheckOSMMapRoad(dbID: number): Promise<boolean>
+        +GetOSMMapRoad(dbID: number, geoJSON?: object): Promise<DBOSMMapRoad>
+        +CheckDBSingleMapRoad(dbID: number): Promise<boolean>
+        +GetDBSingleMapRoad(dbID: number, geoJSON?: object): Promise<DBSingleMapRoad>
+        +CheckDBStationMapMarkers(dbID: number): Promise<boolean>
+        +GetDBStationMapMarkers(dbID: number, geoJSON?: object): Promise<DBStationMapMarker[]>
+        -{static} _instance: DBMapEntityCache
+        +{static} Instance: DBMapEntityCache
+    }
+    class MapArea extends MapEntity {
+        -points: L.LatLng[]
+        -popupMsg: string
+        +className: string
+        +GetMapEntity(): L.Polygon<any>
+        +GetSignificantPoint(): L.LatLng
+    }
+    class MapLayer {
+        #layerEntities: MapEntity[]
+        +activeLayerGroup: L.LayerGroup<any>
+        +layerName: string
+        #layerColor: string
+        -isActive: boolean
+        +id: number
+        +className: string
+        +Activate(state: boolean): boolean
+        +GetActiveState(): boolean
+        +GetAndToggleActiveState(): boolean
+        +AddMapMarkers(marker: MapMarker[]): void
+        +AddMapRoads(road: MapRoad[]): void
+        +AddMapAreas(area: MapArea[]): void
+        +CreateLayerGroup(): L.LayerGroup<any>
+        +GetLayerGroup(): Promise<L.LayerGroup<any>>
+        +GetLayerEntities(): MapEntity[]
+        +{static} globalIDGen: number
+    }
+    class DBMapLayer extends MapLayer {
+        +className: string
+        +SaveToLocalStorage(): void
+        +RemoveFromLocalStorage(): void
+    }
+    class GeoGetter {
+        -{static} GetGenericRails(dbIDs: number[], get: Function, create: Function, check: Function, getStations?: Function, createStations?: Function): Promise<any[]>
+        +{static} GetRails(dbIDs: number[]): Promise<DBSingleMapRoad[]>
+        +{static} GetOSMRails(dbIDs: number[]): Promise<DBOSMMapRoad[]>
+    }
+    class GhostDBMapLayer extends DBMapLayer {
+        -initialized: boolean
+        -populationMethod: Function
+        -collapseElement: HTMLElement
+        -elementInfoObjects: object[]
+        +className: string
+        +GetLayerGroup(): Promise<L.LayerGroup<any>>
+        -DownloadLayer(): Promise<void>
+        +PassPopulationMethod(populationMethod: Function, collapseElement: HTMLElement): void
+        +SaveToLocalStorage(): void
+    }
+    class MapEntityFactory {
+        +{static} CreateMapLayer(name: string, color?: string): MapLayer
+        +{static} CreateDBMapLayer(name: string, color?: string): DBMapLayer
+        +{static} CreateGhostDBMapLayer(name: string, elementInfoObjects: object[], color: string, id: number): DBMapLayer
+        +{static} CreateSingleMapRoad(points: LatLng[], elevation: number[], name?: string, color?: string, weight?: number, opacity?: number, smoothFactor?: number, dbID?: number): SingleMapRoad
+        +{static} CreateMultiMapRoad(points: LatLng[][], elevation: number[][], name?: string, color?: string, weight?: number, opacity?: number, smoothFactor?: number, dbID?: number): MultiMapRoad
+        +{static} CreateDBOSMMapRoad(dbID: number, geoJSON?: object): Promise<DBOSMMapRoad>
+        +{static} CreateDBSingleMapRoad(dbID: number, geoJSON?: object): Promise<DBSingleMapRoad>
+        +{static} CreateMapMarker(point: LatLng, popupMsg: string, name?: string, customIcon?: string, customIconSize?: number): MapMarker
+        +{static} CreateElevationMarker(point: LatLng): MapMarker
+        +{static} CreateDBStationMapMarkers(dbID: number, geoJSON?: object): Promise<DBStationMapMarker[]>
+        +{static} CreateMapArea(points: LatLng[], popupMsg: string, name?: string, dbID?: number): MapArea
+    }
+    class MapWindow {
+        -map: L.Map
+        -activeElevationMarker: MapMarker
+        -CreateInitialLayers(baseMapLayer: L.TileLayer, baseMapName: string): void
+        +RenderMapLayer(mapLayer: MapLayer, render?: boolean): void
+        +RenderElevationMarker(point?: L.LatLng): void
+        +WarpToPoint(point: L.LatLng): void
+    }
+    class DBLayerBuilder {
+        +{static} modalElement: HTMLElement
+        +{static} showButton: HTMLElement
+        +{static} searchBar: HTMLInputElement
+        +{static} searchResults: HTMLElement
+        +{static} createButton: HTMLElement
+        +{static} layerNameBar: HTMLInputElement
+        +{static} layerNameBarDiv: HTMLElement
+        +{static} layerColorPicker: HTMLInputElement
+        +{static} checkAll: HTMLInputElement
+        +{static} elementsDownloaded: boolean
+        +{static} elementInfo: Object[]
+        +{static} SetInteraction(): void
+        +{static} GetElementsFromDB(): void
+        +{static} ParseTags(tags: string): string
+        +{static} CreateEntry(infoObject: Object, index: number): void
+        +{static} StashInfo(infoObject: Object, type: string): void
+        +{static} ToggleInterface(show?: boolean): void
+        +{static} IsInputChecked(entity: HTMLElement): boolean
+        +{static} BuildLayer(): Promise<void>
+        +{static} ClearBoxes(): void
+        +{static} CheckAllVisible(): void
+        +{static} CheckAllVisibleChecked(): void
+        +{static} LocalSearch(): void
+    }
+    class ElevationChart {
+        -mapRoad: SingleMapRoad
+        -points: L.LatLng[]
+        -elevation: number[]
+        -stationInfo: object[]
+        -data: any
+        -chart: Chart<keyof ChartTypeRegistry, (number | ScatterDataPoint | BubbleDataPoint)[], unknown>
+        +layerID: number
+        -RenderChart(): void
+        -AddContextualInfo(): void
+        -ShowChart(): void
+        +HideChart(): void
+        +CheckUIVisible(): boolean
+        -RegisterChartClosing(): void
+        +DestroyChart(): void
+        -FilterDrops(elevation: number[]): void
+        -CalculateConsumption(): number[]
+        -{static} ctx: HTMLCanvasElement
+        -{static} elevationChartElement: HTMLElement
+        -{static} offcanvas: Offcanvas
+        -{static} visualTab: Tab
+        -{static} railName: HTMLElement
+        -{static} dataHeight: HTMLElement
+        -{static} stationListTabButton: HTMLButtonElement
+        -{static} stationBreadcrumbs: HTMLElement
+    }
+    class FileLoader {
+        +{static} SetupGPXLoader(): void
+        +{static} SetupShapefileLoader(): void
+        +{static} SpawnNameInput(containerId: string, addFunction: Function): void
+        +{static} DestroyNameInput(container: HTMLElement): void
+    }
+    class LayerList {
+        -activationMethod: Function
+        -warpMethod: Function
+        -removalMethod: Function
+        +Init(activationMethod: Function, warpMethod: Function, removalMethod: Function): void
+        +AddLayer(mapLayer: MapLayer): void
+        -PopulateLayerEntitesList(mapLayer: MapLayer, collapseElement: HTMLElement): void
+        -RemoveFromLayerList(mapLayer: MapLayer, collapseElement: HTMLElement): void
+        -{static} _instance: LayerList
+        +{static} Instance: LayerList
+    }
+    class App {
+        -mapWindow: MapWindow
+        -localLayers: MapLayer[]
+        -layerList: LayerList
+        -activeElevationChart: ElevationChart
+        -sidebarOffcanvas: Offcanvas
+        -layerActivating: boolean
+        +SetupButtons(): void
+        +Init(centerLat: number, centerLong: number, zoom: number): void
+        -InitLayerList(): void
+        -OnlineDBCheck(): void
+        -RemoveMapLayer(mapLayer: MapLayer): void
+        +AddMapLayer(mapLayer: MapLayer, notFromStorage?: boolean): void
+        -ActivateMapLayer(mapLayer: MapLayer, collapseElement: HTMLElement): void
+        +SetElevationChart(mapRoad: SingleMapRoad): void
+        +LoadFromLocalStorage(): void
+        +RenderElevationMarker(point?: L.LatLng): void
+        +SaveTextToDisk(text: string, filename: string, type?: string): void
+        -DownloadLink(link: string, filename: string): void
+        -{static} _instance: App
+        +{static} Instance: App
+    }
+}
+
+App "1" -- "1" MapWindow
+App "1" -- "1" LayerList
+App "1" -- "1" ElevationChart
+App "1" *-- "N" MapLayer
+App -- DBLayerBuilder
+App -- LogNotify
+App -- FileLoader
+DBLayerBuilder -- DBMapLayer
+MapLayer "1" *-- "N" MapEntity
+LocalEntityDB -- DBMapEntityCache
+DBMapEntityCache -- MapEntityFactory
+ApiComms -- ApiMgr
+ApiMgr -- GeoGetter
+DBMapEntityCache -- GeoGetter
+MapEntityFactory -- GeoGetter
+MapEntityFactory -- MapEntity
+DBLayerBuilder -- GeoGetter
+GhostDBMapLayer -- GeoGetter
+
+@enduml

@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentStyleType="text/css" height="743px" preserveAspectRatio="none" style="width:372px;height:743px;background:#FFFFFF;" version="1.1" viewBox="0 0 372 743" width="372px" zoomAndPan="magnify"><defs/><g><!--MD5=[010e9279a3c0f40e8097429b738c29f8]
+cluster Mapster DB--><g id="cluster_Mapster DB"><path d="M8.5,6.602 L89.5,6.602 A3.75,3.75 0 0 1 92,9.102 L99,31.6699 L362.5,31.6699 A2.5,2.5 0 0 1 365,34.1699 L365,734.102 A2.5,2.5 0 0 1 362.5,736.602 L8.5,736.602 A2.5,2.5 0 0 1 6,734.102 L6,9.102 A2.5,2.5 0 0 1 8.5,6.602 " fill="none" style="stroke:#000000;stroke-width:1.5;"/><line style="stroke:#000000;stroke-width:1.5;" x1="6" x2="99" y1="31.6699" y2="31.6699"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="80" x="10" y="23.5679">Mapster DB</text></g><!--MD5=[b01e8b158bdd5a119eb8f6a1753af867]
+class all_stations--><g id="elem_all_stations"><rect codeLine="6" fill="#F1F1F1" height="178.5433" id="all_stations" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="254" x="58" y="44.602"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="75" x="147.5" y="64.5679">all_stations</text><line style="stroke:#181818;stroke-width:0.5;" x1="59" x2="311" y1="73.6699" y2="73.6699"/><ellipse cx="69" cy="88.7039" fill="#000000" rx="3" ry="3" style="stroke:#000000;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="77" x="78" y="92.6358">id: numeric</text><ellipse cx="69" cy="107.7718" fill="#000000" rx="3" ry="3" style="stroke:#000000;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="166" x="78" y="111.7038">name: char varying (254)</text><ellipse cx="69" cy="126.8397" fill="#000000" rx="3" ry="3" style="stroke:#000000;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="110" x="78" y="130.7717">geom: geometry</text><line style="stroke:#181818;stroke-width:1.0;" x1="59" x2="311" y1="138.8736" y2="138.8736"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="242" x="64" y="157.8396">addr_* (multiple): char varying (254)</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="204" x="64" y="176.9075">description: char varying (254)</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="12" x="64" y="195.9754">...</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="176" x="64" y="215.0433">railway: char varying (254)</text></g><!--MD5=[5491658e5d82340322db1e2ecb3a3e27]
+class station_relation--><g id="elem_station_relation"><rect codeLine="17" fill="#F1F1F1" height="121.3396" id="station_relation" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="158" x="106" y="283.602"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="104" x="133" y="303.5679">station_relation</text><line style="stroke:#181818;stroke-width:0.5;" x1="107" x2="263" y1="312.6699" y2="312.6699"/><ellipse cx="117" cy="327.7039" fill="#000000" rx="3" ry="3" style="stroke:#000000;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="105" x="126" y="331.6358">relcislo: integer</text><ellipse cx="117" cy="346.7718" fill="#000000" rx="3" ry="3" style="stroke:#000000;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="129" x="126" y="350.7038">station_id: numeric</text><line style="stroke:#181818;stroke-width:1.0;" x1="107" x2="263" y1="358.8057" y2="358.8057"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="110" x="112" y="377.7717">geom: geometry</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="146" x="112" y="396.8396">station_order: integer</text></g><!--MD5=[867e6b12b786c6b43dc9bd8fc8aa2c9d]
+class osm_data_index--><g id="elem_osm_data_index"><rect codeLine="25" fill="#F1F1F1" height="102.2717" id="osm_data_index" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="260" x="55" y="464.602"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="107" x="131.5" y="484.5679">osm_data_index</text><line style="stroke:#181818;stroke-width:0.5;" x1="56" x2="314" y1="493.6699" y2="493.6699"/><ellipse cx="66" cy="508.7039" fill="#000000" rx="3" ry="3" style="stroke:#000000;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="105" x="75" y="512.6358">relcislo: integer</text><line style="stroke:#181818;stroke-width:0.5;" x1="56" x2="314" y1="520.7378" y2="520.7378"/><ellipse cx="66" cy="535.7718" fill="#000000" rx="3" ry="3" style="stroke:#000000;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="159" x="75" y="539.7038">id: character varying (6)</text><ellipse cx="66" cy="554.8397" fill="#000000" rx="3" ry="3" style="stroke:#000000;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="234" x="75" y="558.7717">nazevtrasy: character varying (200)</text></g><!--MD5=[92e26053d593e1ddecf3afa42d6d65ce]
+class processed_routes_line--><g id="elem_processed_routes_line"><rect codeLine="31" fill="#F1F1F1" height="94.2717" id="processed_routes_line" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="155" x="22.5" y="626.602"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="149" x="25.5" y="646.5679">processed_routes_line</text><line style="stroke:#181818;stroke-width:0.5;" x1="23.5" x2="176.5" y1="655.6699" y2="655.6699"/><ellipse cx="33.5" cy="670.7039" fill="#000000" rx="3" ry="3" style="stroke:#000000;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="79" x="42.5" y="674.6358">gid: integer</text><ellipse cx="33.5" cy="689.7718" fill="#000000" rx="3" ry="3" style="stroke:#000000;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="105" x="42.5" y="693.7038">relcislo: integer</text><ellipse cx="33.5" cy="708.8397" fill="#000000" rx="3" ry="3" style="stroke:#000000;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="110" x="42.5" y="712.7717">geom: geometry</text></g><!--MD5=[b3105eec70c13182a3f362a8673dff89]
+class osm_rails--><g id="elem_osm_rails"><rect codeLine="37" fill="#F1F1F1" height="94.2717" id="osm_rails" rx="2.5" ry="2.5" style="stroke:#181818;stroke-width:0.5;" width="136" x="213" y="626.602"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="63" x="249.5" y="646.5679">osm_rails</text><line style="stroke:#181818;stroke-width:0.5;" x1="214" x2="348" y1="655.6699" y2="655.6699"/><ellipse cx="224" cy="670.7039" fill="#000000" rx="3" ry="3" style="stroke:#000000;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="79" x="233" y="674.6358">gid: integer</text><ellipse cx="224" cy="689.7718" fill="#000000" rx="3" ry="3" style="stroke:#000000;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="105" x="233" y="693.7038">relcislo: integer</text><ellipse cx="224" cy="708.8397" fill="#000000" rx="3" ry="3" style="stroke:#000000;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="110" x="233" y="712.7717">geom: geometry</text></g><!--MD5=[9f11a4196bd8191546510b707435ceb4]
+link all_stations to station_relation--><g id="link_all_stations_station_relation"><path codeLine="43" d="M185,233.332 C185,247.012 185,260.822 185,273.822 " fill="none" id="all_stations-station_relation" style="stroke:#181818;stroke-width:1.0;"/><line style="stroke:#181818;stroke-width:1.0;" x1="185" x2="191" y1="273.612" y2="281.612"/><line style="stroke:#181818;stroke-width:1.0;" x1="185" x2="179" y1="273.612" y2="281.612"/><line style="stroke:#181818;stroke-width:1.0;" x1="185" x2="185" y1="273.612" y2="281.612"/><ellipse cx="185" cy="267.612" fill="none" rx="4" ry="4" style="stroke:#181818;stroke-width:1.0;"/><line style="stroke:#181818;stroke-width:1.0;" x1="181" x2="189" y1="229.432" y2="229.432"/><line style="stroke:#181818;stroke-width:1.0;" x1="181" x2="189" y1="232.432" y2="232.432"/><line style="stroke:#181818;stroke-width:1.0;" x1="185" x2="185" y1="233.432" y2="225.432"/></g><!--MD5=[aba86ce300f4626f57060866d427792a]
+link station_relation to osm_data_index--><g id="link_station_relation_osm_data_index"><path codeLine="44" d="M185,414.102 C185,427.632 185,441.722 185,454.922 " fill="none" id="station_relation-osm_data_index" style="stroke:#181818;stroke-width:1.0;"/><line style="stroke:#181818;stroke-width:1.0;" x1="185" x2="185" y1="451.842" y2="462.842"/><ellipse cx="185" cy="451.842" fill="none" rx="4" ry="4" style="stroke:#181818;stroke-width:1.0;"/><line style="stroke:#181818;stroke-width:1.0;" x1="189" x2="181" y1="458.842" y2="458.842"/><line style="stroke:#181818;stroke-width:1.0;" x1="185" x2="179" y1="414.372" y2="406.372"/><line style="stroke:#181818;stroke-width:1.0;" x1="185" x2="191" y1="414.372" y2="406.372"/><line style="stroke:#181818;stroke-width:1.0;" x1="185" x2="185" y1="414.372" y2="406.372"/><ellipse cx="185" cy="420.372" fill="none" rx="4" ry="4" style="stroke:#181818;stroke-width:1.0;"/></g><!--MD5=[d0db9c7a2f89c16034a307f437590d3a]
+link osm_data_index to osm_rails--><g id="link_osm_data_index_osm_rails"><path codeLine="45" d="M220.09,573.622 C229.23,588.472 239.05,604.432 248.07,619.092 " fill="none" id="osm_data_index-osm_rails" style="stroke:#181818;stroke-width:1.0;"/><line style="stroke:#181818;stroke-width:1.0;" x1="252.9561" x2="246.1384" y1="619.3904" y2="623.5758"/><line style="stroke:#181818;stroke-width:1.0;" x1="251.3866" x2="244.5688" y1="616.8337" y2="621.0192"/><line style="stroke:#181818;stroke-width:1.0;" x1="247.4545" x2="251.64" y1="618.0742" y2="624.892"/><line style="stroke:#181818;stroke-width:1.0;" x1="215.3934" x2="222.2039" y1="573.6159" y2="569.4185"/><line style="stroke:#181818;stroke-width:1.0;" x1="216.9674" x2="223.7779" y1="576.1698" y2="571.9725"/><line style="stroke:#181818;stroke-width:1.0;" x1="220.8973" x2="216.7" y1="574.9224" y2="568.112"/></g><!--MD5=[1cd994eaaca7b0ae2c796f16599813d0]
+link osm_data_index to processed_routes_line--><g id="link_osm_data_index_processed_routes_line"><path codeLine="46" d="M153.18,575.002 C145.48,589.132 137.28,604.172 129.69,618.122 " fill="none" id="osm_data_index-processed_routes_line" style="stroke:#181818;stroke-width:1.0;"/><line style="stroke:#181818;stroke-width:1.0;" x1="131.2901" x2="126.02" y1="615.1966" y2="624.852"/><ellipse cx="131.2901" cy="615.1966" fill="none" rx="4" ry="4" style="stroke:#181818;stroke-width:1.0;"/><line style="stroke:#181818;stroke-width:1.0;" x1="131.4474" x2="124.4254" y1="623.2574" y2="619.4245"/><line style="stroke:#181818;stroke-width:1.0;" x1="151.4826" x2="158.5046" y1="569.7466" y2="573.5794"/><line style="stroke:#181818;stroke-width:1.0;" x1="150.0452" x2="157.0673" y1="572.3799" y2="576.2127"/><line style="stroke:#181818;stroke-width:1.0;" x1="153.0772" x2="156.91" y1="575.1741" y2="568.152"/></g><!--MD5=[188946bc003916304427029720eb763c]
+@startuml
+
+hide circle
+hide empty members
+
+package "Mapster DB" {
+    entity all_stations {
+       * id: numeric
+       * name: char varying (254)
+       * geom: geometry
+       - -
+       addr_* (multiple): char varying (254)
+       description: char varying (254)
+       ...
+       railway: char varying (254)
+    }
+
+    entity station_relation {
+       * relcislo: integer
+       * station_id: numeric
+       - -
+       geom: geometry
+       station_order: integer
+    }
+
+    entity osm_data_index {
+       * relcislo: integer
+       * id: character varying (6)
+       * nazevtrasy: character varying (200)
+    }
+
+    entity processed_routes_line {
+       * gid: integer
+       * relcislo: integer
+       * geom: geometry
+    }
+
+    entity osm_rails {
+       * gid: integer
+       * relcislo: integer
+       * geom: geometry
+    }
+
+    all_stations ||- -o{ station_relation
+    station_relation }o- -o| osm_data_index
+    osm_data_index ||- -|| osm_rails
+    osm_data_index ||- -o| processed_routes_line
+}
+
+' ' zero or one
+' A |o- -o| B
+
+' ' exactly one
+' C ||- -|| D
+
+' ' zero or many
+' E }o- -o{ F
+
+' ' one or many
+' G }|- -|{ H
+
+@enduml
+
+@startuml
+
+hide circle
+hide empty members
+
+package "Mapster DB" {
+    entity all_stations {
+       * id: numeric
+       * name: char varying (254)
+       * geom: geometry
+       - -
+       addr_* (multiple): char varying (254)
+       description: char varying (254)
+       ...
+       railway: char varying (254)
+    }
+
+    entity station_relation {
+       * relcislo: integer
+       * station_id: numeric
+       - -
+       geom: geometry
+       station_order: integer
+    }
+
+    entity osm_data_index {
+       * relcislo: integer
+       * id: character varying (6)
+       * nazevtrasy: character varying (200)
+    }
+
+    entity processed_routes_line {
+       * gid: integer
+       * relcislo: integer
+       * geom: geometry
+    }
+
+    entity osm_rails {
+       * gid: integer
+       * relcislo: integer
+       * geom: geometry
+    }
+
+    all_stations ||- -o{ station_relation
+    station_relation }o- -o| osm_data_index
+    osm_data_index ||- -|| osm_rails
+    osm_data_index ||- -o| processed_routes_line
+}
+
+
+
+
+
+@enduml
+
+PlantUML version 1.2022.7(Mon Aug 22 19:01:30 CEST 2022)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Default Encoding: UTF-8
+Language: cs
+Country: CZ
+--></g></svg>

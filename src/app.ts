@@ -136,16 +136,12 @@ export class App {
 
         let storageList = JSON.parse(localStorage["dblayers"]);
         for (let i = 0; i < storageList.length; i++) {
-            storageList[i]["id"] = i; // Refreshing indexes (so they always stay low)
             let layer = MapEntityFactory.CreateGhostDBMapLayer(
                 storageList[i]["name"], storageList[i]["elements"],
                 storageList[i]["color"], storageList[i]["id"]
             );
             this.AddMapLayer(layer, false);
         }
-        
-        // NOTE: Maybe don't do this when using EntityDB (IDB)
-        // localStorage["dblayers"] = JSON.stringify(storageList); // Updating with refreshed indexes
     }
 
     public RenderElevationMarker(point?: L.LatLng) {

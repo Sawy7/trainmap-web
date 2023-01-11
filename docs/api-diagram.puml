@@ -1,0 +1,38 @@
+@startuml
+
+database "PostgreSQL" {
+    [all_stations]
+    [station_relation]
+    [osm_data_index]
+    [processed_routes_line]
+    [osm_rails]
+}
+
+package "Mapster API" {
+    [ListRails]
+    [ListOSMRails]
+    [GetRails]
+    [GetOSMRails]
+    [GetStations]
+}
+
+cloud "SQL Queries" {
+  [osm_data_index JOIN processed_routes_line]
+  [osm_data_index JOIN osm_rails]
+  [all_stations JOIN station_relation]
+}
+
+[osm_data_index JOIN processed_routes_line] --> [osm_data_index]
+[osm_data_index JOIN processed_routes_line] --> [processed_routes_line]
+[osm_data_index JOIN osm_rails] --> [osm_data_index]
+[osm_data_index JOIN osm_rails] --> [osm_rails]
+[all_stations JOIN station_relation] --> [all_stations]
+[all_stations JOIN station_relation] --> [station_relation]
+
+[ListRails] --> [osm_data_index JOIN processed_routes_line]
+[ListOSMRails] --> [osm_data_index JOIN osm_rails]
+[GetRails] --> [osm_data_index JOIN processed_routes_line]
+[GetOSMRails] --> [osm_data_index JOIN osm_rails]
+[GetStations] --> [all_stations JOIN station_relation]
+
+@enduml
