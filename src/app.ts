@@ -12,7 +12,6 @@ import { LayerList } from "./layerlist";
 import { LogNotify } from "./lognotify";
 import { SingleMapRoad } from "./singleroad";
 import { LocalEntityDB } from "./localentitydb";
-import { ApiMgr } from "./apimgr";
 
 // TS Singleton: https://stackoverflow.com/questions/30174078/how-to-define-singleton-in-typescript
 export class App {
@@ -22,6 +21,8 @@ export class App {
     private activeElevationChart: ElevationChart;
     private sidebarOffcanvas: Offcanvas = new Offcanvas(document.getElementById("offcanvasNavbar"));
     private layerActivating: boolean = false;
+    private markersHidden: boolean;
+    private hideMarkersButton: HTMLButtonElement = <HTMLButtonElement>document.getElementById("hideMarkersButton");
     private static _instance: App;
 
     private constructor(){};
@@ -35,17 +36,41 @@ export class App {
             this.sidebarOffcanvas.toggle();
         };
 
+        this.hideMarkersButton.onclick = () => {
+            this.HideMarkersInLayers();
+        };
+
         DBLayerBuilder.SetInteraction();
     }
 
     public Init(centerLat: number, centerLong: number, zoom: number) {
         this.mapWindow = new MapWindow(centerLat, centerLong, zoom);
+        this.UpdatePreferences();
         this.SetupButtons();
         this.InitLayerList();
         LogNotify.Init();
         FileLoader.SetupGPXLoader();
         FileLoader.SetupShapefileLoader();
         this.OnlineDBCheck();
+    }
+
+    private UpdatePreferences() {
+        if (this.markersHidden === undefined) {
+            if (localStorage["preferences"] === undefined) {
+                localStorage["preferences"] = JSON.stringify({"markersHidden": false});
+                this.markersHidden = false;
+            }
+            else
+                this.markersHidden = JSON.parse(localStorage["preferences"])["markersHidden"];
+        } else {
+            localStorage["preferences"] = JSON.stringify({"markersHidden": this.markersHidden});
+        }
+
+        let hiddenMarkersButtonIcon = this.hideMarkersButton.children[0];
+        if (this.markersHidden)
+            hiddenMarkersButtonIcon.setAttribute("class", "bi bi-geo");
+        else
+            hiddenMarkersButtonIcon.setAttribute("class", "bi bi-geo-fill");
     }
 
     private InitLayerList() {
@@ -87,6 +112,9 @@ export class App {
     }
 
     public AddMapLayer(mapLayer: MapLayer, notFromStorage: boolean = true) {
+        // Change hiddenMarker preference
+        mapLayer.MapMarkersHide(this.markersHidden);
+
         this.localLayers.push(mapLayer);
         this.layerList.AddLayer(mapLayer);
 
@@ -103,7 +131,7 @@ export class App {
         this.mapWindow.RenderMapLayer(mapLayer, mapLayerNewState);
         
         if (this.activeElevationChart !== undefined && !mapLayerNewState && this.activeElevationChart.layerID == mapLayer.id)
-        this.activeElevationChart.HideChart();
+            this.activeElevationChart.HideChart();
 
         let collapse = new Collapse(collapseElement);
         collapse.toggle();
@@ -127,7 +155,7 @@ export class App {
             this.activeElevationChart.DestroyChart();
             this.activeElevationChart = undefined;
         }
-        this.activeElevationChart = new ElevationChart(mapRoad);
+        this.activeElevationChart = new ElevationChart(mapRoad, this.mapWindow.WarpToPoint.bind(this.mapWindow));
     }
 
     public LoadFromLocalStorage() {
@@ -146,6 +174,18 @@ export class App {
 
     public RenderElevationMarker(point?: L.LatLng) {
         App.Instance.mapWindow.RenderElevationMarker(point);
+    }
+
+    public HideMarkersInLayers() {
+        this.markersHidden = !this.markersHidden;
+        this.localLayers.forEach(layer => {
+            layer.MapMarkersHide(this.markersHidden);
+            if (layer.GetActiveState()) {
+                this.mapWindow.RenderMapLayer(layer, false);
+                this.mapWindow.RenderMapLayer(layer, true);
+            }
+        });
+        this.UpdatePreferences();
     }
 
     public SaveTextToDisk(text: string, filename: string, type: string = "text/plain") {

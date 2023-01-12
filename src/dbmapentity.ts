@@ -33,10 +33,8 @@ export abstract class DBMapEntity extends MapEntity {
             return [];
         return this.POIs;
     }
-    
-    public GetStationsInfo(): object[] {
-        return this.POIs.map((station) => {
-            return {"name": station.GetListInfo(), "order": station.GetOrderIndex()};
-        });
+
+    public GetStations(): DBStationMapMarker[] {
+        return this.POIs;
     }
 }

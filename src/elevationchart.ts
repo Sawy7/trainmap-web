@@ -5,6 +5,7 @@ import L from "leaflet";
 import { App } from './app';
 import { DBSingleMapRoad } from './dbsingleroad';
 import { SingleMapRoad } from './singleroad';
+import { DBStationMapMarker } from './dbstationmarker';
 
 export class ElevationChart {
     private static ctx: HTMLCanvasElement = <HTMLCanvasElement> document.getElementById("elevationChart");
@@ -16,20 +17,22 @@ export class ElevationChart {
     private static stationListTabButton: HTMLButtonElement = <HTMLButtonElement> document.getElementById("stationListTab");
     private static stationBreadcrumbs: HTMLElement = document.getElementById("stationBreadcrumbs");
     private mapRoad: SingleMapRoad;
+    private warpMethod: Function;
     private points: L.LatLng[];
     private elevation: number[] = [];
-    private stationInfo: object[];
+    private stations: DBStationMapMarker[];
     private data;
     private chart: Chart;
     readonly layerID: number;
 
-    public constructor(mapRoad: SingleMapRoad) {
+    public constructor(mapRoad: SingleMapRoad, warpMethod: Function) {
         this.mapRoad = mapRoad;
+        this.warpMethod = warpMethod;
         this.points = (this.mapRoad.GetPoints() as L.LatLng[]);
         this.FilterDrops((this.mapRoad.GetElevation() as number[]));
         this.layerID = this.mapRoad.GetLayerID();
         if (this.mapRoad instanceof DBSingleMapRoad)
-            this.stationInfo = this.mapRoad.GetStationsInfo();
+            this.stations = this.mapRoad.GetStations();
         ElevationChart.visualTab.show();
         this.RenderChart();
         this.AddContextualInfo();
@@ -46,10 +49,11 @@ export class ElevationChart {
             radius.push(0);
         }
 
-        if (this.stationInfo !== undefined) {
-            this.stationInfo.forEach(si => {
-                labels[si["order"]] = si["name"];
-                radius[si["order"]] = 5;
+        if (this.stations !== undefined) {
+            this.stations.forEach(station => {
+                let stationOrder = station.GetOrderIndex(); 
+                labels[stationOrder] = station.GetListInfo();
+                radius[stationOrder] = 5;
             });
         }
 
@@ -170,10 +174,16 @@ export class ElevationChart {
             return;
         }
 
-        this.stationInfo.forEach(si => {
-            let stationCrumb = document.createElement("li");
+        let stationIcon = document.createElement("i");
+        stationIcon.setAttribute("class", "bi bi-train-front-fill");
+        this.stations.forEach(station => {
+            let stationCrumb = document.createElement("a");
             stationCrumb.setAttribute("class", "breadcrumb-item");
-            stationCrumb.innerHTML = `<i class="bi bi-train-front-fill"></i> ${si["name"]}`;
+            stationCrumb.appendChild(stationIcon);
+            stationCrumb.innerHTML += ` ${station.GetListInfo()}`;
+            stationCrumb.onclick = () => {
+                this.warpMethod(station.GetSignificantPoint());
+            };
             ElevationChart.stationBreadcrumbs.appendChild(stationCrumb);
         });
     }

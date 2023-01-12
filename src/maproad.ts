@@ -30,6 +30,7 @@ export abstract class MapRoad extends MapEntity {
         this.weight = weight;
         this.opacity = opacity;
         this.smoothFactor = smoothFactor;
+        this.linkIconName = "bi bi-bookshelf";
         this.dontSerializeList = [
             "polyLine"
         ]

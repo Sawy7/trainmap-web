@@ -10,6 +10,7 @@ export class MapLayer {
     public layerName: string;
     protected layerColor: string;
     private isActive: boolean = false;
+    private mapMarkersHidden: boolean = false;
     static globalIDGen: number = -1;
     readonly id: number;
     readonly className: string = "MapLayer";
@@ -51,6 +52,10 @@ export class MapLayer {
         this.layerEntities.push(...area);
     }
 
+    public MapMarkersHide(hide: boolean = true) {
+        this.mapMarkersHidden = hide;
+    }
+
     public CreateLayerGroup(): L.LayerGroup {
         let activeMapEntities: (L.Marker | L.Polyline | L.Polygon)[] = [];
 
@@ -60,7 +65,8 @@ export class MapLayer {
                 e.SetupInteractivity(this.id);
                 if (this.layerColor !== undefined)
                     gotEntity.setStyle({color: this.layerColor});
-            }
+            } else if (this.mapMarkersHidden && e instanceof MapMarker)
+                return;
             activeMapEntities.push(gotEntity);
         });
 
@@ -72,6 +78,14 @@ export class MapLayer {
 
         return new Promise((resolve) => {
             resolve(this.activeLayerGroup);
+        });
+    }
+        
+    public AddEntitiesToList(warpMethod: Function, entitiesList: HTMLElement) {
+        this.layerEntities.forEach(ma => {
+            let entityLink = ma.GetLink(warpMethod);
+            if (entityLink !== undefined)
+                entitiesList.appendChild(entityLink);
         });
     }
 

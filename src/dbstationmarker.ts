@@ -24,6 +24,10 @@ export class DBStationMapMarker extends MapMarker {
         }
     }
 
+    public GetLink(warpMethod: Function): HTMLElement {
+        return undefined;
+    }
+
     public GetOrderIndex(): number {
         return this.orderIndex;
     }

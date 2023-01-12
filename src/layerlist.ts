@@ -43,9 +43,9 @@ export class LayerList {
         var accordionBody = document.createElement("div");
         accordionBody.setAttribute("class", "accordion-body");
 
-        var routesHeader = document.createElement("h7");
-        routesHeader.innerHTML = "Elementy vrstvy";
-        accordionBody.appendChild(routesHeader);
+        var entityHeader = document.createElement("h7");
+        entityHeader.innerHTML = "Elementy vrstvy";
+        accordionBody.appendChild(entityHeader);
 
         var entityList = document.createElement("div");
         accordionBody.appendChild(entityList);
@@ -87,32 +87,10 @@ export class LayerList {
     }
 
     private PopulateLayerEntitesList(mapLayer: MapLayer, collapseElement: HTMLElement) {
-        let entitiesList = collapseElement.children[0].children[1];
+        let entitiesList = <HTMLElement>collapseElement.children[0].children[1];
         if (entitiesList.innerHTML !== "")
             return;
-        let mapEntities = mapLayer.GetLayerEntities();
-        mapEntities.forEach(ma => {
-            var entityLink = document.createElement("a");
-            entityLink.setAttribute("class", "list-group-item list-group-item-dark d-flex justify-content-between align-items-center");
-            entityLink.setAttribute("href", "#");
-            let significantPoint = ma.GetSignificantPoint();
-            entityLink.innerHTML = `${ma.GetListInfo()}`;
-            var locateIcon = document.createElement("i");
-            if (ma instanceof MapRoad) {
-                entityLink.innerHTML = `<b>${entityLink.innerHTML}</b>`;
-                locateIcon.setAttribute("class", "bi-bookshelf")
-            }
-            else
-                locateIcon.setAttribute("class", "bi-signpost-split-fill")
-            entityLink.onclick = () => {
-                this.warpMethod(significantPoint);
-            };
-            var badge = document.createElement("span");
-            badge.appendChild(locateIcon);
-            badge.setAttribute("class", "badge bg-primary rounded-pill");
-            entityLink.appendChild(badge);
-            entitiesList.appendChild(entityLink);
-        });
+        mapLayer.AddEntitiesToList(this.warpMethod, entitiesList);
     }
 
     private RemoveFromLayerList(mapLayer: MapLayer, collapseElement: HTMLElement) {

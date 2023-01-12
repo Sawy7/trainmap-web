@@ -29,6 +29,7 @@ export class MapMarker extends MapEntity {
         this.point = point;
         this.popupMsg = popupMsg;
         this.name = name;
+        this.linkIconName = "bi-signpost-split-fill";
         this.dontSerializeList = [
             "customIcon",
             "activeMarker"
