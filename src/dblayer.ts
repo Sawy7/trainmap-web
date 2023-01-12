@@ -45,4 +45,18 @@ export class DBMapLayer extends MapLayer {
 
         localStorage["dblayers"] = JSON.stringify(storageList);
     }
+
+    public UpdateProperitesInLocalStorage() {
+        let storageList = JSON.parse(localStorage["dblayers"]);
+
+        for (let i = 0; i < storageList.length; i++) {
+            if (storageList[i]["id"] == this.id) {
+                storageList[i]["name"] = this.layerName;
+                storageList[i]["color"] = this.layerColor;
+                break;
+            }
+        }
+
+        localStorage["dblayers"] = JSON.stringify(storageList);
+    }
 }

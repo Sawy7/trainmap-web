@@ -7,7 +7,7 @@ import { MapRoad } from "./maproad";
 export class MapLayer {
     protected layerEntities: MapEntity[] = [];
     public activeLayerGroup: L.LayerGroup;
-    public layerName: string;
+    protected layerName: string;
     protected layerColor: string;
     private isActive: boolean = false;
     private mapMarkersHidden: boolean = false;
@@ -33,6 +33,22 @@ export class MapLayer {
 
     public GetActiveState() {
         return this.isActive;
+    }
+
+    public GetLayerName(): string {
+        return this.layerName;
+    }
+
+    public ChangeLayerName(name: string) {
+        this.layerName = name; 
+    }
+
+    public GetColor(): string {
+        return this.layerColor;
+    }
+
+    public ChangeColor(color: string) {
+        this.layerColor = color;
     }
 
     public GetAndToggleActiveState() {

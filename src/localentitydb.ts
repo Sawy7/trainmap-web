@@ -1,13 +1,18 @@
-import { geoJSON } from "leaflet";
-
 export class LocalEntityDB {
     private db: Promise<IDBDatabase>;
     private static dbName: string = "localentitydb";
     private static railStore: string = "railStore";
     private static stationStore: string = "stationStore";
+    private static supportedBrowser: boolean;
     private static _instance: LocalEntityDB;
 
     private constructor(){
+        if (!window.indexedDB) {
+            LocalEntityDB.supportedBrowser = false;
+            return;
+        } else
+            LocalEntityDB.supportedBrowser = true;
+        
         const openRequest = window.indexedDB.open(LocalEntityDB.dbName, 1);
 
         this.db = new Promise((resolve, reject) => {
@@ -42,6 +47,9 @@ export class LocalEntityDB {
     }
 
     private async AddEntity(entity: object, store: string) {
+        if (!LocalEntityDB.supportedBrowser)
+            return;
+
         // Get DB when ready
         const db = await this.db;
         
@@ -65,6 +73,9 @@ export class LocalEntityDB {
     }
 
     public async CheckEntity(relcislo: number, store: string): Promise<boolean> {
+        if (!LocalEntityDB.supportedBrowser)
+            return false;
+
         const db = await this.db;
         const objectStore = db.transaction(store).objectStore(store);
         const checkRequest = objectStore.count(relcislo);
@@ -92,6 +103,8 @@ export class LocalEntityDB {
     }
 
     private async GetEntity(relcislo: number, store: string): Promise<object> {
+        // NOTE: This should not be called unless entity was checked, so not asking for browserSupport
+
         const db = await this.db;
         const objectStore = db.transaction(store).objectStore(store);
         const entityRequest = objectStore.get(relcislo);
@@ -116,6 +129,9 @@ export class LocalEntityDB {
     }
 
     private async ClearAllEntities(store: string): Promise<boolean> {
+        if (!LocalEntityDB.supportedBrowser)
+            return;
+
         const db = await this.db;
         const objectStore = db.transaction(store, "readwrite").objectStore(store);
         const clearRequest = objectStore.clear();

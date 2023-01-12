@@ -32,7 +32,7 @@ export class LayerList {
         var accordion = document.createElement("a");
         accordion.setAttribute("class", "list-group-item list-group-item-dark d-flex justify-content-between align-items-center");
         accordion.setAttribute("href", "#");
-        accordion.innerHTML = mapLayer.layerName;
+        accordion.innerHTML = mapLayer.GetLayerName();
 
         var accordionCollapse = document.createElement("div");
         accordionCollapse.setAttribute("class", "accordion-collapse collapse bg-secondary");
@@ -51,6 +51,7 @@ export class LayerList {
         accordionBody.appendChild(entityList);
        
         if (mapLayer instanceof DBMapLayer) {
+            // Delele button
             var operationDelete = document.createElement("button");
             operationDelete.setAttribute("type", "button");
             operationDelete.setAttribute("class", "btn btn-danger float-end");
@@ -60,9 +61,21 @@ export class LayerList {
             var operationDeleteIcon = document.createElement("i");
             operationDeleteIcon.setAttribute("class", "bi-trash-fill");
             operationDelete.appendChild(operationDeleteIcon);
+
+            // Edit button
+            var operationEdit = document.createElement("button");
+            operationEdit.setAttribute("type", "button");
+            operationEdit.setAttribute("class", "btn btn-warning float-end");
+            operationEdit.onclick = () => {
+                this.EditInLayerList(mapLayer, operationEdit, accordion);
+            };
+            var operationEditIcon = document.createElement("i");
+            operationEditIcon.setAttribute("class", "bi-pencil-fill");
+            operationEdit.appendChild(operationEditIcon);
             
             accordionBody.appendChild(document.createElement("br"));
             accordionBody.appendChild(operationDelete);
+            accordionBody.appendChild(operationEdit);
             var br = document.createElement("br");
             br.setAttribute("style", "clear:both");
             accordionBody.appendChild(br);
@@ -107,5 +120,71 @@ export class LayerList {
         // Rebuild localStorage (if DBLayer)
         if (!(mapLayer instanceof DBMapLayer))
             return;
+    }
+
+    private EditInLayerList(mapLayer: MapLayer, operationEdit: HTMLButtonElement, accordion: HTMLElement) {
+        operationEdit.setAttribute("style", "display: none");
+
+        let previousOnclick = accordion.onclick;
+        let previousLayerName = mapLayer.GetLayerName();
+        let previousLayerColor = mapLayer.GetColor();
+
+        accordion.onclick = null;
+        accordion.innerHTML = "";
+        accordion.removeAttribute("href");
+
+        let input = document.createElement("input");
+        input.setAttribute("type", "text");
+        input.setAttribute("placeholder", "Název vrstvy");
+        input.setAttribute("class", "form-control");
+        input.setAttribute("value", previousLayerName);
+
+        let color = document.createElement("input");
+        color.setAttribute("type", "color");
+        color.setAttribute("title", "Barva vrstvy");
+        color.setAttribute("class", "form-control form-control-color");
+        color.setAttribute("value", previousLayerColor);
+
+        var submitButton = document.createElement("button");
+        submitButton.setAttribute("type", "button");
+        submitButton.setAttribute("class", "btn btn-success float-end");
+        submitButton.onclick = () => {
+            if (input.value != previousLayerName || color.value != previousLayerColor) {
+                // if (color.value != previousLayerColor) {
+                //     this.activationMethod(mapLayer, false);
+                //     this.activationMethod(mapLayer, true);
+                // }
+                mapLayer.ChangeLayerName(input.value);
+                mapLayer.ChangeColor(color.value);
+                if (mapLayer instanceof DBMapLayer)
+                    mapLayer.UpdateProperitesInLocalStorage();
+            }
+
+            operationEdit.removeAttribute("style");
+            accordion.innerHTML = input.value;
+            accordion.setAttribute("href", "#");
+            accordion.onclick = previousOnclick;
+        };
+        var submitButtonIcon = document.createElement("i");
+        submitButtonIcon.setAttribute("class", "bi-check");
+        submitButton.appendChild(submitButtonIcon);
+
+        var cancelButton = document.createElement("button");
+        cancelButton.setAttribute("type", "button");
+        cancelButton.setAttribute("class", "btn btn-danger float-end");
+        cancelButton.onclick = () => {
+            operationEdit.removeAttribute("style");
+            accordion.innerHTML = previousLayerName;
+            accordion.setAttribute("href", "#");
+            accordion.onclick = previousOnclick;
+        };
+        var cancelButtonIcon = document.createElement("i");
+        cancelButtonIcon.setAttribute("class", "bi-x");
+        cancelButton.appendChild(cancelButtonIcon);
+
+        accordion.appendChild(input);
+        accordion.appendChild(color);
+        accordion.appendChild(cancelButton);
+        accordion.appendChild(submitButton);
     }
 }

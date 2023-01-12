@@ -1,6 +1,5 @@
 import L from "leaflet";
 import { Offcanvas, Collapse } from "bootstrap";
-
 import { MapWindow } from "./mapwindow";
 import { MapLayer } from "./maplayer";
 import { DBMapLayer } from "./dblayer";
