@@ -7,3 +7,4 @@ index.js.LICENSE.txt
 venv/
 public/api/base.php
 .directory
+.ipynb_checkpoints/
