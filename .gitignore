@@ -8,3 +8,4 @@ venv/
 public/api/base.php
 .directory
 .ipynb_checkpoints/
+__pycache__/
