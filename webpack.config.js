@@ -4,6 +4,8 @@ var webpack = require("webpack");
 module.exports = {
     entry: {
         "index": "./src/index.ts",
+        "login/login": "./src/login.ts",
+        "first-setup/first-setup": "./src/first-setup.ts",
         "offlinestoragesw": "./src/offlinestoragesw.ts"
     },
     resolve: {

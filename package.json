@@ -24,6 +24,7 @@
   "scripts": {
     "build": "webpack && rm public/*.png && rm public/*.svg",
     "host": "webpack-dev-server",
+    "php-deps": "cd public/ && composer install",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

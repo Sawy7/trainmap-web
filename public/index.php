@@ -1,3 +1,14 @@
+<?php
+require __DIR__ . "/vendor/autoload.php";
+
+$db = new \PDO("pgsql:dbname=railway_mapdb;host=localhost;port=5432", "railway_map_app", "aeh7OhNui7shie");
+$auth = new \Delight\Auth\Auth($db);
+
+if (!$auth->isLoggedIn()) {
+    header("Location:login");
+    exit;
+}
+?>
 <!doctype html>
 
 <html lang="cz">
@@ -65,6 +76,15 @@
                         <div id="shapefileInputContainer" class="input-group mb-3">
                             <input class="form-control bg-dark text-light" type="file" id="shapefileInput">
                         </div>
+                    </div>
+                    <div id="userInfo" class="text-center" style="position: absolute; bottom: 0; width: 100%">
+                        <br>
+                        <p>
+                            <?php
+                            echo('<button class="btn btn-secondary float-start" disabled>' . $auth->getEmail() . '</button>');
+                            ?>
+                            <a class="btn btn-danger" href="/login/logout.php"><i class="bi bi-door-open-fill"></i> Odhlásit</a>
+                        </p>
                     </div>
                     <!-- <div id="enetLogo">
                         <img src="custom-assets/enet.png" style="width: 100%;">
@@ -228,7 +248,7 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zavřít</button>
                 <div class="col" id="dbLayerBuilderColorDiv">
-                    <input type="color" class="form-control form-control-color" id="dbLayerBuilderColor" value="#75ff91" title="Barva vrstvy">
+                    <input type="color" class="form-control form-control-color" id="dbLayerBuilderColor" value="#c01c28" title="Barva vrstvy">
                 </div>
                 <div class="col" id="dbLayerBuilderNameDiv">
                     <div>

@@ -1,7 +1,7 @@
 package-lock.json
 node_modules/
-index.js
-offlinestoragesw.js
+*.js
+!webpack.config.js
 public/assets
 index.js.LICENSE.txt
 venv/
@@ -9,3 +9,6 @@ public/api/base.php
 .directory
 .ipynb_checkpoints/
 __pycache__/
+public/vendor
+# Background video
+*.mp4
