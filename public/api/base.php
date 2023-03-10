@@ -1,9 +1,22 @@
 <?php
-// DB Connection Params
-$DB_DBNAME = "INSERT_HERE";
-$DB_USER = "INSERT_HERE";
-$DB_PASSWORD = "INSERT_HERE";
-$DB_HOST = "INSERT_HERE";
+require __DIR__ . "/../config.php";
+require __DIR__ . "/../vendor/autoload.php";
+
+try {
+    $db = new \PDO("pgsql:dbname=" . $DB_DBNAME . ";host=" . $DB_HOST . ";port=5432", $DB_USER, $DB_PASSWORD);
+}
+catch (PDOException $Exception) {
+    echo '{ "type": "Error", "cause": "Could not connect to service" }';
+    exit;
+}
+$auth = new \Delight\Auth\Auth($db);
+
+if (!$auth->isLoggedIn()) {
+    header("Content-Type: application/json");
+    http_response_code(401);
+    echo '{ "type": "Error", "cause": "Not logged in" }';
+    exit;
+}
 
 // Common Constants
 $geomfield = "geom";

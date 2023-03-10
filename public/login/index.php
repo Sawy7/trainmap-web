@@ -1,7 +1,14 @@
 <?php
+require __DIR__ . "/../config.php";
 require __DIR__ . "/../vendor/autoload.php";
 
-$db = new \PDO("pgsql:dbname=railway_mapdb;host=localhost;port=5432", "railway_map_app", "aeh7OhNui7shie");
+try {
+    $db = new \PDO("pgsql:dbname=" . $DB_DBNAME . ";host=" . $DB_HOST . ";port=5432", $DB_USER, $DB_PASSWORD);
+}
+catch (PDOException $Exception) {
+    echo 'Could not connect to service';
+    exit;
+}
 $auth = new \Delight\Auth\Auth($db);
 
 if ($auth->isLoggedIn()) {

@@ -5,10 +5,10 @@ node_modules/
 public/assets
 index.js.LICENSE.txt
 venv/
-public/api/base.php
 .directory
 .ipynb_checkpoints/
 __pycache__/
 public/vendor
+config.php
 # Background video
 *.mp4
