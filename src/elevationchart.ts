@@ -1,6 +1,6 @@
 import Chart from 'chart.js/auto';
 import { getRelativePosition } from 'chart.js/helpers';
-import { Offcanvas, Tab } from 'bootstrap';
+import { Offcanvas, Tab, Popover } from 'bootstrap';
 import L from "leaflet";
 import { App } from './app';
 import { DBSingleMapRoad } from './dbsingleroad';
@@ -14,6 +14,7 @@ export class ElevationChart {
     private static visualTab: Tab = new Tab(document.getElementById("elevationVisualTab"));
     private static railName: HTMLElement = document.getElementById("offcanvasRailName");
     private static dataHeight: HTMLElement = document.getElementById("dataHeight");
+    private static reverseTrackButton: HTMLButtonElement = <HTMLButtonElement> document.getElementById("reverseTrackButton");
     private static stationListTabButton: HTMLButtonElement = <HTMLButtonElement> document.getElementById("stationListTab");
     private static stationBreadcrumbs: HTMLElement = document.getElementById("stationBreadcrumbs");
     private mapRoad: SingleMapRoad;
@@ -23,6 +24,7 @@ export class ElevationChart {
     private stations: DBStationMapMarker[];
     private data;
     private chart: Chart;
+    private chartReversed = false;
     readonly layerID: number;
 
     public constructor(mapRoad: SingleMapRoad, warpMethod: Function) {
@@ -35,6 +37,7 @@ export class ElevationChart {
             this.stations = this.mapRoad.GetStations();
         ElevationChart.visualTab.show();
         this.RenderChart();
+        this.SetupButtons();
         this.AddContextualInfo();
         this.ShowChart();
         this.RegisterChartClosing();
@@ -44,14 +47,23 @@ export class ElevationChart {
         let consumption = this.CalculateConsumption();
         let labels: string[] = [];
         let radius: number[] = [];
-        for (let i = 0; i < this.elevation.length; i++) {
+
+        let localElevation = [...this.elevation];
+        if (this.chartReversed)
+            localElevation.reverse();
+
+        for (let i = 0; i < localElevation.length; i++) {
             labels.push("");
             radius.push(0);
         }
 
         if (this.stations !== undefined) {
             this.stations.forEach(station => {
+                if (!station.IsIncluded())
+                    return;
                 let stationOrder = station.GetOrderIndex(); 
+                if (this.chartReversed)
+                    stationOrder = labels.length-1-stationOrder;
                 labels[stationOrder] = station.GetListInfo();
                 radius[stationOrder] = 5;
             });
@@ -79,7 +91,7 @@ export class ElevationChart {
             datasets: [
                 {
                     label: "Výška (m)", // Name the series
-                    data: this.elevation, // Specify the data values array
+                    data: localElevation, // Specify the data values array
                     fill: false,
                     borderColor: "#2196f3", // Add custom color border (Line)
                     borderWidth: 3 // Specify bar border width
@@ -163,6 +175,18 @@ export class ElevationChart {
         });
     }
 
+    private ReRenderChart() {
+        this.DestroyChart();
+        this.RenderChart();
+    }
+
+    private SetupButtons() {
+        ElevationChart.reverseTrackButton.onclick = () => {
+            this.chartReversed = !this.chartReversed;
+            this.ReRenderChart();
+        };
+    }
+
     private AddContextualInfo() {
         ElevationChart.railName.innerHTML = this.mapRoad.GetListInfo();
         ElevationChart.dataHeight.innerHTML = `${Math.round(Math.min(...this.elevation))}-${Math.round(Math.max(...this.elevation))} m`; 
@@ -176,14 +200,64 @@ export class ElevationChart {
 
         let stationIcon = document.createElement("i");
         stationIcon.setAttribute("class", "bi bi-train-front-fill");
+        ElevationChart.stationBreadcrumbs.innerHTML = "";
         this.stations.forEach(station => {
             let stationCrumb = document.createElement("a");
+            stationCrumb.setAttribute("href", "#");
             stationCrumb.setAttribute("class", "breadcrumb-item");
+            stationCrumb.setAttribute("title", "Title");
+            stationCrumb.setAttribute("data-popover-content", "popoverContent");
+            if (!station.IsIncluded())
+                stationCrumb.setAttribute("style", "color: var(--bs-red)");
             stationCrumb.appendChild(stationIcon);
             stationCrumb.innerHTML += ` ${station.GetListInfo()}`;
-            stationCrumb.onclick = () => {
-                this.warpMethod(station.GetSignificantPoint());
-            };
+
+            new Popover(stationCrumb, {
+                "placement": "auto",
+                "trigger": "focus",
+                "html": true,
+                "title": station.GetListInfo(),
+                "content": () => {
+                    // return popoverParentElement.querySelector(".popover-body").innerHTML;
+                    let buttons = document.createElement("div");
+                    buttons.setAttribute("class", "list-group");
+
+                    let showOnMapButton = document.createElement("a");
+                    showOnMapButton.setAttribute("class", "btn btn-primary");
+                    showOnMapButton.innerHTML = "<i class='bi bi-geo-alt-fill'></i> Zobrazit na mapě";
+                    showOnMapButton.onclick = () => {
+                        this.warpMethod(station.GetSignificantPoint());
+                    };
+
+                    buttons.appendChild(showOnMapButton);
+
+                    let includeButton = document.createElement("a");
+                    if (station.IsIncluded()) {
+                        includeButton.setAttribute("class", "btn btn-danger");
+                        includeButton.innerHTML = "<i class='bi bi-x'></i> Vynechat z grafu";
+                    }
+                    else {
+                        includeButton.setAttribute("class", "btn btn-success");
+                        includeButton.innerHTML = "<i class='bi bi-check'></i> Zahrnout v grafu";
+                    }
+                    includeButton.onclick = () => {
+                        let newState = station.ToggleIncluded();
+                        if (newState)
+                            stationCrumb.setAttribute("style", "");
+                        else
+                            stationCrumb.setAttribute("style", "color: var(--bs-red)");
+                        
+                        // Setup re-render of graph
+                        let visualTabButton = document.getElementById("elevationVisualTab"); 
+                        visualTabButton.addEventListener("click", () => {
+                            this.ReRenderChart();
+                        }, {"once": true});
+                    };
+
+                    buttons.appendChild(includeButton);
+                    return buttons;
+                }
+            });
             ElevationChart.stationBreadcrumbs.appendChild(stationCrumb);
         });
     }

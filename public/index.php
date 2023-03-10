@@ -150,7 +150,7 @@ if (!$auth->isLoggedIn()) {
                                     </a>
                                 </div>
                                 <div class="list-group">
-                                    <a class="list-group-item list-group-item-primary text-center" href="#" id="trainPickerButton">
+                                    <a class="list-group-item list-group-item-primary text-center" href="#" id="reverseTrackButton">
                                         <i class="bi-arrow-left-right"></i> Cesta zpět
                                     </a>
                                 </div>

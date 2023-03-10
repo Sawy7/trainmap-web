@@ -1,9 +1,9 @@
 import { ApiComms } from "./apicomms";
 
 export class ApiMgr {
-    private static rootUrl: string = "http://rmap.vsb.cz/devapi";
+    // private static rootUrl: string = "http://rmap.vsb.cz/devapi";
     // private static rootUrl: string = "http://localhost:3000";
-    // private static rootUrl: string = "/api";
+    private static rootUrl: string = "/api";
 
     public static OnlineDBCheck (): object {
         return JSON.parse(ApiComms.GetRequest(`${this.rootUrl}/onlinedbcheck.php`));

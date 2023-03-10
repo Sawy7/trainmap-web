@@ -4,6 +4,7 @@ import { MapMarker } from "./mapmarker";
 export class DBStationMapMarker extends MapMarker {
     private orderIndex: number;
     readonly className: string = "DBMapMarker";
+    private included = true;
 
     constructor(geoJSON: object) {
         super();
@@ -30,5 +31,14 @@ export class DBStationMapMarker extends MapMarker {
 
     public GetOrderIndex(): number {
         return this.orderIndex;
+    }
+
+    public IsIncluded(): boolean {
+        return this.included;
+    }
+
+    public ToggleIncluded() {
+        this.included = !this.included;
+        return this.included;
     }
 }

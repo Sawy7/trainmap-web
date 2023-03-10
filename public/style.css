@@ -114,3 +114,9 @@ label {
 .offcanvas-header {
     align-items: unset !important;
 }
+
+.popover  {
+    --bs-popover-header-bg: var(--bs-gray-dark) !important;
+    --bs-popover-bg: var(--bs-gray-dark) !important;
+    color: #FFF;
+}
