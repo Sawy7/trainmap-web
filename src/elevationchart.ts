@@ -225,9 +225,9 @@ export class ElevationChart {
                     let showOnMapButton = document.createElement("a");
                     showOnMapButton.setAttribute("class", "btn btn-primary");
                     showOnMapButton.innerHTML = "<i class='bi bi-geo-alt-fill'></i> Zobrazit na mapě";
-                    showOnMapButton.onclick = () => {
+                    showOnMapButton.addEventListener("click", () => {
                         this.warpMethod(station.GetSignificantPoint());
-                    };
+                    }, {"once": true});
 
                     buttons.appendChild(showOnMapButton);
 
@@ -240,7 +240,7 @@ export class ElevationChart {
                         includeButton.setAttribute("class", "btn btn-success");
                         includeButton.innerHTML = "<i class='bi bi-check'></i> Zahrnout v grafu";
                     }
-                    includeButton.onclick = () => {
+                    includeButton.addEventListener("click", () => {
                         let newState = station.ToggleIncluded();
                         if (newState)
                             stationCrumb.setAttribute("style", "");
@@ -252,7 +252,7 @@ export class ElevationChart {
                         visualTabButton.addEventListener("click", () => {
                             this.ReRenderChart();
                         }, {"once": true});
-                    };
+                    }, {"once": true});
 
                     buttons.appendChild(includeButton);
                     return buttons;
