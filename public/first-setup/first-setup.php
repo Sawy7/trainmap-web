@@ -20,6 +20,7 @@ if ($userCount > 0) {
 
 try {
     $userId = $auth->register($_POST['email'], $_POST['password'], $_POST['username']);
+    $auth->admin()->addRoleForUserByEmail($_POST['email'], \Delight\Auth\Role::ADMIN);
     header("Location:/login");
     exit;
 }

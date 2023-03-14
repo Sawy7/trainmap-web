@@ -86,16 +86,6 @@ if ($userCount > 0) {
         </div>
     </div>
 
-    <!-- <div class="container">
-      <div
-        class="row align-items-center bg-success text-light"
-        style="min-height: 100vh">
-        <div class="col-md-12">
-          <h1>GeeksforGeeks</h1>
-        </div>
-      </div>
-    </div> -->
-
     <script src="/first-setup/first-setup.js"></script>
 </body>
 </html>
