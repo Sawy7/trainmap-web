@@ -1,5 +1,5 @@
 const path = require("path")
-var webpack = require("webpack");
+const webpack = require("webpack");
 
 module.exports = {
     entry: {
@@ -65,5 +65,18 @@ module.exports = {
         new webpack.ProvidePlugin({
             Buffer: ['buffer', 'Buffer'],
         })
-    ]
+    ],
+    devServer: {
+        watchFiles: ["./public/**/*.php"],
+        proxy: {      
+            path: "/",
+            target: "http://localhost:3000/",
+            secure: false,
+            changeOrigin: true,
+            onProxyReq: proxyReq => {
+                if (proxyReq.getHeader("origin"))
+                    proxyReq.setHeader("origin", "http://localhost:3000/");
+            }
+        }
+    } 
 }
