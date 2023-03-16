@@ -21,18 +21,6 @@ export class ApiMgr {
         return JSON.parse(ApiComms.GetRequest(`${this.rootUrl}/listosmrails.php`));
     }
 
-    public static GetElement(dbID: number): object {
-        return JSON.parse(ApiComms.GetRequest(`${this.rootUrl}/getelement.php?id=${dbID}`));
-    }
-
-    public static GetElements(dbIDs: number[]): object {
-        let requestJSON = {"ids": dbIDs};
-        return JSON.parse(ApiComms.PostRequest(
-            `${this.rootUrl}/getelements.php`,
-            JSON.stringify(requestJSON)
-        ));
-    }
-
     public static GetRails(dbIDs: number[]): object {
         let requestJSON = {"relcisla": dbIDs};
         return JSON.parse(ApiComms.PostRequest(
@@ -55,13 +43,5 @@ export class ApiMgr {
             `${this.rootUrl}/getstations.php`,
             JSON.stringify(requestJSON)
         ));
-    }
-
-    public static GetGIDs(dbID: number): object {
-        return JSON.parse(ApiComms.GetRequest(`${this.rootUrl}/getgids.php?id=${dbID}`));
-    }
-
-    public static GetLineator(id: number): object {
-        return JSON.parse(ApiComms.GetRequest(`${this.rootUrl}/getlineator.php?id=${id}`));
     }
 }

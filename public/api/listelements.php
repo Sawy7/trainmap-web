@@ -9,20 +9,14 @@
 header("Access-Control-Allow-Origin: *"); // NOTE: This can be configured in Apache
 header("Content-Type: application/json");
 
-include "base.php";
- 
-// Check DB Connection
-if (!$conn) {
-    echo '{ "type": "LayerList", "layers": [ ], "status": "dboff" }';
-    exit;
-}
+require "apibase.php";
 
 # Build SQL SELECT statement and return the geometry as a GeoJSON element in EPSG: 4326
 $sql = "SELECT * FROM map_data_index ORDER BY id";
 // echo $sql;
 
 # Try query or error
-$rs = @pg_query($conn, $sql);
+$rs = $db->query($sql);
 if (!$rs) {
     echo '{ "type": "LayerList", "layers": [ ], "status": "sqlerror" }';
     exit;
@@ -32,7 +26,7 @@ if (!$rs) {
 $output    = '';
 $rowOutput = '';
 
-while ($row = pg_fetch_assoc($rs)) {
+while ($row = $rs->fetch()) {
     $rowOutput = (strlen($rowOutput) > 0 ? ', ' : '') . '{';
     $rowOutput .= createJsonKey("id", $row["id"], true);
     $rowOutput .= ', ' . createJsonKey("name", $row["nazevtrasy"]);

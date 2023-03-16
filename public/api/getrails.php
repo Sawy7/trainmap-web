@@ -20,15 +20,7 @@ if (empty($data['relcisla'])) {
 } else
     $relcisla = $data['relcisla'];
 
-$relcisla_str = implode(",", $relcisla);
-
-include "base.php";
-
-// Check DB Connection
-if (!$conn) {
-    echo '{ "type": "FeatureCollection", "features": null, "properties": null, "status": "dboff" }';
-    exit;
-}
+require "apibase.php";
 
 // Build SQL SELECT statement and return the geometry as a GeoJSON element in EPSG: 4326
 // $sql = "SELECT ST_AsGeoJSON(ST_SimplifyVW(ST_Transform(" . $geomfield . ", " . $srid . "), 0.0000001)) AS geojson, osm_data_index.*
@@ -36,13 +28,15 @@ if (!$conn) {
 // WHERE osm_data_index.relcislo IN (" . pg_escape_string($conn, $relcisla_str) . ")";
 
 // TODO: Simplify doesn't really work with station indexes (disabled for now)
-$sql = "SELECT ST_AsGeoJSON(ST_Transform(" . $geomfield . ", " . $srid . ")) AS geojson, osm_data_index.*
+$placeholders = rtrim(str_repeat('?, ', count($relcisla)), ', ') ;
+$sql = "SELECT ST_AsGeoJSON(ST_Transform($geomfield, $srid)) AS geojson, osm_data_index.*
 FROM processed_routes_line JOIN osm_data_index ON processed_routes_line.relcislo = osm_data_index.relcislo
-WHERE osm_data_index.relcislo IN (" . pg_escape_string($conn, $relcisla_str) . ")";
+WHERE osm_data_index.relcislo IN ($placeholders)";
 // echo $sql;
 
 // Try query or error
-$rs = @pg_query($conn, $sql);
+$rs = $db->prepare($sql);
+$rs->execute($relcisla);
 if (!$rs) {
     echo '{ "type": "FeatureCollection", "features": null, "properties": null, "status": "sqlerror" }';
     exit;
@@ -52,7 +46,7 @@ if (!$rs) {
 $output    = '';
 $rowOutput = '';
 
-while ($row = pg_fetch_assoc($rs)) {
+while ($row = $rs->fetch()) {
     $rowOutput = (strlen($rowOutput) > 0 ? ',' : '') . '{"type": "Feature", "geometry": ' . $row['geojson'] . ', "properties": {';
     $props = '';
     $props .= createJsonKey("relcislo", $row["relcislo"], true);

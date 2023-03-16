@@ -11,13 +11,7 @@
 header("Access-Control-Allow-Origin: *"); // NOTE: This can be configured in Apache
 header("Content-Type: application/json");
 
-include "base.php";
-
-// Check DB Connection
-if (!$conn) {
-    echo '{"type": "RailList", "railnums": [ ], "status": "dboff" }';
-    exit;
-}
+require "apibase.php";
 
 // Build SQL SELECT statement and return the geometry as a GeoJSON element in EPSG: 4326
 $sql = "SELECT DISTINCT osm_data_index.*
@@ -25,7 +19,7 @@ FROM processed_routes_line JOIN osm_data_index ON processed_routes_line.relcislo
 // echo $sql;
 
 // Try query or error
-$rs = @pg_query($conn, $sql);
+$rs = $db->query($sql);
 if (!$rs) {
     echo '{"type": "RailList", "layers": [ ], "status": "sqlerror" }';
     exit;
@@ -35,7 +29,7 @@ if (!$rs) {
 $output    = '';
 $rowOutput = '';
 
-while ($row = pg_fetch_assoc($rs)) {
+while ($row = $rs->fetch()) {
     $rowOutput = (strlen($rowOutput) > 0 ? ', ' : '') . '{';
     $rowOutput .= createJsonKey("relcislo", $row["relcislo"], true);
     $rowOutput .= ', ' . createJsonKey("id", $row["id"]);
