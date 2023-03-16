@@ -7,6 +7,7 @@ module.exports = {
         "login/login": "./src/login.ts",
         "first-setup/first-setup": "./src/first-setup.ts",
         "admin/admin": "./src/admin.ts",
+        "admin/users": "./src/users.ts",
         "offlinestoragesw": "./src/offlinestoragesw.ts"
     },
     resolve: {

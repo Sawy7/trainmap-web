@@ -23,4 +23,17 @@ export class ApiComms {
         xmlHttp.send(data);
         return xmlHttp.responseText;
     }
+    
+    static PostRequestURLEncoded(url: string, data: object): string {
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.open("POST", url, false);
+        xmlHttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        let dataString = "";
+        for (const prop in data) {
+            dataString += `${prop}=${data[prop]}&`;
+        }
+        dataString.slice(0, -1);
+        xmlHttp.send(dataString);
+        return xmlHttp.responseText;
+    }
 }

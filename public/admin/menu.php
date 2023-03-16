@@ -1,7 +1,7 @@
 <?php
 function GenerateHref($currentPage, $expectedPage)
 {
-    echo ($currentPage == $expectedPage) ? '<a href="#" class="nav-link active">' : '<a href="' . $expectedPage . '" class="nav-link text-white">';
+    echo($currentPage == $expectedPage) ? '<a href="#" class="nav-link active">' : '<a href="' . $expectedPage . '" class="nav-link text-white">';
 }
 ?>
 

@@ -19,7 +19,7 @@ if (!$auth->hasRole(\Delight\Auth\Role::ADMIN)) {
     <title>Mapster - Admin panel</title>
 
     <!-- Scripts -->
-    <script src="/admin/admin.js"></script>
+    <script src="/admin/users.js"></script>
     <!-- Custom Styles -->
     <link rel="stylesheet" href="/admin/admin.css">
 </head>
@@ -36,82 +36,124 @@ if (!$auth->hasRole(\Delight\Auth\Role::ADMIN)) {
                     <div class="row">
                         <div id="userInfo" class="col-md">
                             <h4>Operace</h4>
-                            <div class="btn-group" role="group" aria-label="operationButtons" style="width: 100%">
-                                <button type="button" class="btn btn-danger">Odstranit</button>
-                                <button type="button" class="btn btn-warning">Deaktivovat</button>
+                            <div id="operationsPlaceholder">
+                                <p>Nebyl vybrán žádný uživatel</p>
                             </div>
-                            <br><br>
-                            <div class="accordion" id="operationAccordion">
-                                <div class="accordion-item">
-                                    <h2 class="accordion-header" id="headingPass">
-                                        <button class="accordion-button collapsed" type="button"
-                                            data-bs-toggle="collapse" data-bs-target="#collapsePass"
-                                            aria-expanded="true" aria-controls="collapsePass">
-                                            Změnit heslo
-                                        </button>
-                                    </h2>
-                                    <div id="collapsePass" class="accordion-collapse collapse"
-                                        aria-labelledby="headingPass" data-bs-parent="#operationAccordion">
-                                        <div class="accordion-body">
-                                            <form action="NEW_ACTION_HERE" method="post">
+                            <div id="editOperations" style="display: none">
+                                <div class="btn-group" role="group" aria-label="operationButtons" style="width: 100%">
+                                    <button id="delUserButton" type="button" class="btn btn-danger">Odstranit</button>
+                                    <button id="deactivateUserButton" type="button" class="btn btn-warning" disabled>Deaktivovat</button>
+                                </div>
+                                <br><br>
+                                <div class="accordion" id="operationAccordion">
+                                    <div class="accordion-item" id="changePassAccordion">
+                                        <h2 class="accordion-header" id="headingPass">
+                                            <button class="accordion-button collapsed" type="button"
+                                                data-bs-toggle="collapse" data-bs-target="#collapsePass"
+                                                aria-expanded="true" aria-controls="collapsePass">
+                                                Změnit heslo
+                                            </button>
+                                        </h2>
+                                        <div id="collapsePass" class="accordion-collapse collapse"
+                                            aria-labelledby="headingPass" data-bs-parent="#operationAccordion">
+                                            <div class="accordion-body">
                                                 <div class="form-group">
                                                     <label>Heslo</label>
-                                                    <input id="password" name="password" class="form-control"
+                                                    <input id="passwordEdit" class="form-control"
                                                         type="password">
                                                 </div>
                                                 <br>
                                                 <div class="form-group">
                                                     <label>Heslo znovu</label>
-                                                    <input id="passwordAgain" class="form-control" type="password">
+                                                    <input id="passwordAgainEdit" class="form-control" type="password">
                                                 </div>
                                                 <br>
                                                 <div class="form-group">
-                                                    <button id="submitButton" type="submit"
+                                                    <button id="submitButtonEdit" type="submit"
                                                         class="btn btn-primary btn-block float-end"
                                                         disabled>Změnit</button>
                                                     <br><br>
                                                 </div>
-                                            </form>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="accordion-item">
-                                    <h2 class="accordion-header" id="headingPerms">
-                                        <button class="accordion-button collapsed" type="button"
-                                            data-bs-toggle="collapse" data-bs-target="#collapsePerms"
-                                            aria-expanded="true" aria-controls="collapsePerms">
-                                            Nastavit oprávnění
-                                        </button>
-                                    </h2>
-                                    <div id="collapsePerms" class="accordion-collapse collapse"
-                                        aria-labelledby="headingPerms" data-bs-parent="#operationAccordion">
-                                        <div class="accordion-body">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="radioAdmin"
-                                                    id="radioAdmin" checked>
-                                                <label class="form-check-label" for="radioAdmin">
-                                                    Administrátor
-                                                </label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="radioNormal"
-                                                    id="radioNormal">
-                                                <label class="form-check-label" for="radioNormal">
-                                                    Normální uživatel
-                                                </label>
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header" id="headingPerms">
+                                            <button class="accordion-button collapsed" type="button"
+                                                data-bs-toggle="collapse" data-bs-target="#collapsePerms"
+                                                aria-expanded="true" aria-controls="collapsePerms">
+                                                Nastavit oprávnění
+                                            </button>
+                                        </h2>
+                                        <div id="collapsePerms" class="accordion-collapse collapse"
+                                            aria-labelledby="headingPerms" data-bs-parent="#operationAccordion">
+                                            <div class="accordion-body">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="roleRadio"
+                                                        id="radioAdmin" checked>
+                                                    <label class="form-check-label" for="radioAdmin">
+                                                        Administrátor
+                                                    </label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="roleRadio"
+                                                        id="radioNormal">
+                                                    <label class="form-check-label" for="radioNormal">
+                                                        Normální uživatel
+                                                    </label>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                            <div id="newUserOperations" style="display: none">
+                                <h5>Nový uživatel</h5>
+                                <div class="form-group">
+                                    <label>E-mailová adresa</label>
+                                    <input id="emailNew" class="form-control" type="email">
+                                </div>
+                                <br>
+                                <div class="form-group">
+                                    <label>Heslo</label>
+                                    <input id="passwordNew" name="password" class="form-control" type="password">
+                                </div>
+                                <br>
+                                <div class="form-group">
+                                    <label>Heslo znovu</label>
+                                    <input id="passwordAgainNew" class="form-control" type="password">
+                                </div>
+                                <br>
+                                <div class="form-group">
+                                    <button id="submitButtonNew" class="btn btn-primary btn-block float-end"
+                                        disabled>Vytvořit účet</button>
+                                    <br><br>
+                                </div>
+                            </div>
                         </div>
-                        <div id="userList" class="list-group col-md-4">
+                        <div class="col-md-4">
                             <h4>Seznam uživatelů</h4>
-                            <a href="#" class="list-group-item list-group-item-action active">user@mail.com</a>
-                            <a href="#" class="list-group-item list-group-item-action">user@mail.com</a>
-                            <a href="#" class="list-group-item list-group-item-action">user@mail.com</a>
-                            <a href="#" class="list-group-item list-group-item-action">user@mail.com</a>
-                            <a href="#" class="list-group-item list-group-item-action">user@mail.com</a>
+                            <div id="userList" class="list-group">
+                                <!-- <a href="#" class="list-group-item list-group-item-action active">user@mail.com</a> -->
+                                <?php
+                                $users = $db->query("SELECT email, roles_mask FROM users;")->fetchAll();
+                                foreach ($users as $u) {
+                                    echo ('<a href="#" class="list-group-item d-flex justify-content-between align-items-center" value="' . $u["roles_mask"] . '">');
+                                    echo ($u["email"]);
+                                    if ($u["roles_mask"] == 1)
+                                        echo (' <span class="badge bg-danger rounded-pill"><i class="bi bi-suit-spade-fill"></i></span>');
+                                    echo ('</a>');
+                                }
+                                // <a href="#" class="list-group-item list-group-item-action">user@mail.com</a>
+                                ?>
+                            </div>
+                            <br>
+                            <div class="list-group">
+                                <a class="list-group-item list-group-item-success text-center" href="#"
+                                    id="addUserButton">
+                                    <i class="bi-plus"></i> Přidat uživatele
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
