@@ -5,6 +5,12 @@ import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider, Button
 import json
 
+"""
+TODO:
+- Add DTW for graph comparison
+- Add power limiter
+"""
+
 # Constants: ############################################################################################################################################
 G_TO_MS2 = 9.80665
 TRAIN_ACC_G = 0.1
@@ -48,7 +54,7 @@ def calc_radius_curve(point_a, point_b, point_c):
         # print("It's a straight line")
         return None
     
-def calc_curve_resistance(radius, numerator=650, denominator=55):
+def calc_curve_resistance(radius, numerator, denominator):
     return numerator/(radius-denominator) # [N/kN]
 
 def calc_curve_resistance_force(point_a, point_b, point_c, mass, numerator=650, denominator=55):
@@ -83,14 +89,13 @@ def calc_tangential_force(mass, angle_cos, velocity):
 def calc_parallel_g_force(mass, angle_sin):
     return mass*G_TO_MS2*angle_sin
 
-def calc_running_resistance(velocity, a=1.35, b=0.0008, c=0.00033):
+def calc_running_resistance(velocity, a, b, c):
     if velocity == 0:
         a = 0
     velocity_in_kph = velocity*3.6
     return a+b*velocity_in_kph+c*velocity_in_kph**2
 
 def calc_running_resistance_force(velocity, mass, a=1.35, b=0.0008, c=0.00033):
-    # print(velocity, mass)
     resistance = calc_running_resistance(velocity, a, b, c)
     mass_in_tons = mass/1000
     return resistance * mass_in_tons * G_TO_MS2
@@ -99,29 +104,13 @@ def calc_acceleration(force, mass):
     return force/mass
 
 def calc_velocity(acceleration, distance, init_velocity=0):
-    return math.sqrt(init_velocity**2 + 2*acceleration*distance)
+    return math.sqrt(init_velocity**2 + 2*acceleration*distance) # Changing parameters can break this
 
 def calc_reverse_acceleration(velocity, distance, init_velocity):
     return (velocity**2-init_velocity**2)/(2*distance)
 
 def calc_force(mass, acceleration):
     return mass*acceleration
-
-def draw_plot(dist_values, highlight_zero, args):
-    fig=plt.figure(figsize=(20,4), dpi= 100)
-    plt.xlabel("Vzdálenost (m)")
-    if highlight_zero:
-        plt.axhline(y=0, color="grey", linestyle="dotted")
-    if "stations" in args:
-        plt.plot(dist_values, args["values"], "-D", label=args["name"], markevery=args["stations"])
-    elif "scatter" in args and args["scatter"]:
-        plt.scatter(dist_values, args["values"], label=args["name"], marker="o")
-    else:
-        plt.plot(dist_values, args["values"], label=args["name"])
-    if "limit_values" in args:
-        plt.plot(dist_values, args["limit_values"], linestyle="dotted", label=args["limit_name"])
-    plt.legend()
-    plt.show()
 
 def parse_points_from_geojson(geojson_raw):
     geojson = json.loads(geojson_raw)
@@ -157,7 +146,11 @@ def get_energy_from_force(force_values, dist_values):
 #########################################################################################################################################################
 
 class ConsumptionPart:
-    def __init__(self, mass_locomotive, mass_wagon, points, max_velocities, filter_window_elev, filter_window_curve, acceleration_limit=None):
+    def __init__(
+            self, mass_locomotive, mass_wagon, points,
+            max_velocities, filter_window_elev, filter_window_curve,
+            curve_res_p: tuple, running_res_p: tuple,
+            acceleration_limit=None):
         # Input parameters
         self.mass_locomotive = mass_locomotive
         self.mass_wagon = mass_wagon
@@ -165,6 +158,8 @@ class ConsumptionPart:
         self.max_velocities = max_velocities
         self.filter_window_elev = filter_window_elev
         self.filter_window_curve = filter_window_curve
+        self.curve_res_p = curve_res_p
+        self.running_res_p = running_res_p
         self.acceleration_limit = acceleration_limit
 
         self.curve_res_force_all_l = []
@@ -184,8 +179,8 @@ class ConsumptionPart:
         for i in range(len(self.points)):
             if i % 3 == 0:
                 if i+2 < len(self.points):
-                    curve_res_force_l = calc_curve_resistance_force(self.points[i], self.points[i+1], self.points[i+2], self.mass_locomotive)/3
-                    curve_res_force_w = calc_curve_resistance_force(self.points[i], self.points[i+1], self.points[i+2], self.mass_wagon)/3
+                    curve_res_force_l = calc_curve_resistance_force(self.points[i], self.points[i+1], self.points[i+2], self.mass_locomotive, *self.curve_res_p)/3
+                    curve_res_force_w = calc_curve_resistance_force(self.points[i], self.points[i+1], self.points[i+2], self.mass_wagon, *self.curve_res_p)/3
                 else:
                     curve_res_force_l = 0
                     curve_res_force_w = 0
@@ -220,11 +215,11 @@ class ConsumptionPart:
             # Forces on locomotive
             tangential_force_l = calc_tangential_force(self.mass_locomotive, angle_cos, end_velocity[-1])
             parallel_g_force_l = calc_parallel_g_force(self.mass_locomotive, angle_sin)
-            running_res_force_l = calc_running_resistance_force(end_velocity[-1], self.mass_locomotive)
+            running_res_force_l = calc_running_resistance_force(end_velocity[-1], self.mass_locomotive, *self.running_res_p)
             
             # Forces on wagon
             parallel_g_force_w = calc_parallel_g_force(self.mass_wagon, angle_sin)
-            running_res_force_w = calc_running_resistance_force(end_velocity[-1], self.mass_wagon)
+            running_res_force_w = calc_running_resistance_force(end_velocity[-1], self.mass_wagon, *self.running_res_p)
             
             # Curve forces
             curve_res_force_l = self.curve_res_force_all_l[i]
@@ -291,11 +286,11 @@ class ConsumptionPart:
             # Forces on locomotive
             tangential_force_l = calc_tangential_force(self.mass_locomotive, angle_cos, self.velocity_values[-1])
             parallel_g_force_l = calc_parallel_g_force(self.mass_locomotive, angle_sin)
-            running_res_force_l = calc_running_resistance_force(self.velocity_values[-1], self.mass_locomotive)
+            running_res_force_l = calc_running_resistance_force(self.velocity_values[-1], self.mass_locomotive, *self.running_res_p)
             
             # Forces on wagon
             parallel_g_force_w = calc_parallel_g_force(self.mass_wagon, angle_sin)
-            running_res_force_w = calc_running_resistance_force(self.velocity_values[-1], self.mass_wagon)
+            running_res_force_w = calc_running_resistance_force(self.velocity_values[-1], self.mass_wagon, *self.running_res_p)
             
             # Curve forces
             curve_res_force_l = self.curve_res_force_all_l[i]
@@ -405,17 +400,27 @@ class PlotData:
 class Consumption:
     def __init__(self, file_path):
         # Params
-        self.mass_locomotive = 80000 # kg (80 t)
-        self.mass_wagon = 1000000 # kg (1000 t)
-        self.filter_window_elev = 100
-        self.filter_window_curve = 10
-        self.acceleration_limit = None
+        self.params = {
+            "mass_locomotive": 80000,   # kg (80 t)
+            "mass_wagon": 1000000,      # kg (1000 t)
+            "acceleration_limit": None
+        }
+        self.variable_params = {
+            "Elevation smoothing": 100,
+            "Curve smoothing": 10,
+            "Curve A": 650,
+            "Curve B": 55,
+            "Running a": 1.35,
+            "Running b": 0.0008,
+            "Running c": 0.00033
+        }
 
         # Internal data
         self.file_path = file_path
         self.points = None
         self.stations = None
         self.max_velocities_in_mps = None
+        self.sliders = []
 
         self.clean()
         self.load_from_file()
@@ -429,40 +434,23 @@ class Consumption:
             max_velocities = parse_max_velocity_from_geojson(geojson_raw)
             self.max_velocities_in_mps = [x/3.6 for x in max_velocities]
 
-    def get_plot_data(self, name):
-        if name == "acceleration":
-            return self.acceleration_values
-        elif name == "velocity":
-            return self.velocity_values
-        elif name == "force":
-            return self.force_values
-        elif name == "exerted_force":
-            return self.exerted_force_values
-        elif name == "tangential_force":
-            return self.tangential_f_values
-        elif name == "parallel_f_values":
-            return self.parallel_f_values
-        elif name == "running_res_f_values":
-            return self.running_res_f_values
-        elif name == "curve_res_f_values":
-            return self.curve_res_f_values
-        elif name == "energy_from_exerted_force":
-            return self.energy_from_exerted_force
-
     def set_plot_data(self, plot_data: PlotData):
-        plot_data.plot_obj.set_ydata(self.get_plot_data(plot_data.name))
+        plot_data.plot_obj.set_ydata(self.series[plot_data.name])
 
     def clean(self):
-        self.force_values = []
-        self.exerted_force_values = []
-        self.dist_values = []
-        self.velocity_values = []
-        self.acceleration_values = []
-        self.tangential_f_values = []
-        self.parallel_f_values = []
-        self.running_res_f_values = []
-        self.curve_res_f_values = []  
-        self.energy_from_exerted_force = []
+        # Calculated series
+        self.series = {
+            "force_values": [],
+            "exerted_force_values": [],
+            "dist_values": [],
+            "velocity_values": [],
+            "acceleration_values": [],
+            "tangential_f_values": [],
+            "parallel_f_values": [],
+            "running_res_f_values": [],
+            "curve_res_f_values": [],
+            "energy_from_exerted_force": []
+        }
     
     def run(self):
         station_offset = 1
@@ -474,70 +462,88 @@ class Consumption:
             split_points = self.points[self.stations[i]:self.stations[i+1]-station_offset+1]
             split_max_velocities_in_mps = self.max_velocities_in_mps[self.stations[i]:self.stations[i+1]-station_offset+1]
 
-            consumption_part = ConsumptionPart(self.mass_locomotive, self.mass_wagon, split_points, split_max_velocities_in_mps, self.filter_window_elev, self.filter_window_curve, self.acceleration_limit)
+            consumption_part = ConsumptionPart(
+                self.params["mass_locomotive"],
+                self.params["mass_wagon"],
+                split_points,
+                split_max_velocities_in_mps,
+                self.variable_params["Elevation smoothing"],
+                self.variable_params["Curve smoothing"],
+                (self.variable_params["Curve A"], self.variable_params["Curve B"]),
+                (self.variable_params["Running a"], self.variable_params["Running b"], self.variable_params["Running c"]),
+                self.params["acceleration_limit"]
+            )
             consumption_part.run()
 
-            self.force_values += consumption_part.force_values
-            self.exerted_force_values += consumption_part.exerted_force_values
-            self.dist_values += [d+prev_dist_offset for d in consumption_part.dist_values]
-            self.velocity_values += consumption_part.velocity_values
-            self.acceleration_values += consumption_part.acceleration_values
-            self.tangential_f_values += consumption_part.tangential_f_values
-            self.parallel_f_values += consumption_part.parallel_f_values
-            self.running_res_f_values += consumption_part.running_res_f_values
-            self.curve_res_f_values += consumption_part.curve_res_f_values
+            self.series["force_values"] += consumption_part.force_values
+            self.series["exerted_force_values"] += consumption_part.exerted_force_values
+            self.series["dist_values"] += [d+prev_dist_offset for d in consumption_part.dist_values]
+            self.series["velocity_values"] += consumption_part.velocity_values
+            self.series["acceleration_values"] += consumption_part.acceleration_values
+            self.series["tangential_f_values"] += consumption_part.tangential_f_values
+            self.series["parallel_f_values"] += consumption_part.parallel_f_values
+            self.series["running_res_f_values"] += consumption_part.running_res_f_values
+            self.series["curve_res_f_values"] += consumption_part.curve_res_f_values
 
-            prev_dist_offset = self.dist_values[-1]
+            prev_dist_offset = self.series["dist_values"][-1]
 
-        self.energy_from_exerted_force = get_energy_from_force(self.exerted_force_values, self.dist_values)
+        self.series["energy_from_exerted_force"] = get_energy_from_force(self.series["exerted_force_values"], self.series["dist_values"])
 
-def create_slider(label, min, max, init, fig, pos_left):
-    axslider_window = fig.add_axes([pos_left, 0.18, 0.0225, 0.63])
-    label = label.replace(" ", "\n")
-    return Slider(
-        ax=axslider_window,
-        label=label,
-        valmin=min,
-        valmax=max,
-        valinit=init,
-        orientation="vertical"
-    )
+    def render_plot_window(self):
+        self.plots = [
+            PlotData("acceleration_values", "Zrychlení (m/s2)"),
+            PlotData("velocity_values", "Rychlost (m/s)"),
+            PlotData("force_values", "Síla (N)"),
+            PlotData("energy_from_exerted_force", "Energie z vydané síly (J)")
+        ]
+
+        self.fig, axs = plt.subplots(len(self.plots), figsize=(20,4), dpi=100, sharex=True)
+        for i,p in enumerate(self.plots):
+            self.plots[i].plot_obj, = axs[i].plot(c.series["dist_values"], c.series[p.name], label=p.pretty_name)
+            axs[i].legend(loc="center left", bbox_to_anchor=(1, 0.5))
+            if i == len(self.plots)-1:
+                axs[i].set_xlabel("Vzdálenost (m)")
+            # axs[i].set_ylabel(p.pretty_name)
     
+        self.fig.subplots_adjust(left=0.40)
+        self.params_to_sliders()
+
+        plt.show()
+
+    def params_to_sliders(self):
+        pos_step = .05
+        pos_left = .03
+        for vp in self.variable_params.keys():
+            if self.variable_params[vp] is not None:
+                c.create_slider(vp, 0, 200, pos_left),
+                pos_left += pos_step
+
+    def create_slider(self, key_label, min, max, pos_left):
+        axslider_window = self.fig.add_axes([pos_left, 0.18, 0.0225, 0.63])
+        self.sliders.append(
+            Slider(
+                ax=axslider_window,
+                label=key_label.replace(" ", "\n"),
+                valmin=min,
+                valmax=max,
+                valinit=self.variable_params[key_label],
+                orientation="vertical"
+        ))
+        self.update_slider(self.sliders[-1], key_label)
+
+    def update_slider(self, slider: Slider, key_label: str):
+        def update(val):
+            self.variable_params[key_label] = val
+            self.clean()
+            self.run()
+            for p in self.plots:
+                self.set_plot_data(p)
+            self.fig.canvas.draw_idle()
+
+        slider.on_changed(update)
 
 if __name__ == "__main__":
     c = Consumption("olo-opava.geojson")
     c.run()
+    c.render_plot_window()
 
-    plots = [
-        PlotData("acceleration", "Zrychlení (m/s2)"),
-        PlotData("velocity", "Rychlost (m/s)"),
-        PlotData("force", "Síla (N)"),
-        PlotData("energy_from_exerted_force", "Energie z vydané síly (J)")
-    ]
-
-    fig, axs = plt.subplots(len(plots), figsize=(20,4), dpi=100, sharex=True)
-    for i,p in enumerate(plots):
-        plots[i].plot_obj, = axs[i].plot(c.dist_values, c.get_plot_data(p.name), label=p.pretty_name)
-        axs[i].legend(loc="center left", bbox_to_anchor=(1, 0.5))
-        if i == len(plots)-1:
-            axs[i].set_xlabel("Vzdálenost (m)")
-        # axs[i].set_ylabel(p.pretty_name)
-
-    fig.subplots_adjust(left=0.20)
-    sliders = [
-        create_slider("Elevation smoothing", 0, 200, c.filter_window_elev, fig, 0.05),
-        create_slider("Curve smoothing", 0, 200, c.filter_window_curve, fig, 0.1)
-    ]
-
-    def update(val):
-        c.filter_window_elev = val
-        c.clean()
-        c.run()
-        for p in plots:
-            c.set_plot_data(p)
-        fig.canvas.draw_idle()
-
-    for s in sliders:
-        s.on_changed(update)
-    
-    plt.show()
