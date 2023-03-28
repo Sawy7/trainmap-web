@@ -3,6 +3,7 @@ import numpy as np
 from scipy.signal import savgol_filter
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider, Button
+from fastdtw import fastdtw
 import json
 
 """
@@ -392,10 +393,8 @@ class PlotData:
     def __init__(self, name, pretty_name):
         self.name = name
         self.pretty_name = pretty_name
-        self.plot_obj = None
-
-    def set_plot_obj(self, plot_obj):
-        self.plot_obj = plot_obj
+        self.axes_obj = None
+        self.lines = []
 
 class Consumption:
     def __init__(self, file_path):
@@ -421,21 +420,10 @@ class Consumption:
         self.stations = None
         self.max_velocities_in_mps = None
         self.sliders = []
+        self.comparison_series = {}
 
         self.clean()
         self.load_from_file()
-
-    def load_from_file(self):
-        with open(self.file_path) as f:
-            lines = f.readlines()
-            geojson_raw = "".join(lines)
-            self.points = parse_points_from_geojson(geojson_raw)
-            self.stations = parse_stations_from_geojson(geojson_raw)
-            max_velocities = parse_max_velocity_from_geojson(geojson_raw)
-            self.max_velocities_in_mps = [x/3.6 for x in max_velocities]
-
-    def set_plot_data(self, plot_data: PlotData):
-        plot_data.plot_obj.set_ydata(self.series[plot_data.name])
 
     def clean(self):
         # Calculated series
@@ -452,6 +440,29 @@ class Consumption:
             "energy_from_exerted_force": []
         }
     
+    def insert_comparsion(self, name, data):
+        self.comparison_series[name] = data
+
+    def load_from_file(self):
+        with open(self.file_path) as f:
+            lines = f.readlines()
+            geojson_raw = "".join(lines)
+            self.points = parse_points_from_geojson(geojson_raw)
+            self.stations = parse_stations_from_geojson(geojson_raw)
+            max_velocities = parse_max_velocity_from_geojson(geojson_raw)
+            self.max_velocities_in_mps = [x/3.6 for x in max_velocities]
+
+    def update_plot_data(self, plot_data: PlotData):
+        plot_data.lines[0].set_ydata(self.series[plot_data.name])
+        if plot_data.name in self.comparison_series:
+            if len(plot_data.lines) > 1:
+                plot_data.lines[1].set_ydata(self.comparison_series[plot_data.name])
+            else:
+                line, = plot_data.axes_obj.plot(self.comparison_series["dist_values"], self.comparison_series[plot_data.name], label="(cmp)")
+                plot_data.lines.append(line)
+
+            self.get_dtw(plot_data.name)
+
     def run(self):
         station_offset = 1
         prev_dist_offset = 0
@@ -499,7 +510,9 @@ class Consumption:
 
         self.fig, axs = plt.subplots(len(self.plots), figsize=(20,4), dpi=100, sharex=True)
         for i,p in enumerate(self.plots):
-            self.plots[i].plot_obj, = axs[i].plot(c.series["dist_values"], c.series[p.name], label=p.pretty_name)
+            self.plots[i].axes_obj = axs[i]
+            line, = axs[i].plot(c.series["dist_values"], c.series[p.name], label=p.pretty_name)
+            self.plots[i].lines.append(line)
             axs[i].legend(loc="center left", bbox_to_anchor=(1, 0.5))
             if i == len(self.plots)-1:
                 axs[i].set_xlabel("Vzdálenost (m)")
@@ -537,13 +550,22 @@ class Consumption:
             self.clean()
             self.run()
             for p in self.plots:
-                self.set_plot_data(p)
+                self.update_plot_data(p)
             self.fig.canvas.draw_idle()
 
         slider.on_changed(update)
 
+    def get_dtw(self, name):
+        distance, path = fastdtw(self.series[name], self.comparison_series[name])
+        print(f"{name} distance: {distance}")
+
 if __name__ == "__main__":
     c = Consumption("olo-opava.geojson")
     c.run()
-    c.render_plot_window()
 
+    # Testing comparison
+    acceleration_test_cmp = [x-0.1 for x in c.series["acceleration_values"]]
+    c.insert_comparsion("dist_values", c.series["dist_values"]) # This is very neccesary
+    c.insert_comparsion("acceleration_values", acceleration_test_cmp)
+
+    c.render_plot_window()
