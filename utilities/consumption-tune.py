@@ -6,12 +6,6 @@ from matplotlib.widgets import Slider, Button
 from fastdtw import fastdtw
 import json
 
-"""
-TODO:
-- Add DTW for graph comparison
-- Add power limiter
-"""
-
 # Constants: ############################################################################################################################################
 G_TO_MS2 = 9.80665
 TRAIN_ACC_G = 0.1
@@ -144,6 +138,14 @@ def get_energy_from_force(force_values, dist_values):
         to_return.append(running_sum)
     return to_return
 
+def calc_power_from_acceleration(mass, acceleration, velocity):
+    # P = mav
+    return mass*acceleration*velocity
+
+def calc_acceleration_from_power(power, mass, velocity):
+    # a = P/(m*v)
+    return power/(mass*velocity)
+
 #########################################################################################################################################################
 
 class ConsumptionPart:
@@ -151,7 +153,7 @@ class ConsumptionPart:
             self, mass_locomotive, mass_wagon, points,
             max_velocities, filter_window_elev, filter_window_curve,
             curve_res_p: tuple, running_res_p: tuple,
-            acceleration_limit=None):
+            acceleration_limit=None, power_limit=None):
         # Input parameters
         self.mass_locomotive = mass_locomotive
         self.mass_wagon = mass_wagon
@@ -162,6 +164,7 @@ class ConsumptionPart:
         self.curve_res_p = curve_res_p
         self.running_res_p = running_res_p
         self.acceleration_limit = acceleration_limit
+        self.power_limit = power_limit
 
         self.curve_res_force_all_l = []
         self.curve_res_force_all_w = []
@@ -194,6 +197,16 @@ class ConsumptionPart:
 
         self.curve_res_force_all_l = savgol_filter(self.curve_res_force_all_l, self.filter_window_curve, 0, mode="nearest")
         self.curve_res_force_all_w = savgol_filter(self.curve_res_force_all_w, self.filter_window_curve, 0, mode="nearest")
+
+    def cap_acceleration(self, mass, acceleration, velocity):
+        if self.power_limit is None:
+            return acceleration
+        else:
+            uncapped_power = calc_power_from_acceleration(mass, acceleration, velocity)
+            if uncapped_power > self.power_limit:
+                return calc_acceleration_from_power(uncapped_power, mass, velocity)
+            else:
+                return acceleration
 
     def slow_down_to_max_limit_six(self, max_velocity, slow_point_index):
         end_force = []
@@ -228,14 +241,13 @@ class ConsumptionPart:
             
             # Is it incline/decline?
             if self.points[i-1][2] - self.points[i][2] > 0: # Incline
-                # print("incline")
                 final_force = tangential_force_l - parallel_g_force_l - parallel_g_force_w - running_res_force_l - running_res_force_w
             else: # Decline
-                # print("decline")
                 final_force = tangential_force_l + parallel_g_force_l + parallel_g_force_w - running_res_force_l - running_res_force_w
             final_force += - curve_res_force_l - curve_res_force_w
             exerted_force = tangential_force_l
             acceleration = calc_acceleration(final_force, self.mass_locomotive+self.mass_wagon)
+            acceleration = self.cap_acceleration(self.mass_locomotive+self.mass_wagon, acceleration, end_velocity[-1])
             # NOTE: If acceleration exceeds the limit, we'll just cap it
             if self.acceleration_limit is not None and acceleration > self.acceleration_limit:
                 acceleration = self.acceleration_limit
@@ -308,6 +320,8 @@ class ConsumptionPart:
                     final_force = tangential_force_l + parallel_g_force_l + parallel_g_force_w - running_res_force_l - running_res_force_w
                 final_force += - curve_res_force_l - curve_res_force_w
                 acceleration = calc_acceleration(final_force, self.mass_locomotive+self.mass_wagon)
+                acceleration = self.cap_acceleration(self.mass_locomotive+self.mass_wagon, acceleration, self.velocity_values[-1])
+                # print(testcc)
                 # NOTE: If acceleration exceeds the limit, we'll just cap it
                 if self.acceleration_limit is not None and acceleration > self.acceleration_limit:
                     acceleration = self.acceleration_limit
@@ -402,7 +416,8 @@ class Consumption:
         self.params = {
             "mass_locomotive": 80000,   # kg (80 t)
             "mass_wagon": 1000000,      # kg (1000 t)
-            "acceleration_limit": None
+            "acceleration_limit": None,
+            "power_limit": 4500*1000    # 4500 kW
         }
         self.variable_params = {
             "Elevation smoothing": 100,
@@ -451,6 +466,7 @@ class Consumption:
             self.stations = parse_stations_from_geojson(geojson_raw)
             max_velocities = parse_max_velocity_from_geojson(geojson_raw)
             self.max_velocities_in_mps = [x/3.6 for x in max_velocities]
+            self.series["elevation_values"] = [e[2] for e in self.points]
 
     def update_plot_data(self, plot_data: PlotData):
         plot_data.lines[0].set_ydata(self.series[plot_data.name])
@@ -482,7 +498,8 @@ class Consumption:
                 self.variable_params["Curve smoothing"],
                 (self.variable_params["Curve A"], self.variable_params["Curve B"]),
                 (self.variable_params["Running a"], self.variable_params["Running b"], self.variable_params["Running c"]),
-                self.params["acceleration_limit"]
+                self.params["acceleration_limit"],
+                self.params["power_limit"]
             )
             consumption_part.run()
 
@@ -503,6 +520,7 @@ class Consumption:
     def render_plot_window(self):
         self.plots = [
             PlotData("acceleration_values", "Zrychlení (m/s2)"),
+            PlotData("elevation_values", "Výška (m)"),
             PlotData("velocity_values", "Rychlost (m/s)"),
             PlotData("force_values", "Síla (N)"),
             PlotData("energy_from_exerted_force", "Energie z vydané síly (J)")
@@ -516,14 +534,12 @@ class Consumption:
             axs[i].legend(loc="center left", bbox_to_anchor=(1, 0.5))
             if i == len(self.plots)-1:
                 axs[i].set_xlabel("Vzdálenost (m)")
-            # axs[i].set_ylabel(p.pretty_name)
     
-        self.fig.subplots_adjust(left=0.40)
-        self.params_to_sliders()
-
+        # self.params_to_sliders() # ENABLE SLIDERS HERE
         plt.show()
 
     def params_to_sliders(self):
+        self.fig.subplots_adjust(left=0.40)
         pos_step = .05
         pos_left = .03
         for vp in self.variable_params.keys():
@@ -563,9 +579,9 @@ if __name__ == "__main__":
     c = Consumption("olo-opava.geojson")
     c.run()
 
-    # Testing comparison
-    acceleration_test_cmp = [x-0.1 for x in c.series["acceleration_values"]]
-    c.insert_comparsion("dist_values", c.series["dist_values"]) # This is very neccesary
-    c.insert_comparsion("acceleration_values", acceleration_test_cmp)
+    # # Testing comparison
+    # acceleration_test_cmp = [x-0.1 for x in c.series["acceleration_values"]]
+    # c.insert_comparsion("dist_values", c.series["dist_values"]) # This is very neccesary
+    # c.insert_comparsion("acceleration_values", acceleration_test_cmp)
 
     c.render_plot_window()
