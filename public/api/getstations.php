@@ -64,7 +64,7 @@ while ($row = $rs->fetch()) {
 }
 $output .= '{"type": "FeatureCollection", "features": [ ' . $relOutput . ' ], "properties": {"relcislo": ' . $prevRelcislo . '}}';
 
-if (empty($output)) {
+if ($prevRelcislo == NULL) {
     $output = '{ "type": "Stations", "Collections": null, "status": "nodata" }';
 } else {
     $output = '{"type": "Stations", "Collections": [ ' . $output . ' ], "status": "ok" }';
