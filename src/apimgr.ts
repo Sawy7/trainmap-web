@@ -44,4 +44,12 @@ export class ApiMgr {
             JSON.stringify(requestJSON)
         ));
     }
+
+    public static CalcConsumption(dbID: number): object {
+        let requestJSON = {"relcislo": dbID};
+        return JSON.parse(ApiComms.PostRequest(
+            `${this.rootUrl}/calcconsumption.php`,
+            JSON.stringify(requestJSON)
+        ));
+    }
 }

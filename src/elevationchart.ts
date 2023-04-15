@@ -6,6 +6,7 @@ import { App } from './app';
 import { DBSingleMapRoad } from './dbsingleroad';
 import { SingleMapRoad } from './singleroad';
 import { DBStationMapMarker } from './dbstationmarker';
+import { LogNotify } from './lognotify';
 
 export class ElevationChart {
     private static ctx: HTMLCanvasElement = <HTMLCanvasElement> document.getElementById("elevationChart");
@@ -13,8 +14,11 @@ export class ElevationChart {
     private static offcanvas: Offcanvas = new Offcanvas(document.getElementById("offcanvasElevation"));
     private static visualTab: Tab = new Tab(document.getElementById("elevationVisualTab"));
     private static railName: HTMLElement = document.getElementById("offcanvasRailName");
+    private static elevationChartDiv: HTMLDivElement = <HTMLDivElement> document.getElementById("elevationChartDiv");
+    private static elevationChartHeading: HTMLElement = document.getElementById("elevationChartHeading");
     private static dataHeight: HTMLElement = document.getElementById("dataHeight");
     private static reverseTrackButton: HTMLButtonElement = <HTMLButtonElement> document.getElementById("reverseTrackButton");
+    private static calculateConsumptionButton: HTMLButtonElement = <HTMLButtonElement> document.getElementById("calculateConsumptionButton");
     private static stationListTabButton: HTMLButtonElement = <HTMLButtonElement> document.getElementById("stationListTab");
     private static stationBreadcrumbs: HTMLElement = document.getElementById("stationBreadcrumbs");
     private mapRoad: SingleMapRoad;
@@ -22,6 +26,7 @@ export class ElevationChart {
     private points: L.LatLng[];
     private elevation: number[] = [];
     private stations: DBStationMapMarker[];
+    private consumption: number[];
     private data;
     private chart: Chart;
     private chartReversed = false;
@@ -44,7 +49,6 @@ export class ElevationChart {
     }
 
     private RenderChart() {
-        let consumption = this.CalculateConsumption();
         let labels: string[] = [];
         let radius: number[] = [];
 
@@ -69,23 +73,6 @@ export class ElevationChart {
             });
         }
 
-        // console.log("len", consumption.length, this.elevation.length);
-        // // FOR DEMO ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        // let stationIndexes = [0, 193, 329, 373, 430, 584, 682, 794, 942, this.points.length-1];
-        // let stationNames = ["Opava Východ", "Opava Komárov", "Štítina", "Mokré Lazce", "Lhota u Opavy", "Háj ve Slezsku", "Jilešovice", "Děhylov", "Ostrava-Třebovice", "Ostrava-Svinov"];
-        // let currentStation = 0;
-        // for (let i = 0; i < this.elevation.length; i++) {
-        //     if (stationIndexes.includes(i)) {
-        //         labels.push("Stanice: " + stationNames[currentStation++]);
-        //         radius.push(2);
-        //     }
-        //     else {
-        //         labels.push("");
-        //         radius.push(0);
-        //     }
-        // }
-        // // FOR DEMO ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
         this.data = {
             labels: labels,
             datasets: [
@@ -96,15 +83,18 @@ export class ElevationChart {
                     borderColor: "#2196f3", // Add custom color border (Line)
                     borderWidth: 3 // Specify bar border width
                 },
-                // {
-                //     label: "Spotřeba (kW)",
-                //     data: consumption,
-                //     fill: false,
-                //     borderColor: "#dc3545",
-                //     borderWidth: 3,
-                //     tension: 0.3
-                // }
             ]
+        }
+
+        if (this.consumption !== undefined) {
+            this.data["datasets"].push({
+                    label: "Spotřeba (J)",
+                    data: this.consumption,
+                    fill: false,
+                    borderColor: "#dc3545",
+                    borderWidth: 3,
+                    tension: 0.3
+            })
         }
 
         this.chart = new Chart(ElevationChart.ctx, {
@@ -173,6 +163,9 @@ export class ElevationChart {
                 }
             }]
         });
+
+        let height = ElevationChart.elevationChartDiv.clientHeight * 0.98 - ElevationChart.elevationChartHeading.clientHeight;
+        ElevationChart.ctx.style.height = `${height}px`;
     }
 
     private ReRenderChart() {
@@ -185,6 +178,25 @@ export class ElevationChart {
             this.chartReversed = !this.chartReversed;
             this.ReRenderChart();
         };
+
+        if (this.mapRoad instanceof DBSingleMapRoad) {
+            ElevationChart.calculateConsumptionButton.onclick = () => {
+                LogNotify.ToggleThrobber();
+                LogNotify.UpdateThrobberMessage("Získávání údajů o spotřebě");
+                setTimeout(() => {
+                    if (this.consumption === undefined) {
+                        ElevationChart.calculateConsumptionButton.setAttribute("class", "list-group-item list-group-item-warning text-center");
+                        ElevationChart.calculateConsumptionButton.innerHTML = '<i class="bi-calculator-fill"></i> Přepočítat';
+                    }
+                    let consumptionJSON = (this.mapRoad as DBSingleMapRoad).CalcConsumption();
+                    this.consumption = consumptionJSON["Data"]["exerted_energy"];
+                    this.ReRenderChart();
+                    LogNotify.ToggleThrobber();
+                });
+            };
+        } else {
+            ElevationChart.calculateConsumptionButton.setAttribute("style", "display: none");
+        }
     }
 
     private AddContextualInfo() {

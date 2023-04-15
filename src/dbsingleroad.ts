@@ -1,8 +1,8 @@
 import L from "leaflet";
-import { ApiMgr } from "./apimgr";
 import { DBMapEntity } from "./dbmapentity";
 import { Helper } from "./helper";
 import { SingleMapRoad } from "./singleroad";
+import { ApiMgr } from "./apimgr";
 
 export class DBSingleMapRoad extends SingleMapRoad {
     readonly className: string = "DBSingleMapRoad";
@@ -55,31 +55,9 @@ export class DBSingleMapRoad extends SingleMapRoad {
         }
     }
 
-    // public GetGeoJSON(): object {
-    //     let coords: number[][];
-    //     for (let i = 0; i < this.points.length; i++) {
-    //         const p = this.points[i];
-    //         const e = this.elevation[i];
-    //         coords.push([p.lat, p.lng, e]);
-    //     }
-    //     return {
-    //         "type": "Feature",
-    //         "geometry": {
-    //             "type": "LineString",
-    //             "coordinates": coords 
-    //         },
-    //         "properties": {
-    //             "relcislo": this.dbID,
-    //             "name": this.name,
-    //             "color": this.color,
-    //             "weight": this.weight,
-    //             "opacity": this.opacity,
-    //             "smooth_factor": this.smoothFactor,
-    //             // TODO: Missing id and tags
-    //         },
-    //         "status": "ok"
-    //     }
-    // }
+    public CalcConsumption(): object {
+        return ApiMgr.CalcConsumption(this.dbID);
+    }
 }
 export interface DBSingleMapRoad extends DBMapEntity {};
 Helper.applyMixins(DBSingleMapRoad, [DBMapEntity]);

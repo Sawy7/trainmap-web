@@ -119,7 +119,7 @@ if (!$auth->isLoggedIn()) {
                     <div class="container-fluid">
                         <div class="row">
                             <div class="col-10" id="elevationChartDiv">
-                                <h6>Graf</h6>
+                                <h6 id="elevationChartHeading">Graf</h6>
                                 <div id="elevationChartWrapperDiv">
                                     <canvas id="elevationChart"></canvas>
                                 </div>
@@ -144,6 +144,9 @@ if (!$auth->isLoggedIn()) {
                                 <div class="list-group">
                                     <a class="list-group-item list-group-item-primary text-center" href="#" id="reverseTrackButton">
                                         <i class="bi-arrow-left-right"></i> Cesta zpět
+                                    </a>
+                                    <a class="list-group-item list-group-item-primary text-center" href="#" id="calculateConsumptionButton">
+                                        <i class="bi-calculator-fill"></i> Spotřeba
                                     </a>
                                 </div>
                             </div>
