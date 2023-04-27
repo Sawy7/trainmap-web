@@ -40,6 +40,9 @@ while ($row = $rs->fetch()) {
     $rowOutput .= ', ' . createJsonKey("smooth_factor", $row["smooth_factor"], true);
     $rowOutput .= ', ' . createJsonKey("tags", $row["tags"]);
     $rowOutput .= '}';
+
+    // json_encode($row);
+
     $output .= $rowOutput;
 }
 

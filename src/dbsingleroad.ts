@@ -56,7 +56,11 @@ export class DBSingleMapRoad extends SingleMapRoad {
     }
 
     public CalcConsumption(): object {
-        return ApiMgr.CalcConsumption(this.dbID);
+        // return ApiMgr.CalcConsumption(this.dbID);
+        
+        // Using external Python API now:
+        let stationIDs = this.GetStations().map(s => s.GetStationID());
+        return ApiMgr.CalcConsumptionExt(this.dbID, stationIDs);
     }
 }
 export interface DBSingleMapRoad extends DBMapEntity {};

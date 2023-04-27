@@ -3,6 +3,7 @@ import { MapMarker } from "./mapmarker";
 
 export class DBStationMapMarker extends MapMarker {
     private orderIndex: number;
+    private dbID: number;
     readonly className: string = "DBMapMarker";
     private included = true;
 
@@ -20,6 +21,7 @@ export class DBStationMapMarker extends MapMarker {
                 20
             );
             this.orderIndex = geoJSON["properties"]["order"];
+            this.dbID = geoJSON["properties"]["id"];
         } else {
             console.log("Unknown feature type!")
         }
@@ -31,6 +33,14 @@ export class DBStationMapMarker extends MapMarker {
 
     public GetOrderIndex(): number {
         return this.orderIndex;
+    }
+
+    public SetOrderIndex(orderIndex: number) {
+        this.orderIndex = orderIndex;
+    }
+
+    public GetStationID(): number {
+        return this.dbID;
     }
 
     public IsIncluded(): boolean {

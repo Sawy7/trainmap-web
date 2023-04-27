@@ -49,6 +49,7 @@ export class ElevationChart {
     }
 
     private RenderChart() {
+        console.log(this.elevation.length);
         let labels: string[] = [];
         let radius: number[] = [];
 
@@ -77,6 +78,7 @@ export class ElevationChart {
             labels: labels,
             datasets: [
                 {
+                    yAxisID: "ElevationY",
                     label: "Výška (m)", // Name the series
                     data: localElevation, // Specify the data values array
                     fill: false,
@@ -88,12 +90,13 @@ export class ElevationChart {
 
         if (this.consumption !== undefined) {
             this.data["datasets"].push({
-                    label: "Spotřeba (J)",
-                    data: this.consumption,
-                    fill: false,
-                    borderColor: "#dc3545",
-                    borderWidth: 3,
-                    tension: 0.3
+                yAxisID: "ConsumptionY",
+                label: "Spotřeba (J)",
+                data: this.consumption,
+                fill: false,
+                borderColor: "#dc3545",
+                borderWidth: 3,
+                tension: 0.3
             })
         }
 
@@ -115,7 +118,13 @@ export class ElevationChart {
                         display: false
                     },
                     y: {
-                        ticks: { color: "white" }
+                        display: false
+                    },
+                    ConsumptionY: {
+                        position: "right",
+                        ticks: {
+                            color: "#dc3545"
+                        }
                     }
                 },
                 plugins: {
@@ -188,14 +197,30 @@ export class ElevationChart {
                         ElevationChart.calculateConsumptionButton.setAttribute("class", "list-group-item list-group-item-warning text-center");
                         ElevationChart.calculateConsumptionButton.innerHTML = '<i class="bi-calculator-fill"></i> Přepočítat';
                     }
-                    let consumptionJSON = (this.mapRoad as DBSingleMapRoad).CalcConsumption();
-                    this.consumption = consumptionJSON["Data"]["exerted_energy"];
+                    this.LoadDataFromConsumption();
                     this.ReRenderChart();
                     LogNotify.ToggleThrobber();
                 });
             };
         } else {
             ElevationChart.calculateConsumptionButton.setAttribute("style", "display: none");
+        }
+    }
+
+    private LoadDataFromConsumption() {
+        let consumptionJSON = (this.mapRoad as DBSingleMapRoad).CalcConsumption();
+        this.consumption = consumptionJSON["Data"]["exerted_energy"];
+        this.points = consumptionJSON["Data"]["coordinates"].map(coord => new L.LatLng(coord[1], coord[0]));
+        this.elevation = consumptionJSON["Data"]["elevation_values"];
+
+        let stationOrders = consumptionJSON["Data"]["station_orders"];
+        let i = 0;
+        if (this.stations !== undefined) {
+            this.stations.forEach(station => {
+                if (!station.IsIncluded())
+                    return;
+                station.SetOrderIndex(stationOrders[i++]);
+            });
         }
     }
 
@@ -230,7 +255,6 @@ export class ElevationChart {
                 "html": true,
                 "title": station.GetListInfo(),
                 "content": () => {
-                    // return popoverParentElement.querySelector(".popover-body").innerHTML;
                     let buttons = document.createElement("div");
                     buttons.setAttribute("class", "list-group");
 

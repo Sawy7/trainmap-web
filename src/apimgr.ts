@@ -52,4 +52,12 @@ export class ApiMgr {
             JSON.stringify(requestJSON)
         ));
     }
+
+    public static CalcConsumptionExt(railID: number, stationIDs: number[]): object {
+        let requestJSON = {"relcislo": railID, "station_ids": stationIDs};
+        return JSON.parse(ApiComms.PostRequest(
+            `${this.rootUrl}/calcconsumptionext.php`,
+            JSON.stringify(requestJSON)
+        ));
+    }
 }
