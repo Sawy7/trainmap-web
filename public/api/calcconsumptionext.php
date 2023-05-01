@@ -102,10 +102,10 @@ while ($row = $rs->fetch()) {
 // exit;
 
 $options = array(
-    'http' => array(
-        'header'  => "Content-type: application/json\r\n",
-        'method'  => 'POST',
-        'content' => json_encode($apiInputData)
+    "http" => array(
+        "header"  => "Content-type: application/json\r\n",
+        "method"  => "POST",
+        "content" => json_encode($apiInputData)
     )
 );
 $context  = stream_context_create($options);

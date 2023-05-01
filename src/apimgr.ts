@@ -9,10 +9,6 @@ export class ApiMgr {
         return JSON.parse(ApiComms.GetRequest(`${this.rootUrl}/onlinedbcheck.php`));
     }
 
-    public static ListElements(): object {
-        return JSON.parse(ApiComms.GetRequest(`${this.rootUrl}/listelements.php`));
-    }
-
     public static ListRails(): object {
         return JSON.parse(ApiComms.GetRequest(`${this.rootUrl}/listrails.php`));
     }

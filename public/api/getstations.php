@@ -24,50 +24,61 @@ require "apibase.php";
 
 // Build SQL SELECT statement and return the geometry as a GeoJSON element in EPSG: 4326
 $placeholders = rtrim(str_repeat('?, ', count($relcisla)), ', ') ;
-$sql = "SELECT all_stations.name AS name, ST_AsGeoJSON(station_relation.$geomfield) AS geom,
-station_relation.relcislo AS relcislo, all_stations.id as station_id, station_relation.station_order
+$sql = "SELECT all_stations.name, ST_AsGeoJSON(station_relation.$geomfield) AS geom,
+station_relation.relcislo AS relcislo, all_stations.id, station_relation.station_order AS order
 FROM station_relation JOIN
 all_stations ON station_relation.station_id = all_stations.id
 WHERE relcislo IN ($placeholders)
 ORDER BY station_relation.relcislo, station_order";
 // echo $sql;
 
+// Build stationJSON
+$stationJSON = [];
+$stationJSON["type"] = "Stations";
+$stationJSON["Collections"] = [];
+$stationJSON["status"] = null;
+
 // Try query or error
 $rs = $db->prepare($sql);
 $rs->execute($relcisla);
 if (!$rs) {
-    echo '{ "type": "Stations", "Collections": null, "status": "sqlerror" }';
+    $stationJSON["status"] = "sqlerror";
+    http_response_code(500);
+    echo json_encode($stationJSON);
     exit;
 }
 
-// Build GeoJSON
-$output    = '';
-$rowOutput = '';
-$relOutput = '';
-$prevRelcislo = NULL;
+$singleCollection = [];
+$singleCollection["type"] = "FeatureCollection";
+$singleCollection["features"] = [];
+$singleCollection["properties"] = [];
+$singleCollection["properties"]["relcislo"] = null;
 
-while ($row = $rs->fetch()) {
-    if ($prevRelcislo != NULL && $prevRelcislo != $row["relcislo"]) {
-        $output .= '{"type": "FeatureCollection", "features": [ ' . $relOutput . ' ], "properties": {"relcislo": ' . $prevRelcislo . '}},';
-        $relOutput = '';
-        $rowOutput = '';
+while ($row = $rs->fetch(PDO::FETCH_ASSOC)) {
+    if ($singleCollection["properties"]["relcislo"] != NULL && $singleCollection["properties"]["relcislo"] != $row["relcislo"]) {
+        array_push($stationJSON["Collections"], $singleCollection);
+        $singleCollection["features"] = [];
     }
-    $prevRelcislo = $row["relcislo"];
-    $rowOutput = (strlen($rowOutput) > 0 ? ',' : '') . '{"type": "Feature", "geometry": ' . $row[$geomfield] . ', "properties": {';
-    $props = '';
-    $props .= createJsonKey("name", $row["name"]);
-    $props .= ', ' . createJsonKey("id", $row["station_id"], true);
-    $props .= ', ' . createJsonKey("order", $row["station_order"], true);
-    $rowOutput .= $props . '}';
-    $rowOutput .= "}";
-    $relOutput .= $rowOutput;
-}
-$output .= '{"type": "FeatureCollection", "features": [ ' . $relOutput . ' ], "properties": {"relcislo": ' . $prevRelcislo . '}}';
+    $singleCollection["properties"]["relcislo"] = $row["relcislo"];
 
-if ($prevRelcislo == NULL) {
-    $output = '{ "type": "Stations", "Collections": null, "status": "nodata" }';
-} else {
-    $output = '{"type": "Stations", "Collections": [ ' . $output . ' ], "status": "ok" }';
+    $singleStation = [];
+    $singleStation["type"] = "Feature";
+    $singleStation["geometry"] = json_decode($row[$geomfield]);
+
+    $singleStation["properties"] = [];
+    $singleStation["properties"]["id"] = intval($row["id"]);
+    $singleStation["properties"]["name"] = $row["name"];
+    $singleStation["properties"]["order"] = $row["order"];
+
+    array_push($singleCollection["features"], $singleStation);
 }
-echo $output;
+array_push($stationJSON["Collections"], $singleCollection);
+
+if ($singleCollection["properties"]["relcislo"] == null) {
+    $stationJSON["status"] = "nodata";
+    http_response_code(500);
+} else {
+    $stationJSON["status"] = "ok";
+}
+echo json_encode($stationJSON);
 ?>

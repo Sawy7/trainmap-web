@@ -14,7 +14,7 @@ header("Content-Type: application/json");
 require "apibase.php";
 
 // Build SQL SELECT statement and return the geometry as a GeoJSON element in EPSG: 4326
-$sql = "SELECT *
+$sql = "SELECT relcislo, id, nazevtrasy as name, 'OSM nezpracovaná;' || tags as tags
 FROM osm_data_index
 WHERE relcislo NOT IN
 (
@@ -22,35 +22,6 @@ WHERE relcislo NOT IN
 )";
 // echo $sql;
 
-// Try query or error
-$rs = $db->query($sql);
-if (!$rs) {
-    echo '{"type": "RailList", "layers": [ ], "status": "sqlerror" }';
-    exit;
-}
-
-// Build GeoJSON
-$output    = '';
-$rowOutput = '';
-
-while ($row = $rs->fetch()) {
-    $rowOutput = (strlen($rowOutput) > 0 ? ', ' : '') . '{';
-    $rowOutput .= createJsonKey("relcislo", $row["relcislo"], true);
-    $rowOutput .= ', ' . createJsonKey("id", $row["id"]);
-    $rowOutput .= ', ' . createJsonKey("name", $row["nazevtrasy"]);
-    $rowOutput .= ', ' . createJsonKey("color", $row["color"]);
-    $rowOutput .= ', ' . createJsonKey("weight", $row["weight"], true);
-    $rowOutput .= ', ' . createJsonKey("opacity", $row["opacity"], true);
-    $rowOutput .= ', ' . createJsonKey("smooth_factor", $row["smooth_factor"], true);
-    $rowOutput .= ', ' . createJsonKey("tags", "OSM nezpracovaná;" . $row["tags"]);
-    $rowOutput .= '}';
-    $output .= $rowOutput;
-}
-
-if (empty($output)) {
-    echo '{"type": "RailList", "layers": [ ], "status": "nodata" }';
-} else {
-    $output = '{"type": "RailList", "layers": [ ' . $output . ' ], "status": "ok" }';
-    echo $output;
-}
+// Build railList JSON from DB query
+echo buildRailListJSON($db, $sql);
 ?>

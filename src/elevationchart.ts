@@ -49,7 +49,6 @@ export class ElevationChart {
     }
 
     private RenderChart() {
-        console.log(this.elevation.length);
         let labels: string[] = [];
         let radius: number[] = [];
 

@@ -16,6 +16,7 @@ header("Content-Type: application/json");
 $data = json_decode(file_get_contents('php://input'), true);
 if (empty($data['relcisla'])) {
     echo '{"type": "MissingParameter", "name": "relcisla"}';
+    http_response_code(400);
     exit;
 } else
     $relcisla = $data['relcisla'];
@@ -29,44 +30,11 @@ require "apibase.php";
 
 // TODO: Simplify doesn't really work with station indexes (disabled for now)
 $placeholders = rtrim(str_repeat('?, ', count($relcisla)), ', ') ;
-$sql = "SELECT ST_AsGeoJSON(ST_Transform($geomfield, $srid)) AS geojson, osm_data_index.*
+$sql = "SELECT ST_AsGeoJSON(ST_Transform($geomfield, $srid)) AS geojson, osm_data_index.relcislo, id, nazevtrasy as name, tags
 FROM processed_routes_line JOIN osm_data_index ON processed_routes_line.relcislo = osm_data_index.relcislo
 WHERE osm_data_index.relcislo IN ($placeholders)";
 // echo $sql;
 
-// Try query or error
-$rs = $db->prepare($sql);
-$rs->execute($relcisla);
-if (!$rs) {
-    echo '{ "type": "FeatureCollection", "features": null, "properties": null, "status": "sqlerror" }';
-    exit;
-}
-
-// Build GeoJSON
-$output    = '';
-$rowOutput = '';
-
-while ($row = $rs->fetch()) {
-    $rowOutput = (strlen($rowOutput) > 0 ? ',' : '') . '{"type": "Feature", "geometry": ' . $row['geojson'] . ', "properties": {';
-    $props = '';
-    $props .= createJsonKey("relcislo", $row["relcislo"], true);
-    $props .= ', ' . createJsonKey("id", $row["id"]);
-    $props .= ', ' . createJsonKey("name", $row["nazevtrasy"]);
-    $props .= ', ' . createJsonKey("color", $row["color"]);
-    $props .= ', ' . createJsonKey("weight", $row["weight"], true);
-    $props .= ', ' . createJsonKey("opacity", $row["opacity"], true);
-    $props .= ', ' . createJsonKey("smooth_factor", $row["smooth_factor"], true);
-    $props .= ', ' . createJsonKey("tags", $row["tags"]);
-    $rowOutput .= $props . '}';
-    $rowOutput .= ', ' . createJsonKey("status", "ok");
-    $rowOutput .= "}";
-    $output .= $rowOutput;
-}
-
-if (empty($output)) {
-    $output = '{ "type": "FeatureCollection", "features": null, "status": "nodata" }';
-} else {
-    $output = '{"type": "FeatureCollection", "features": [ ' . $output . ' ], "status": "ok" }';
-}
-echo $output;
+// Build geoJSON from DB query
+echo buildGeoJSON($db, $sql, $relcisla);
 ?>

@@ -1,5 +1,4 @@
 import L from "leaflet";
-import { ApiMgr } from "./apimgr";
 import { DBMapEntity } from "./dbmapentity";
 import { Helper } from "./helper";
 import { LogNotify } from "./lognotify";
@@ -30,6 +29,7 @@ export class DBOSMMapRoad extends MapRoad {
 
     public constructor(geoJSON?: object) {
         super();
+        this.Init(undefined, undefined);
         if (geoJSON["status"] !== "ok") {
             // TODO: Add method check
             this.wasRemoved = true;

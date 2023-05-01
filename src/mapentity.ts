@@ -21,7 +21,6 @@ export abstract class MapEntity {
 
         if (this.linkIconName !== undefined) {
             var locateIcon = document.createElement("i");
-            // entityLink.innerHTML = `<b>${entityLink.innerHTML}</b>`;
             locateIcon.setAttribute("class", this.linkIconName);
             entityLink.onclick = () => {
                 warpMethod(significantPoint);
