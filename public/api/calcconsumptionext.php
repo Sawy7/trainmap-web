@@ -79,13 +79,13 @@ while ($row = $rs->fetch()) {
 
 // Get velocity_ways
 $sql = "SELECT start_order, end_order, maxspeed
-FROM even_way_relation JOIN
-osm_ways ON even_way_relation.way_id = osm_ways.id
+FROM get_even_route_line_ways(?) AS ewr JOIN
+osm_ways ON ewr.way_id = osm_ways.id
 WHERE relcislo = ?";
 
 // Try query or error
 $rs = $db->prepare($sql);
-$rs->execute([$relcislo]);
+$rs->execute([$relcislo, $relcislo]);
 if (!$rs) {
     echo '{ "type": "Consumption", "Data": null, "status": "sqlerror" }';
     http_response_code(500);
