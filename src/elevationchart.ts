@@ -149,31 +149,31 @@ export class ElevationChart {
                     App.Instance.RenderElevationMarker(elevationMarkerPos);
                 }
             },
-            plugins: [{
-                id: "tooltipLine",
-                afterDraw: (chart: { tooltip?: any; scales?: any; ctx?: any }) => {
-                    if (chart.tooltip.opacity === 1) {
-                        const { ctx } = chart;
-                        const { caretX } = chart.tooltip;
-                        const topY = chart.scales.y.top;
-                        const bottomY = chart.scales.y.bottom;
+            // plugins: [{
+            //     id: "tooltipLine",
+            //     afterDraw: (chart: { tooltip?: any; scales?: any; ctx?: any }) => {
+            //         if (chart.tooltip.opacity === 1) {
+            //             const { ctx } = chart;
+            //             const { caretX } = chart.tooltip;
+            //             const topY = chart.scales.y.top;
+            //             const bottomY = chart.scales.y.bottom;
                 
-                        ctx.save();
-                        ctx.setLineDash([3, 3]);
-                        ctx.beginPath();
-                        ctx.moveTo(caretX, topY - 5);
-                        ctx.lineTo(caretX, bottomY);
-                        ctx.lineWidth = 1;
-                        ctx.strokeStyle = "#FFFFFF";
-                        ctx.stroke();
-                        ctx.restore();
-                    }
-                }
-            }]
+            //             ctx.save();
+            //             ctx.setLineDash([3, 3]);
+            //             ctx.beginPath();
+            //             ctx.moveTo(caretX, topY - 5);
+            //             ctx.lineTo(caretX, bottomY);
+            //             ctx.lineWidth = 1;
+            //             ctx.strokeStyle = "#FFFFFF";
+            //             ctx.stroke();
+            //             ctx.restore();
+            //         }
+            //     }
+            // }]
         });
 
-        let height = ElevationChart.elevationChartDiv.clientHeight * 0.98 - ElevationChart.elevationChartHeading.clientHeight;
-        ElevationChart.ctx.style.height = `${height}px`;
+        // let height = ElevationChart.elevationChartDiv.clientHeight * 0.98 - ElevationChart.elevationChartHeading.clientHeight;
+        // ElevationChart.ctx.style.height = `${height}px`;
     }
 
     private ReRenderChart() {

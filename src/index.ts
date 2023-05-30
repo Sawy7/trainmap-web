@@ -18,6 +18,7 @@ import { App } from "./app";
 import { MapEntityFactory } from './mapentityfactory';
 import { LocalEntityDB } from './localentitydb';
 import { DBMapEntityCache } from './dbentitycache';
+import { GeoGetter } from './geogetter';
 
 let app = App.Instance;
 app.Init(49.86, 15.51, 9);
@@ -44,3 +45,10 @@ app.LoadFromLocalStorage();
 // test();
 
 // DBMapEntityCache.Instance.GetDBStationMapMarkers(49010);
+
+// async function uiTestTrack() {
+//     let ttracks = await GeoGetter.GetRails([49010]);
+//     let ttrack = ttracks[0];
+//     ttrack.ClickSetElevationChart(null);
+// }
+// uiTestTrack();

@@ -11,13 +11,22 @@ body {
 }
 
 #offcanvasElevation {
+    @media (max-width: 768px) {
+        max-height: 60% !important;
+    }
     width: 100%;
     height: fit-content;
 }
 
+@media (max-width: 768px) {
+  [class*="col-"] {
+      margin-bottom: 50px;
+  }
+}
+
 #elevationChartDiv {
-    padding-top: 1%;
-    padding-bottom: 1%;
+    padding-top: 3%;
+    padding-bottom: 3%;
     background: var(--bs-gray-dark);
 }
 
@@ -61,8 +70,8 @@ body {
     margin-right: 1%;
 }
 
-#dbLayerBuilderColorDiv {
-    margin-left: 30%;
+.modal-footer {
+    flex-wrap: nowrap !important;
 }
 
 .form-control-color {
@@ -111,6 +120,20 @@ label {
     background-color: var(--bs-gray-dark) !important;
 }
 
+.card-body {
+    min-width: 300px;
+}
+
+.card {
+    min-width: 300px !important;
+    margin-right: 10px;
+}
+
+.card-img-top {
+    max-height: 100px;
+    object-fit: cover;
+}
+
 .offcanvas-header {
     align-items: unset !important;
 }
@@ -119,4 +142,9 @@ label {
     --bs-popover-header-bg: var(--bs-gray-dark) !important;
     --bs-popover-bg: var(--bs-gray-dark) !important;
     color: #FFF;
+}
+
+.tab-content  
+{
+    overflow-x: auto;
 }
