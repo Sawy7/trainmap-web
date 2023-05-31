@@ -80,19 +80,17 @@ if (!$auth->isLoggedIn()) {
                             <input class="form-control bg-dark text-light" type="file" id="shapefileInput">
                         </div>
                     </div>
-                    <div id="userInfo" class="text-center" style="position: absolute; bottom: 0; width: 100%">
-                        <br>
-                        <p>
-                            <?php
-                            echo ('<button class="btn btn-secondary float-start" disabled>' . $auth->getEmail() . '</button>');
-                            ?>
-                            <a class="btn btn-danger" href="/login/logout.php"><i class="bi bi-door-open-fill"></i>
-                                Odhlásit</a>
-                        </p>
-                    </div>
                     <!-- <div id="enetLogo">
                         <img src="custom-assets/enet.png" style="width: 100%;">
                     </div> -->
+                </div>
+                <div id="userInfo" class="justify-content-between">
+                    <br>
+                    <?php
+                    echo ('<button class="btn btn-secondary float-start" disabled>' . $auth->getEmail() . '</button>');
+                    ?>
+                    <a class="btn btn-danger" href="/login/logout.php"><i class="bi bi-door-open-fill"></i>Odhlásit</a>
+                    <br>
                 </div>
             </div>
         </div>

@@ -53,8 +53,11 @@ export class ElevationChart {
         let radius: number[] = [];
 
         let localElevation = [...this.elevation];
-        if (this.chartReversed)
+        let localPoints = [...this.points];
+        if (this.chartReversed) {
             localElevation.reverse();
+            localPoints.reverse();
+        }
 
         for (let i = 0; i < localElevation.length; i++) {
             labels.push("");
@@ -145,7 +148,7 @@ export class ElevationChart {
                     const canvasPosition = getRelativePosition(e, this.chart);
                     const index = this.chart.scales.x.getValueForPixel(canvasPosition.x);
                     // console.log(index);
-                    let elevationMarkerPos = this.points[index];
+                    let elevationMarkerPos = localPoints[index];
                     App.Instance.RenderElevationMarker(elevationMarkerPos);
                 }
             },

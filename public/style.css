@@ -144,7 +144,12 @@ label {
     color: #FFF;
 }
 
-.tab-content  
-{
+.tab-content {
     overflow-x: auto;
+}
+
+#userInfo {
+    display: flex;
+    padding-top: var(--bs-offcanvas-padding-y);
+    padding-bottom: var(--bs-offcanvas-padding-y);
 }
