@@ -11,12 +11,15 @@ body {
 }
 
 #offcanvasElevation {
-    @media (max-width: 768px) {
-        max-height: 60% !important;
-    }
     width: 100%;
     height: fit-content;
 }
+
+@media (max-width: 768px) {
+    #offcanvasElevation {
+        max-height: 60% !important;
+    }
+};
 
 @media (max-width: 768px) {
   [class*="col-"] {
