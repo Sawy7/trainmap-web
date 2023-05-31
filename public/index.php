@@ -65,19 +65,11 @@ if (!$auth->isLoggedIn()) {
                         </a>
                     </div>
                     <br><br>
-                    <div id="gpxFileForm">
-                        <h5>Nahrát vrstvu ze souboru GPX</h5>
-                        <br>
-                        <div id="gpxFileInputContainer" class="input-group mb-3">
-                            <input class="form-control bg-dark text-light" type="file" id="gpxFileInput">
-                        </div>
-                    </div>
-                    <br><br>
-                    <div id="shapefileForm">
-                        <h5>Nahrát vrstvu ze souboru shapefile</h5>
-                        <br>
-                        <div id="shapefileInputContainer" class="input-group mb-3">
-                            <input class="form-control bg-dark text-light" type="file" id="shapefileInput">
+                    <div id="fileForm">
+                        <h5>Nahrát vrstvu ze souboru</h5>
+                        <h6 id="fileLoaderTip">Podporuje GPX a Shapefile (jako .zip)</h6>
+                        <div id="fileInputContainer" class="input-group mb-3">
+                            <input class="form-control bg-dark text-light" type="file" id="fileInput">
                         </div>
                     </div>
                     <!-- <div id="enetLogo">

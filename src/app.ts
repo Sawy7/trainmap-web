@@ -48,8 +48,7 @@ export class App {
         this.SetupButtons();
         this.InitLayerList();
         LogNotify.Init();
-        FileLoader.SetupGPXLoader();
-        FileLoader.SetupShapefileLoader();
+        FileLoader.SetupFileLoader();
         this.OnlineDBCheck();
     }
 

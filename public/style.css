@@ -153,3 +153,7 @@ label {
     padding-top: var(--bs-offcanvas-padding-y);
     padding-bottom: var(--bs-offcanvas-padding-y);
 }
+
+#fileLoaderTip {
+    color: #9ca0a3;
+}
