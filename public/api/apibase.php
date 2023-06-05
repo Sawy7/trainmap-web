@@ -86,6 +86,15 @@ function buildRailListJSON($db, $sql) {
     $json["layers"] = [];
 
     while ($row = $rs->fetch(PDO::FETCH_ASSOC)) {
+        if (array_key_exists("tags", $row))
+            $row["tags"] = json_decode($row["tags"]);
+        else
+            $row["tags"] = array([
+                "tag_name" => "errors",
+                "tag_values" => [
+                    "OSM nezpracovaná" => 100
+                ]
+            ]);
         array_push($json["layers"], $row);
     }
 

@@ -14,7 +14,7 @@ header("Content-Type: application/json");
 require "apibase.php";
 
 // Build SQL SELECT statement and return the geometry as a GeoJSON element in EPSG: 4326
-$sql = "SELECT relcislo, id, nazevtrasy as name, 'OSM nezpracovaná;' || tags as tags
+$sql = "SELECT relcislo, id, nazevtrasy as name--, 'OSM nezpracovaná;' || tags as tags
 FROM osm_data_index
 WHERE relcislo NOT IN
 (

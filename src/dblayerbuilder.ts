@@ -69,8 +69,34 @@ export class DBLayerBuilder {
         }, 0);
     }
 
-    static ParseTags(tags: string) {
-        return tags.replace(/;/g, " • ");
+    static ParseTags(tags: object[]) {
+        if (tags === undefined)
+            return "";
+
+        let toReturn = "";
+        let firstCategory = true;
+
+        tags.forEach(tagCategory => {
+            // toReturn += `\n${tagCategory["tag_name"]}: `;
+
+            let maxPortion: number = undefined;
+            let maxPortionTag: string;
+            const tagCatValues = tagCategory["tag_values"];
+            for (const valProperty in tagCatValues) {
+                if (maxPortion === undefined || tagCatValues[valProperty] > maxPortion) {
+                    maxPortion = tagCatValues[valProperty];
+                    maxPortionTag = valProperty;
+                }
+            }
+
+            if (!firstCategory)
+                toReturn += " • ";
+            else
+                firstCategory = false;
+            toReturn += maxPortionTag;
+        });
+
+        return toReturn;
     }
 
     static CreateEntry(infoObject: Object, index: number) {
