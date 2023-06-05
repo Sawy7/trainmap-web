@@ -13,6 +13,7 @@ body {
 #offcanvasElevation {
     width: 100%;
     height: fit-content;
+    z-index: 1000 !important;
 }
 
 @media (max-width: 768px) {

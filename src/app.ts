@@ -147,7 +147,7 @@ export class App {
 
     public SetElevationChart(mapRoad: SingleMapRoad) {
         if (this.activeElevationChart !== undefined) {
-            if (this.activeElevationChart.layerID == mapRoad.GetLayerID() && this.activeElevationChart.CheckUIVisible())
+            if (this.activeElevationChart.IsSameMapRoad(mapRoad) && this.activeElevationChart.CheckUIVisible())
                 return;
             
             this.activeElevationChart.DestroyChart();

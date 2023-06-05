@@ -371,4 +371,8 @@ export class ElevationChart {
         }
         return con;
     }
+
+    public IsSameMapRoad(mapRoad: SingleMapRoad) {
+        return mapRoad === this.mapRoad;
+    }
 }
