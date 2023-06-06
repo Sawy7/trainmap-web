@@ -44,6 +44,7 @@ export class ElevationChart {
         this.RenderChart();
         this.SetupButtons();
         this.AddContextualInfo();
+        this.ChangeConsumptionButton();
         this.ShowChart();
         this.RegisterChartClosing();
     }
@@ -174,9 +175,6 @@ export class ElevationChart {
                 }
             }]
         });
-
-        // let height = ElevationChart.elevationChartDiv.clientHeight * 0.98 - ElevationChart.elevationChartHeading.clientHeight;
-        // ElevationChart.ctx.style.height = `${height}px`;
     }
 
     private ReRenderChart() {
@@ -187,35 +185,63 @@ export class ElevationChart {
     private SetupButtons() {
         ElevationChart.reverseTrackButton.onclick = () => {
             this.chartReversed = !this.chartReversed;
-            this.ReRenderChart();
+            if (this.consumption !== undefined)
+                this.ClickCalculateConsumption();
+            else
+                this.ReRenderChart();
         };
 
         if (this.mapRoad instanceof DBSingleMapRoad) {
             ElevationChart.calculateConsumptionButton.onclick = () => {
-                LogNotify.ToggleThrobber();
-                LogNotify.UpdateThrobberMessage("Získávání údajů o spotřebě");
-                setTimeout(() => {
-                    if (this.consumption === undefined) {
-                        ElevationChart.calculateConsumptionButton.setAttribute("class", "list-group-item list-group-item-warning text-center");
-                        ElevationChart.calculateConsumptionButton.innerHTML = '<i class="bi-calculator-fill"></i> Přepočítat';
-                    }
-                    this.LoadDataFromConsumption();
-                    this.ReRenderChart();
-                    LogNotify.ToggleThrobber();
-                });
+                this.ClickCalculateConsumption();
             };
         } else {
             ElevationChart.calculateConsumptionButton.setAttribute("style", "display: none");
         }
     }
 
+    private ChangeConsumptionButton(freshButton: boolean = true) {
+        let commonClasses = "list-group-item text-center";
+        let buttonName = "Spotřeba";
+        if (freshButton)
+            commonClasses += " list-group-item-primary";
+        else {
+            commonClasses += " list-group-item-warning";
+            buttonName = "Přepočítat";
+        }
+        ElevationChart.calculateConsumptionButton.setAttribute("class", commonClasses);
+        let buttonIcon = document.createElement("i");
+        buttonIcon.setAttribute("class", "bi-calculator-fill");
+        ElevationChart.calculateConsumptionButton.innerHTML = "";
+        ElevationChart.calculateConsumptionButton.appendChild(buttonIcon);
+        ElevationChart.calculateConsumptionButton.innerHTML += ` ${buttonName}`;
+    }
+
+    private ClickCalculateConsumption() {
+        LogNotify.ToggleThrobber();
+        LogNotify.UpdateThrobberMessage("Získávání údajů o spotřebě");
+        setTimeout(() => {
+            if (this.consumption === undefined)
+                this.ChangeConsumptionButton(false);
+            this.LoadDataFromConsumption();
+            this.ReRenderChart();
+            LogNotify.ToggleThrobber();
+        });
+    }
+
     private LoadDataFromConsumption() {
-        let consumptionJSON = (this.mapRoad as DBSingleMapRoad).CalcConsumption();
+        let consumptionJSON = (this.mapRoad as DBSingleMapRoad).CalcConsumption(this.chartReversed);
         this.consumption = consumptionJSON["Data"]["exerted_energy"];
         this.points = consumptionJSON["Data"]["coordinates"].map(coord => new L.LatLng(coord[1], coord[0]));
         this.elevation = consumptionJSON["Data"]["elevation_values"];
-
         let stationOrders = consumptionJSON["Data"]["station_orders"];
+
+        if (this.chartReversed) {
+            this.points.reverse();
+            this.elevation.reverse();
+            stationOrders = stationOrders.map(order => this.points.length-1-order);
+        }
+
         let i = 0;
         if (this.stations !== undefined) {
             this.stations.forEach(station => {

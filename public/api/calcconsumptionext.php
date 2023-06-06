@@ -7,6 +7,7 @@
  * 
  * @param 		string		$relcislo       The OSM relation id *REQUIRED*
  * @param 		string		$station_ids    The OSM relation id *REQUIRED*
+ * @param 		boolean		$is_reversed    If the direction of the train is swapped
  * @return 		string					    resulting json string
  */
 
@@ -29,13 +30,22 @@ if (empty($data['station_ids'])) {
 } else
     $station_ids = $data['station_ids'];
 
+if (empty($data['is_reversed']))
+    $is_reversed = false;
+else
+    $is_reversed = $data['is_reversed'];
 
 require "apibase.php";
 
 // Get linestring
 $sql = "SELECT ST_AsGeoJSON(ST_Collect($geomfield)) AS geojson FROM (
 SELECT (ST_DumpPoints(geom)).geom FROM even_processed_routes_line WHERE relcislo = ?
-) AS all_points;";
+ORDER BY (ST_DumpPoints(geom)).path[1]";
+
+if ($is_reversed)
+    $sql .= " DESC";
+
+$sql .= ") AS all_points;";
 
 // Try query or error
 $rs = $db->prepare($sql);
@@ -75,6 +85,14 @@ $apiInputData->station_orders = [];
 
 while ($row = $rs->fetch()) {
     array_push($apiInputData->station_orders, $row["station_order"]);
+}
+
+if ($is_reversed) {
+    $pointCount = count($apiInputData->coordinates);
+    foreach($apiInputData->station_orders as &$so) {
+        $so = $pointCount-1-$so;
+    }
+    $apiInputData->station_orders = array_reverse($apiInputData->station_orders);
 }
 
 // Get velocity_ways

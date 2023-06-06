@@ -49,8 +49,8 @@ export class ApiMgr {
         ));
     }
 
-    public static CalcConsumptionExt(railID: number, stationIDs: number[]): object {
-        let requestJSON = {"relcislo": railID, "station_ids": stationIDs};
+    public static CalcConsumptionExt(railID: number, stationIDs: number[], isReversed: boolean): object {
+        let requestJSON = {"relcislo": railID, "station_ids": stationIDs, "is_reversed": isReversed};
         return JSON.parse(ApiComms.PostRequest(
             `${this.rootUrl}/calcconsumptionext.php`,
             JSON.stringify(requestJSON)
