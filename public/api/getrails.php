@@ -30,7 +30,7 @@ require "apibase.php";
 
 // TODO: Simplify doesn't really work with station indexes (disabled for now)
 $placeholders = rtrim(str_repeat('?, ', count($relcisla)), ', ') ;
-$sql = "SELECT ST_AsGeoJSON(ST_Transform($geomfield, $srid)) AS geojson, osm_data_index.relcislo, id, nazevtrasy as name, tags
+$sql = "SELECT ST_AsGeoJSON(ST_Transform($geomfield, $srid)) AS geojson, osm_data_index.relcislo, id, nazevtrasy as name
 FROM processed_routes_line JOIN osm_data_index ON processed_routes_line.relcislo = osm_data_index.relcislo
 WHERE osm_data_index.relcislo IN ($placeholders)";
 // echo $sql;

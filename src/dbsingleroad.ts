@@ -33,10 +33,7 @@ export class DBSingleMapRoad extends SingleMapRoad {
             let lsElevation: number[] = [];
             [lsPoints, lsElevation] = DBSingleMapRoad.ParseGeoJSON(geoJSON);
 
-            this.Init(lsPoints, lsElevation, geoJSON["properties"]["name"],
-                geoJSON["properties"]["color"], geoJSON["properties"]["weight"],
-                geoJSON["properties"]["opacity"], geoJSON["properties"]["smoothFactor"]
-            );
+            this.Init(lsPoints, lsElevation, geoJSON["properties"]["name"]);
             this.name = geoJSON["properties"]["name"];
             this.dbID = geoJSON["properties"]["relcislo"];
 

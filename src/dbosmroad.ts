@@ -42,10 +42,7 @@ export class DBOSMMapRoad extends MapRoad {
             let mlElevation: number[][] = [];
             [mlPoints, mlElevation] = DBOSMMapRoad.ParseGeoJSON(geoJSON);
 
-            this.delegate = new MultiMapRoad(mlPoints, mlElevation, geoJSON["properties"]["name"],
-                geoJSON["properties"]["color"], geoJSON["properties"]["weight"],
-                geoJSON["properties"]["opacity"], geoJSON["properties"]["smoothFactor"]
-            );
+            this.delegate = new MultiMapRoad(mlPoints, mlElevation, geoJSON["properties"]["name"]);
             this.name = geoJSON["properties"]["name"];
             
             this.wasRemoved = false;

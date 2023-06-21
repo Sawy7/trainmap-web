@@ -1,4 +1,3 @@
-import L, { LeafletEventHandlerFn } from "leaflet";
 import { MapRoad } from "./maproad";
 import { App } from "./app";
 
@@ -11,13 +10,9 @@ export class SingleMapRoad extends MapRoad {
         points?: L.LatLng[],
         elevation?: number[],
         name?: string,
-        color?: string,
-        weight?: number,
-        opacity?: number,
-        smoothFactor?: number
     ) {
         super();
-        this.Init(points, elevation, name, color, weight, opacity, smoothFactor);
+        this.Init(points, elevation, name);
     }
 
     override ClickSetElevationChart(event: L.LeafletEvent): L.LeafletMouseEventHandlerFn {

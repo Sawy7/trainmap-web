@@ -10,14 +10,10 @@ export class MultiMapRoad extends MapRoad {
     public constructor(
         points?: L.LatLng[][],
         elevation?: number[][],
-        name?: string,
-        color?: string,
-        weight?: number,
-        opacity?: number,
-        smoothFactor?: number
+        name?: string
     ) {
         super();
-        this.Init(points, elevation, name, color, weight, opacity, smoothFactor);
+        this.Init(points, elevation, name);
     }
     
     protected ClickSetElevationChart(event: L.LeafletEvent): L.LeafletMouseEventHandlerFn {

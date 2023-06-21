@@ -2,7 +2,6 @@ import L, { LeafletEventHandlerFn } from "leaflet";
 import { MapEntity } from "./mapentity";
 
 export abstract class MapRoad extends MapEntity {
-    protected color: string;
     protected weight: number;
     protected opacity: number;
     protected smoothFactor: number;
@@ -20,16 +19,11 @@ export abstract class MapRoad extends MapEntity {
         points: L.LatLng[] | L.LatLng[][],
         elevation: number[] | number[][],
         name: string = "Cesta",
-        color: string = "red",
-        weight: number = 5,
-        opacity: number = 0.5,
-        smoothFactor: number = 1
     ) {
         this.name = name;
-        this.color = color;
-        this.weight = weight;
-        this.opacity = opacity;
-        this.smoothFactor = smoothFactor;
+        this.weight = 5;
+        this.opacity = 0.5;
+        this.smoothFactor = 1;
         this.linkIconName = "bi bi-bookshelf";
         this.dontSerializeList = [
             "polyLine"
@@ -40,7 +34,6 @@ export abstract class MapRoad extends MapEntity {
 
     public GetMapEntity(): any {
         this.polyLine = new L.Polyline(this.points, {
-            color: this.color,
             weight: this.weight,
             opacity: this.opacity,
             smoothFactor: this.smoothFactor

@@ -1,7 +1,6 @@
 import { DBMapLayer } from "./dblayer";
 import { GhostDBMapLayer } from "./ghostdblayer";
 import { MapLayer } from "./maplayer";
-import { MapRoad } from "./maproad";
 
 export class LayerList {
     private static _instance: LayerList;

@@ -28,18 +28,16 @@ export class MapEntityFactory {
     // Roads
     public static CreateSingleMapRoad(
         points: LatLng[], elevation: number[],
-        name?: string, color?: string, weight?: number,
-        opacity?: number, smoothFactor?: number, dbID?: number
+        name?: string
     ): SingleMapRoad {
-        return new SingleMapRoad(points, elevation, name, color, weight, opacity, smoothFactor);
+        return new SingleMapRoad(points, elevation, name);
     }
 
     public static CreateMultiMapRoad(
         points: LatLng[][], elevation: number[][],
-        name?: string, color?: string, weight?: number,
-        opacity?: number, smoothFactor?: number, dbID?: number
+        name?: string
     ): MultiMapRoad {
-        return new MultiMapRoad(points, elevation, name, color, weight, opacity, smoothFactor);
+        return new MultiMapRoad(points, elevation, name);
     }
 
     public static async CreateDBOSMMapRoad(dbID: number, geoJSON?: object): Promise<DBOSMMapRoad> {

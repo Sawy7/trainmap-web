@@ -58,7 +58,8 @@ export class FileLoader {
 
             let addFunction = (name: string) => {
                 let gpxLayer = MapEntityFactory.CreateMapLayer(name);
-                gpxLayer.AddMapRoads(MapEntityFactory.CreateSingleMapRoad(pointsArr, elevArr, "Cesta", "purple"));
+                gpxLayer.AddMapRoads(MapEntityFactory.CreateSingleMapRoad(pointsArr, elevArr, "Cesta"));
+                gpxLayer.ChangeColor("purple");
                 App.Instance.AddMapLayer(gpxLayer);
             }
             FileLoader.SpawnNameInput("fileInputContainer", addFunction);
@@ -89,7 +90,8 @@ export class FileLoader {
             let addFunction = (name: string) => {
                 let shapefileLayer = MapEntityFactory.CreateMapLayer(name);
                 for (let i = 0; i < multiPointsArr.length; i++) {
-                    shapefileLayer.AddMapRoads(new SingleMapRoad(multiPointsArr[i], multiElevArr[i], "Cesta", "blue"));
+                    shapefileLayer.AddMapRoads(new SingleMapRoad(multiPointsArr[i], multiElevArr[i], "Cesta"));
+                    shapefileLayer.ChangeColor("blue");
                 }
                 App.Instance.AddMapLayer(shapefileLayer);
             }

@@ -25,7 +25,7 @@ require "apibase.php";
 
 // Build SQL SELECT statement and return the geometry as a GeoJSON element in EPSG: 4326
 $placeholders = rtrim(str_repeat('?, ', count($relcisla)), ', ') ;
-$sql = "SELECT ST_AsGeoJSON(ST_Multi(ST_LineMerge(ST_Collect($geomfield)))) AS geojson, osm_data_index.relcislo, id, nazevtrasy as name, tags
+$sql = "SELECT ST_AsGeoJSON(ST_Multi(ST_LineMerge(ST_Collect($geomfield)))) AS geojson, osm_data_index.relcislo, id, nazevtrasy as name
 FROM osm_rails JOIN osm_data_index ON osm_rails.relcislo = osm_data_index.relcislo
 WHERE osm_data_index.relcislo IN ($placeholders)
 GROUP BY osm_data_index.relcislo";
