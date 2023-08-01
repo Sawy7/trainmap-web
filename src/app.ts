@@ -83,7 +83,7 @@ export class App {
     private OnlineDBCheck() {
         // TODO: Flip to actual PHP script
         // let onlineDBTimestamp = ApiMgr.OnlineDBCheck()["timestamp"];
-        let onlineDBTimestamp = JSON.parse('{ "type": "OnlineDBCheck", "timestamp": 1673036221764 }')["timestamp"];
+        let onlineDBTimestamp = JSON.parse('{ "type": "OnlineDBCheck", "timestamp": 1673036221768 }')["timestamp"];
 
         let localStorageTimestamp;
         if (localStorage["onlinedbtimestamp"] !== undefined)

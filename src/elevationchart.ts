@@ -37,6 +37,7 @@ export class ElevationChart {
         this.warpMethod = warpMethod;
         this.points = (this.mapRoad.GetPoints() as L.LatLng[]);
         this.FilterDrops((this.mapRoad.GetElevation() as number[]));
+        this.elevation = (this.mapRoad.GetElevation() as number[]);
         this.layerID = this.mapRoad.GetLayerID();
         if (this.mapRoad instanceof DBSingleMapRoad)
             this.stations = this.mapRoad.GetStations();
