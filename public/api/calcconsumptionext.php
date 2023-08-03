@@ -12,7 +12,7 @@
  */
 
 header("Access-Control-Allow-Origin: *"); // NOTE: This can be configured in Apache
-header("Content-Type: application/json");
+// header("Content-Type: application/json");
 
 // Retrive JSON variables
 $data = json_decode(file_get_contents('php://input'), true);
@@ -37,31 +37,6 @@ else
 
 require "apibase.php";
 
-// Get linestring
-$sql = "SELECT ST_AsGeoJSON(ST_Collect($geomfield)) AS geojson FROM (
-SELECT (ST_DumpPoints(geom)).geom FROM even_processed_routes_line WHERE relcislo = ?
-ORDER BY (ST_DumpPoints(geom)).path[1]";
-
-if ($is_reversed)
-    $sql .= " DESC";
-
-$sql .= ") AS all_points;";
-
-// Try query or error
-$rs = $db->prepare($sql);
-$rs->execute([$relcislo]);
-if (!$rs) {
-    echo '{ "type": "Consumption", "Data": null, "status": "sqlerror" }';
-    http_response_code(500);
-    exit;
-}
-
-$apiInputData = new stdClass();
-
-while ($row = $rs->fetch()) {
-    $apiInputData->coordinates = json_decode($row["geojson"])->coordinates;
-}
-
 // Get station_orders
 $placeholders = rtrim(str_repeat('?, ', count($station_ids)), ', ') ;
 $sql = "SELECT all_stations.name AS name, ST_AsGeoJSON(even_station_relation.$geomfield) AS geom,
@@ -81,10 +56,35 @@ if (!$rs) {
     exit;
 }
 
+$apiInputData = new stdClass();
 $apiInputData->station_orders = [];
 
 while ($row = $rs->fetch()) {
     array_push($apiInputData->station_orders, $row["station_order"]);
+}
+
+// Get linestring
+$sql = "SELECT ST_AsGeoJSON(ST_Collect($geomfield)) AS geojson FROM (
+SELECT (ST_DumpPoints(geom)).geom FROM even_processed_routes_line_dtm
+WHERE relcislo = ?
+ORDER BY (ST_DumpPoints(geom)).path[1]";
+
+if ($is_reversed)
+    $sql .= " DESC";
+
+$sql .= ") AS all_points;";
+
+// Try query or error
+$rs = $db->prepare($sql);
+$rs->execute([$relcislo]);
+if (!$rs) {
+    echo '{ "type": "Consumption", "Data": null, "status": "sqlerror" }';
+    http_response_code(500);
+    exit;
+}
+
+while ($row = $rs->fetch()) {
+    $apiInputData->coordinates = json_decode($row["geojson"])->coordinates;
 }
 
 if ($is_reversed) {
@@ -127,13 +127,28 @@ $options = array(
     )
 );
 $context  = stream_context_create($options);
-$result = file_get_contents($CONSUM_API_HOST, false, $context);
+$apiUrl = "http";
+if ($CONSUM_API_TLS)
+    $apiUrl .= "s://";
+else
+    $apiUrl .= "://";
+$apiUrl .= $CONSUM_API_HOST . ":" . $CONSUM_API_PORT . "/" . $CONSUM_API_ENDPOINT;
+$result = file_get_contents($apiUrl, false, $context);
 
-if (!$rs) {
+if (!$result) {
     echo '{ "type": "Consumption", "Data": null, "status": "apierror" }';
     http_response_code(500);
     exit;
 }
+
+// Crop linestring to stations
+$apiInputData->coordinates = array_slice($apiInputData->coordinates, 0, $apiInputData->station_orders[count($apiInputData->station_orders) - 1]);
+$apiInputData->coordinates = array_slice($apiInputData->coordinates, $apiInputData->station_orders[0] - 1);
+$offset = $apiInputData->station_orders[0];
+foreach($apiInputData->station_orders as &$so) {
+    $so -= $offset;
+}
+$apiInputData->station_orders[count($apiInputData->station_orders) - 1] = count($apiInputData->coordinates) - 1;
 
 $apiOutputData = (object) array_merge((array) $apiInputData, (array) json_decode($result));
 

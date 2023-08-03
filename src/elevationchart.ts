@@ -71,7 +71,8 @@ export class ElevationChart {
                 if (!station.IsIncluded())
                     return;
                 let stationOrder = station.GetOrderIndex(); 
-                if (this.chartReversed)
+                // When consumption is calculated, API flips the stations automagically
+                if (this.consumption === undefined && this.chartReversed)
                     stationOrder = labels.length-1-stationOrder;
                 labels[stationOrder] = station.GetListInfo();
                 radius[stationOrder] = 5;
@@ -355,7 +356,6 @@ export class ElevationChart {
         for (let i = 1; i < elevation.length; i++) {
             if (Math.abs(this.elevation[i-1] - elevation[i]) > 10) {
                 this.elevation.push(this.elevation[i-1]);
-                // console.log("bonk", Math.abs(this.elevation[i-1] - elevation[i]));
             } else {
                 this.elevation.push(elevation[i]);
             }

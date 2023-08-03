@@ -3,7 +3,7 @@ node_modules/
 *.js
 !webpack.config.js
 public/assets
-index.js.LICENSE.txt
+*.js.LICENSE.txt
 venv/
 .directory
 .ipynb_checkpoints/
