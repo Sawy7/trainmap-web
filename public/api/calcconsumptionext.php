@@ -12,7 +12,7 @@
  */
 
 header("Access-Control-Allow-Origin: *"); // NOTE: This can be configured in Apache
-// header("Content-Type: application/json");
+header("Content-Type: application/json");
 
 // Retrive JSON variables
 $data = json_decode(file_get_contents('php://input'), true);
@@ -115,6 +115,12 @@ $apiInputData->velocity_ways = [];
 while ($row = $rs->fetch()) {
     array_push($apiInputData->velocity_ways, ["start" => $row["start_order"], "end" => $row["end_order"], "velocity" => $row["maxspeed"]]);
 }
+
+$apiInputData->mass_locomotive_kg = $data["mass_locomotive_kg"];
+$apiInputData->mass_wagon_kg = $data["mass_wagon_kg"];
+$apiInputData->power_limit_kw = $data["power_limit_kw"];
+$apiInputData->recuperation_coef = $data["recuperation_coef"];
+$apiInputData->energy_in_kwh = true;
 
 // echo json_encode($apiInputData);
 // exit;

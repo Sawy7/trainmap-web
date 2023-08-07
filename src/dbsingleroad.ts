@@ -3,6 +3,7 @@ import { DBMapEntity } from "./dbmapentity";
 import { Helper } from "./helper";
 import { SingleMapRoad } from "./singleroad";
 import { ApiMgr } from "./apimgr";
+import { TrainCard } from "./traincard";
 
 export class DBSingleMapRoad extends SingleMapRoad {
     readonly className: string = "DBSingleMapRoad";
@@ -52,12 +53,24 @@ export class DBSingleMapRoad extends SingleMapRoad {
         }
     }
 
-    public CalcConsumption(isReversed: boolean): object {
+    public CalcConsumption(
+        selectedTrainCard: TrainCard, recuperationCoef: number,
+        isReversed: boolean
+    ): object {
         // return ApiMgr.CalcConsumption(this.dbID);
         
         // Using external Python API now:
-        let stationIDs = this.GetStations().map(s => s.GetStationID());
-        return ApiMgr.CalcConsumptionExt(this.dbID, stationIDs, isReversed);
+        let stationIDs = this.GetStations().reduce((ids, s) => {
+            if (s.IsIncluded())
+                ids.push(s.GetStationID());
+            return ids;
+        }, []);
+        return ApiMgr.CalcConsumptionExt(
+            this.dbID, stationIDs,
+            selectedTrainCard.massLocomotive, selectedTrainCard.massWagon,
+            selectedTrainCard.powerLimit, recuperationCoef,
+            isReversed
+        );
     }
 }
 export interface DBSingleMapRoad extends DBMapEntity {};

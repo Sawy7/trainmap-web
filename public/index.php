@@ -152,18 +152,18 @@ if (!$auth->isLoggedIn()) {
                                     </a>
                                     <a href="#"
                                         class="list-group-item list-group-item-dark list-group-item-action d-flex justify-content-between align-items-center">
-                                        <span class="badge bg-primary">Výška <i class="bi-rulers"></i></span> <span
-                                            id="dataHeight">210-250</span>
+                                        <span class="badge bg-primary">Výška <i class="bi-rulers"></i></span>
+                                        <span id="dataHeight">210-250</span>
                                     </a>
                                     <a href="#"
                                         class="list-group-item list-group-item-dark list-group-item-action d-flex justify-content-between align-items-center">
-                                        <span class="badge bg-danger">Hmotnost <i
-                                                class="bi-train-front-fill"></i></span> - kg
+                                        <span class="badge bg-danger">Hmotnost <i class="bi-train-front-fill"></i></span>
+                                        <span id="dataMass">- kg</span>
                                     </a>
                                     <a href="#"
                                         class="list-group-item list-group-item-dark list-group-item-action d-flex justify-content-between align-items-center">
                                         <span class="badge bg-danger">Spotřeba <i class="bi-fuel-pump-fill"></i></span>
-                                        - KWh
+                                        <span id="dataEnergy">- kWh</span>
                                     </a>
                                 </div>
                                 <div class="list-group">
@@ -186,83 +186,7 @@ if (!$auth->isLoggedIn()) {
                         <div class="invisible hidden-xs">&nbsp;</div>
                     </div>
                     <!-- Padding -->
-                    <div class="d-flex flex-row flex-nowrap">
-                        <div class="card card-gray-dark">
-                            <img src="https://www.cd.cz/assets/info/regionalni-vlak480x170.jpg" class="card-img-top">
-                            <div class="card-body">
-                                <h5 class="card-title">City Shark</h5>
-                                <p class="card-text">
-                                <p>
-                                    <span class="badge bg-danger">Hmotnost <i class="bi-train-front-fill"></i></span>
-                                    23000 kg
-                                </p>
-                                <span class="badge bg-danger">Spotřeba <i class="bi-fuel-pump-fill"></i></span> 250
-                                KWh/km
-                                </p>
-                                <a href="#" class="stretched-link"></a>
-                            </div>
-                        </div>
-                        <div class="card card-gray-dark">
-                            <img src="https://www.cd.cz/assets/info/regionalni-vlak480x170.jpg" class="card-img-top">
-                            <div class="card-body">
-                                <h5 class="card-title">City Shark</h5>
-                                <p class="card-text">
-                                <p>
-                                    <span class="badge bg-danger">Hmotnost <i class="bi-train-front-fill"></i></span>
-                                    23000 kg
-                                </p>
-                                <span class="badge bg-danger">Spotřeba <i class="bi-fuel-pump-fill"></i></span> 250
-                                KWh/km
-                                </p>
-                                <a href="#" class="stretched-link"></a>
-                            </div>
-                        </div>
-                        <div class="card card-gray-dark">
-                            <img src="https://www.cd.cz/assets/info/regionalni-vlak480x170.jpg" class="card-img-top">
-                            <div class="card-body">
-                                <h5 class="card-title">City Shark</h5>
-                                <p class="card-text">
-                                <p>
-                                    <span class="badge bg-danger">Hmotnost <i class="bi-train-front-fill"></i></span>
-                                    23000 kg
-                                </p>
-                                <span class="badge bg-danger">Spotřeba <i class="bi-fuel-pump-fill"></i></span> 250
-                                KWh/km
-                                </p>
-                                <a href="#" class="stretched-link"></a>
-                            </div>
-                        </div>
-                        <div class="card card-gray-dark">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/8/87/471_035_CD_Ostrava.jpg" class="card-img-top">
-                            <div class="card-body">
-                                <h5 class="card-title">City Elefant</h5>
-                                <p class="card-text">
-                                <p>
-                                    <span class="badge bg-danger">Hmotnost <i class="bi-train-front-fill"></i></span>
-                                    24000 kg
-                                </p>
-                                <span class="badge bg-danger">Spotřeba <i class="bi-fuel-pump-fill"></i></span> 290
-                                KWh/km
-                                </p>
-                                <a href="#" class="stretched-link"></a>
-                            </div>
-                        </div>
-                        <div class="card card-gray-dark">
-                            <img src="https://zdopravy.cz/wp-content/uploads/2021/01/pendolino.jpg" class="card-img-top">
-                            <div class="card-body">
-                                <h5 class="card-title">Pendolino</h5>
-                                <p class="card-text">
-                                <p>
-                                    <span class="badge bg-danger">Hmotnost <i class="bi-train-front-fill"></i></span>
-                                    29000 kg
-                                </p>
-                                <span class="badge bg-danger">Spotřeba <i class="bi-fuel-pump-fill"></i></span> 310
-                                KWh/km
-                                </p>
-                                <a href="#" class="stretched-link"></a>
-                            </div>
-                        </div>
-                    </div>
+                    <div class="d-flex flex-row flex-nowrap" id="trainCardHolder"></div>
                 </div>
                 <div class="tab-pane fade" id="stationList" role="tabpanel" aria-labelledby="stationListTab">
                     <!-- Padding -->

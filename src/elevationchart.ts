@@ -7,6 +7,7 @@ import { DBSingleMapRoad } from './dbsingleroad';
 import { SingleMapRoad } from './singleroad';
 import { DBStationMapMarker } from './dbstationmarker';
 import { LogNotify } from './lognotify';
+import { TrainCard } from './traincard';
 
 export class ElevationChart {
     private static ctx: HTMLCanvasElement = <HTMLCanvasElement> document.getElementById("elevationChart");
@@ -14,11 +15,13 @@ export class ElevationChart {
     private static offcanvas: Offcanvas = new Offcanvas(document.getElementById("offcanvasElevation"));
     private static visualTab: Tab = new Tab(document.getElementById("elevationVisualTab"));
     private static railName: HTMLElement = document.getElementById("offcanvasRailName");
-    private static elevationChartDiv: HTMLDivElement = <HTMLDivElement> document.getElementById("elevationChartDiv");
-    private static elevationChartHeading: HTMLElement = document.getElementById("elevationChartHeading");
     private static dataHeight: HTMLElement = document.getElementById("dataHeight");
+    private static dataMass: HTMLElement = document.getElementById("dataMass");
+    private static dataEnergy: HTMLElement = document.getElementById("dataEnergy");
     private static reverseTrackButton: HTMLButtonElement = <HTMLButtonElement> document.getElementById("reverseTrackButton");
     private static calculateConsumptionButton: HTMLButtonElement = <HTMLButtonElement> document.getElementById("calculateConsumptionButton");
+    private static trainCards: TrainCard[];
+    private static trainCardHolder: HTMLElement = document.getElementById("trainCardHolder");
     private static stationListTabButton: HTMLButtonElement = <HTMLButtonElement> document.getElementById("stationListTab");
     private static stationBreadcrumbs: HTMLElement = document.getElementById("stationBreadcrumbs");
     private mapRoad: SingleMapRoad;
@@ -30,6 +33,8 @@ export class ElevationChart {
     private data;
     private chart: Chart;
     private chartReversed = false;
+    private selectedTrainCard: TrainCard;
+    private lazyReRenderInProgress: boolean = false;
     readonly layerID: number;
 
     public constructor(mapRoad: SingleMapRoad, warpMethod: Function) {
@@ -44,8 +49,11 @@ export class ElevationChart {
         ElevationChart.visualTab.show();
         this.RenderChart();
         this.SetupButtons();
+        this.AddTrains();
         this.AddContextualInfo();
+        this.ChangeReverseButton();
         this.ChangeConsumptionButton();
+        this.SetConsumptionData();
         this.ShowChart();
         this.RegisterChartClosing();
     }
@@ -73,6 +81,7 @@ export class ElevationChart {
                 let stationOrder = station.GetOrderIndex(); 
                 // When consumption is calculated, API flips the stations automagically
                 if (this.consumption === undefined && this.chartReversed)
+                // if (this.chartReversed)
                     stationOrder = labels.length-1-stationOrder;
                 labels[stationOrder] = station.GetListInfo();
                 radius[stationOrder] = 5;
@@ -96,7 +105,7 @@ export class ElevationChart {
         if (this.consumption !== undefined) {
             this.data["datasets"].push({
                 yAxisID: "ConsumptionY",
-                label: "Spotřeba (J)",
+                label: "Spotřeba (kWh)",
                 data: this.consumption,
                 fill: false,
                 borderColor: "#dc3545",
@@ -182,6 +191,7 @@ export class ElevationChart {
     private ReRenderChart() {
         this.DestroyChart();
         this.RenderChart();
+        console.log(this.chartReversed);
     }
 
     private SetupButtons() {
@@ -191,6 +201,7 @@ export class ElevationChart {
                 this.ClickCalculateConsumption();
             else
                 this.ReRenderChart();
+            this.ChangeReverseButton(!this.chartReversed);
         };
 
         if (this.mapRoad instanceof DBSingleMapRoad) {
@@ -200,6 +211,19 @@ export class ElevationChart {
         } else {
             ElevationChart.calculateConsumptionButton.setAttribute("style", "display: none");
         }
+    }
+
+    private ChangeReverseButton(goBack: boolean = true) {
+        let buttonName = "Cesta zpět";
+        if (!goBack)
+            buttonName = "Cesta vpřed";
+
+        ElevationChart.reverseTrackButton.setAttribute("class", "list-group-item list-group-item-primary text-center");
+        let buttonIcon = document.createElement("i");
+        buttonIcon.setAttribute("class", "bi-arrow-left-right");
+        ElevationChart.reverseTrackButton.innerHTML = "";
+        ElevationChart.reverseTrackButton.appendChild(buttonIcon);
+        ElevationChart.reverseTrackButton.innerHTML += ` ${buttonName}`;
     }
 
     private ChangeConsumptionButton(freshButton: boolean = true) {
@@ -231,17 +255,30 @@ export class ElevationChart {
         });
     }
 
+    private SetConsumptionData(mass: number = undefined, consumption: number = undefined) {
+        if (mass === undefined)
+            ElevationChart.dataMass.innerHTML = "- kg";
+        else
+            ElevationChart.dataMass.innerHTML = `${mass} kg`;
+
+        if (consumption === undefined)
+            ElevationChart.dataEnergy.innerHTML = "- kWh";
+        else
+            ElevationChart.dataEnergy.innerHTML = `${consumption.toFixed(2)} kWh`;
+    }
+
     private LoadDataFromConsumption() {
-        let consumptionJSON = (this.mapRoad as DBSingleMapRoad).CalcConsumption(this.chartReversed);
+        let consumptionJSON = (this.mapRoad as DBSingleMapRoad).CalcConsumption(this.selectedTrainCard, 0.5, this.chartReversed);
         this.consumption = consumptionJSON["Data"]["exerted_energy"];
         this.points = consumptionJSON["Data"]["coordinates"].map(coord => new L.LatLng(coord[1], coord[0]));
         this.elevation = consumptionJSON["Data"]["elevation_values"];
         let stationOrders = consumptionJSON["Data"]["station_orders"];
 
+        // API sends everything reversed (app always stores it in default direction)
         if (this.chartReversed) {
             this.points.reverse();
             this.elevation.reverse();
-            stationOrders = stationOrders.map(order => this.points.length-1-order);
+            stationOrders.reverse();
         }
 
         let i = 0;
@@ -252,6 +289,64 @@ export class ElevationChart {
                 station.SetOrderIndex(stationOrders[i++]);
             });
         }
+
+        this.SetConsumptionData(
+            this.selectedTrainCard.massLocomotive+this.selectedTrainCard.massWagon,
+            this.consumption[this.consumption.length-1]
+        );
+    }
+
+    private ChangeLazyReRender() {
+        if (this.lazyReRenderInProgress)
+            return;
+
+        this.lazyReRenderInProgress = true;
+
+        let visualTabButton = document.getElementById("elevationVisualTab"); 
+        visualTabButton.addEventListener("click", () => {
+            if (this.consumption !== undefined)
+                this.ClickCalculateConsumption();
+            else
+                this.ReRenderChart();
+            this.lazyReRenderInProgress = false;
+        }, {"once": true});
+    }
+
+    private AddTrains() {
+        ElevationChart.trainCards = [
+            new TrainCard(
+                "Stadler Tango NF2", 34500, 200, 600,
+                "https://upload.wikimedia.org/wikipedia/commons/9/9c/Stadler_Tango_NF2_v_Ostrav%C4%9B_%2804%29.jpg"
+            ),
+            new TrainCard(
+                "Stadler Tango NF2", 34500, 0, 600,
+                "https://upload.wikimedia.org/wikipedia/commons/9/9c/Stadler_Tango_NF2_v_Ostrav%C4%9B_%2804%29.jpg"
+            ),
+            new TrainCard(
+                "Stadler Tango NF2", 34500, 0, 600,
+                "https://upload.wikimedia.org/wikipedia/commons/9/9c/Stadler_Tango_NF2_v_Ostrav%C4%9B_%2804%29.jpg"
+            )
+        ];
+
+        ElevationChart.trainCardHolder.innerHTML = "";
+
+        ElevationChart.trainCards.forEach(t => {
+            ElevationChart.trainCardHolder.appendChild(t.GetCardElement());
+            t.RegisterToggleAction(() => {
+                if (t.GetState())
+                    return;
+                ElevationChart.trainCards.forEach(otherCard => {
+                    otherCard.ToggleCard(false);
+                });
+                t.ToggleCard(true);
+                this.selectedTrainCard = t;
+                if (this.consumption !== undefined)
+                    this.ChangeLazyReRender();
+            });
+        });
+
+        ElevationChart.trainCards[0].ToggleCard(true);
+        this.selectedTrainCard = ElevationChart.trainCards[0];
     }
 
     private AddContextualInfo() {
@@ -314,10 +409,7 @@ export class ElevationChart {
                             stationCrumb.setAttribute("style", "color: var(--bs-red)");
                         
                         // Setup re-render of graph
-                        let visualTabButton = document.getElementById("elevationVisualTab"); 
-                        visualTabButton.addEventListener("click", () => {
-                            this.ReRenderChart();
-                        }, {"once": true});
+                        this.ChangeLazyReRender();
                     }, {"once": true});
 
                     buttons.appendChild(includeButton);
@@ -360,43 +452,6 @@ export class ElevationChart {
                 this.elevation.push(elevation[i]);
             }
         }
-    }
-
-    private CalculateConsumption(): number[] {
-        // TODO: This is a stub
-        let stationIndexes = [0, 193, 329, 373, 430, 584, 682, 794, 942, this.points.length-1];
-        let con: number[] = [];
-        let jetOffset = 10;
-
-        let currentStation = 0;
-        for (let i = 0; i < this.points.length; i++) {
-            if (i == stationIndexes[currentStation]) {
-                // going down
-                if (i != stationIndexes[0]) {
-                    for (let j = 0; j < jetOffset; j++) {
-                        con.pop();
-                    }
-                    let half = Math.floor(jetOffset/2);
-                    con = con.concat(new Array(half).fill(undefined));
-                    con.push(-20);
-                    con = con.concat(new Array(jetOffset-half-1).fill(undefined));
-                }
-                // going up
-                con.push(0);
-                if (i != stationIndexes[stationIndexes.length-1]) {
-                    let half = Math.floor(jetOffset/2);
-                    con = con.concat(new Array(half).fill(undefined));
-                    con.push(this.elevation[i]-100);
-                    con = con.concat(new Array(jetOffset-half-1).fill(undefined));
-                    i+=jetOffset;
-                }
-                currentStation++;
-            }
-            else {
-                con.push(this.elevation[i]-190);
-            } 
-        }
-        return con;
     }
 
     public IsSameMapRoad(mapRoad: SingleMapRoad) {

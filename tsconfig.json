@@ -2,7 +2,6 @@
     "compilerOptions": {
         "target": "es6",
         "module": "es2015",
-        "watch": true,
         "moduleResolution": "node",
         "allowSyntheticDefaultImports": true
     }
