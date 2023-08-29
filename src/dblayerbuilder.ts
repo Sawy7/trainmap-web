@@ -18,10 +18,10 @@ export class DBLayerBuilder {
     static elementsDownloaded = false;
     static elementInfo: Object[] = [];
 
-    static SetInteraction() {
-        this.showButton.onclick = () => {
-            this.ToggleInterface();
-            this.GetElementsFromDB();
+    static async SetInteraction() {
+        this.showButton.onclick = async() => {
+            if (await this.GetElementsFromDB())
+                this.ToggleInterface();
         };
 
         this.searchBar.onkeyup = () => {
@@ -37,9 +37,9 @@ export class DBLayerBuilder {
         };
     }
 
-    static GetElementsFromDB() {
+    static async GetElementsFromDB(): Promise<boolean> {
         if (this.elementsDownloaded)
-            return;
+            return true;
 
         this.ClearBoxes();
 
@@ -47,26 +47,36 @@ export class DBLayerBuilder {
 
         LogNotify.ToggleThrobber();
 
-        setTimeout(() => {
+        async function Populate() {
             let rails = ApiMgr.ListRails();
-            for (let i = 0; i < rails["layers"].length; i++) {
-                const dbMapEntity = rails["layers"][i];
-                
-                this.CreateEntry(dbMapEntity, i);
-                this.StashInfo(dbMapEntity, "rail");
-            }
+            let status = true;
+            if (rails["status"] == "ok") {
+                for (let i = 0; i < rails["layers"].length; i++) {
+                    const dbMapEntity = rails["layers"][i];
+                    
+                    this.CreateEntry(dbMapEntity, i);
+                    this.StashInfo(dbMapEntity, "rail");
+                }
 
-            let offset = rails["layers"].length;
-            let osmRails = ApiMgr.ListOSMRails();
-            for (let i = offset; i < offset+osmRails["layers"].length; i++) {
-                const dbMapEntity = osmRails["layers"][i-offset];
-                
-                this.CreateEntry(dbMapEntity, i);
-                this.StashInfo(dbMapEntity, "osmrail");
+                let offset = rails["layers"].length;
+                let osmRails = ApiMgr.ListOSMRails();
+                for (let i = offset; i < offset+osmRails["layers"].length; i++) {
+                    const dbMapEntity = osmRails["layers"][i-offset];
+                    
+                    this.CreateEntry(dbMapEntity, i);
+                    this.StashInfo(dbMapEntity, "osmrail");
+                }
+                this.elementsDownloaded = true;
+            } else {
+                LogNotify.PushAlert("Aplikace je nedostupná (síťová chyba). Zkuste to znovu později.",
+                    undefined, undefined, "danger");
+                status = false;
             }
-            this.elementsDownloaded = true;
             LogNotify.ToggleThrobber();
-        }, 0);
+            return status;
+        }
+
+        return await Populate.bind(this)();
     }
 
     static ParseTags(tags: object[]) {
@@ -163,7 +173,6 @@ export class DBLayerBuilder {
         let dbOSMRails: number[] = [];
         
         LogNotify.ToggleThrobber();
-        LogNotify.UpdateThrobberMessage(`Získávání ${allResults.length} tratí`);
         allResults.forEach(res => {
             let input = res.children[0].children[0] as HTMLInputElement;
             if (input.checked) {
@@ -175,29 +184,28 @@ export class DBLayerBuilder {
                 input.checked = false;
             }
         });
+        LogNotify.UpdateThrobberMessage(`Získávání ${dbRails.length+dbOSMRails.length} tratí`);
         
         // Call for all categories at once
         let fetchedRails = await GeoGetter.GetRails(dbRails);
-        fetchedRails.forEach(road => {
-            layer.AddMapRoads(road);
-            layer.AddMapMarkers(...road.GetAdjacentMapEntities());
-        });
         let fetchedOSMRails = await GeoGetter.GetOSMRails(dbOSMRails);
-        fetchedOSMRails.forEach(road => {
-            layer.AddMapRoads(road);
-        });
-        App.Instance.AddMapLayer(layer);
+        if (fetchedRails === undefined || fetchedOSMRails === undefined) {
+            LogNotify.PushAlert("Aplikace je nedostupná (síťová chyba). Zkuste to znovu později.",
+                undefined, undefined, "danger");
+        } else {
+            fetchedRails.forEach(road => {
+                layer.AddMapRoads(road);
+                layer.AddMapMarkers(...road.GetAdjacentMapEntities());
+            });
+            fetchedOSMRails.forEach(road => {
+                layer.AddMapRoads(road);
+            });
+            App.Instance.AddMapLayer(layer);
+        }
         LogNotify.ToggleThrobber();
     }
 
     static ClearBoxes() {
-        // This is done elsewhere
-        // let allResults = Array.from(this.searchResults.children);
-        // allResults.forEach(res => {
-        //     let input = res.children[0].children[0] as HTMLInputElement;
-        //     input.checked = false;
-        // });
-
         this.searchBar.value = "";
         this.LocalSearch();
         this.layerNameBar.value = "";

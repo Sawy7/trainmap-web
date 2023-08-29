@@ -191,7 +191,6 @@ export class ElevationChart {
     private ReRenderChart() {
         this.DestroyChart();
         this.RenderChart();
-        console.log(this.chartReversed);
     }
 
     private SetupButtons() {
@@ -247,10 +246,15 @@ export class ElevationChart {
         LogNotify.ToggleThrobber();
         LogNotify.UpdateThrobberMessage("Získávání údajů o spotřebě");
         setTimeout(() => {
-            if (this.consumption === undefined)
-                this.ChangeConsumptionButton(false);
-            this.LoadDataFromConsumption();
-            this.ReRenderChart();
+            let apiStatus = this.LoadDataFromConsumption();
+            if (apiStatus) {
+                if (this.consumption === undefined)
+                    this.ChangeConsumptionButton(false);
+                this.ReRenderChart();
+            } else {
+                LogNotify.PushAlert("API pro výpočet spotřeby neodpovídá. Zkuste to znovu později.",
+                    undefined, undefined, "danger");
+            }
             LogNotify.ToggleThrobber();
         });
     }
@@ -267,8 +271,10 @@ export class ElevationChart {
             ElevationChart.dataEnergy.innerHTML = `${consumption.toFixed(2)} kWh`;
     }
 
-    private LoadDataFromConsumption() {
+    private LoadDataFromConsumption(): boolean {
         let consumptionJSON = (this.mapRoad as DBSingleMapRoad).CalcConsumption(this.selectedTrainCard, 0.5, this.chartReversed);
+        if (consumptionJSON["status"] != "ok")
+            return false;
         this.consumption = consumptionJSON["Data"]["exerted_energy"];
         this.points = consumptionJSON["Data"]["coordinates"].map(coord => new L.LatLng(coord[1], coord[0]));
         this.elevation = consumptionJSON["Data"]["elevation_values"];
@@ -294,6 +300,8 @@ export class ElevationChart {
             this.selectedTrainCard.massLocomotive+this.selectedTrainCard.massWagon,
             this.consumption[this.consumption.length-1]
         );
+
+        return true;
     }
 
     private ChangeLazyReRender() {

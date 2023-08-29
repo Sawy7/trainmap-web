@@ -32,7 +32,10 @@ export class GeoGetter {
         let stationCollections: object[] = [];
         if (dbIDsToFetch.length > 0)
         {
-            features = await get(dbIDsToFetch)["features"];
+            let response = await get(dbIDsToFetch);
+            if (response["status"] != "ok")
+                return undefined;
+            features = response["features"];
             if (getStations !== undefined)
                 stationCollections = getStations(dbIDsToFetch)["Collections"];
         }

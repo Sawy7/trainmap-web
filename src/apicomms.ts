@@ -3,24 +3,22 @@ export class ApiComms {
     static GetRequest(url: string): string {
         var xmlHttp = new XMLHttpRequest();
         xmlHttp.open("GET", url, false);
-        xmlHttp.send(null);
-        return xmlHttp.responseText;
-    }
-    
-    static GetRequestAsync(url: string, callback: Function) {
-        var xmlHttp = new XMLHttpRequest();
-        xmlHttp.onreadystatechange = function() { 
-            if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
-            callback(xmlHttp.responseText);
+        try {
+            xmlHttp.send(null);
+        } catch (error) {
+            return JSON.stringify({"status": "networkerror"});
         }
-        xmlHttp.open("GET", url, true);
-        xmlHttp.send(null);
+        return xmlHttp.responseText;
     }
 
     static PostRequest(url: string, data: string): string {
         var xmlHttp = new XMLHttpRequest();
         xmlHttp.open("POST", url, false);
-        xmlHttp.send(data);
+        try {
+            xmlHttp.send(data);
+        } catch (error) {
+            return JSON.stringify({"status": "networkerror"});
+        }
         return xmlHttp.responseText;
     }
     
@@ -33,7 +31,11 @@ export class ApiComms {
             dataString += `${prop}=${data[prop]}&`;
         }
         dataString.slice(0, -1);
-        xmlHttp.send(dataString);
+        try {
+            xmlHttp.send(dataString);
+        } catch (error) {
+            return JSON.stringify({"status": "networkerror"});
+        }
         return xmlHttp.responseText;
     }
 }
