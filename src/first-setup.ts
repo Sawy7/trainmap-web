@@ -7,13 +7,15 @@ import 'font-awesome/css/font-awesome.min.css';
 // Internal imports
 import { FormUtilities } from './formutilities';
 
-let passwordInput = document.getElementById("password") as HTMLInputElement;
-let passwordAgainInput = document.getElementById("passwordAgain") as HTMLInputElement;
-let submitButton = document.getElementById("submitButton") as HTMLButtonElement;
+document.addEventListener("DOMContentLoaded", () => {
+    let passwordInput = document.getElementById("password") as HTMLInputElement;
+    let passwordAgainInput = document.getElementById("passwordAgain") as HTMLInputElement;
+    let submitButton = document.getElementById("submitButton") as HTMLButtonElement;
 
-passwordInput.onkeyup = () => {
-    FormUtilities.ValidatePassword(passwordInput, passwordAgainInput, submitButton);
-};
-passwordAgainInput.onkeyup = () => {
-    FormUtilities.ValidatePassword(passwordInput, passwordAgainInput, submitButton);
-};
+    passwordInput.onkeyup = () => {
+        FormUtilities.ValidatePassword(passwordInput, passwordAgainInput, submitButton);
+    };
+    passwordAgainInput.onkeyup = () => {
+        FormUtilities.ValidatePassword(passwordInput, passwordAgainInput, submitButton);
+    };
+});

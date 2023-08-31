@@ -47,13 +47,13 @@ export class UsersApp {
         let addUserButton = document.getElementById("addUserButton") as HTMLLinkElement; 
         addUserButton.onclick = () => {
             this.DeactivateAllUserButtons();
-            this.ShowPageSegment("newUserOperations");
+            this.ShowPageSegment("newUserOperations")
         };
 
         // Delete user
         let delUserButton = document.getElementById("delUserButton") as HTMLLinkElement;
         delUserButton.onclick = () => {
-            let result = UsersApiMgr.DeleteUser(this.chosenUser.innerHTML);
+            let result = UsersApiMgr.DeleteUser(this.chosenUser.children[0].innerHTML);
             console.log(result);
             if (result["type"] !== "success") {
                 console.log("Error"); // TODO: Some notification would be nice
@@ -63,6 +63,34 @@ export class UsersApp {
             this.chosenUser = undefined;
             this.ShowPageSegment("operationsPlaceholder");
         };
+
+        // ChangeRole
+        let roleRadios = [
+            {"element": "radioNormal", "mask": 0, "pill": "user-pill"},
+            {"element": "radioAdmin", "mask": 1, "pill": "admin-pill"},
+        ];
+        roleRadios.forEach(rr => {
+            let element = document.getElementById(rr["element"]);
+            element.onclick = () => {
+                let result = UsersApiMgr.ChangeRole(this.chosenUser.children[0].innerHTML, rr["mask"]);
+                if (result["type"] !== "success") {
+                    console.log("Error"); // TODO: Some notification would be nice
+                    return;
+                }
+                this.chosenUser.setAttribute("value", rr["mask"].toString());
+                let prevPills = this.chosenUser.children;
+                for (let element of prevPills) {
+                    if (element.classList.contains("rounded-pill"))
+                        element.remove();
+                }
+                let rolePill = document.getElementsByClassName(rr["pill"])[0].cloneNode(true) as HTMLElement;
+                rolePill.setAttribute("style", "");
+                this.chosenUser.appendChild(rolePill);
+
+                let delUserButton = document.getElementById("delUserButton") as HTMLLinkElement;
+                delUserButton.disabled = rr["mask"] === 1;
+            };
+        });
     }
 
     private ShowPageSegment(segmentName: string) {
@@ -115,7 +143,7 @@ export class UsersApp {
         };
 
         this.submitButtonEdit.onclick = () => {
-            let result = UsersApiMgr.ChangePassword(this.chosenUser.innerHTML, this.passwordInputEdit.value);
+            let result = UsersApiMgr.ChangePassword(this.chosenUser.children[0].innerHTML, this.passwordInputEdit.value);
             if (result["type"] !== "success") {
                 console.log("Error"); // TODO: Some notification would be nice
                 return;
@@ -132,8 +160,13 @@ export class UsersApp {
 
         // Set edit according to admin/non-admin
         let delUserButton = document.getElementById("delUserButton") as HTMLLinkElement;
-        delUserButton.disabled = userButton.getAttribute("value") === "1";
-        let radioName = delUserButton.disabled ? "radioAdmin" : "radioNormal";
+        let userRole = parseInt(userButton.getAttribute("value"));
+        delUserButton.disabled = userRole === 1;
+        let radioName: string;
+        if (userRole == 0)
+            radioName = "radioNormal";
+        else if (userRole == 1)
+            radioName = "radioAdmin";
         let radioToEnable = document.getElementById(radioName) as HTMLInputElement;
         radioToEnable.checked = true;
 
@@ -153,7 +186,14 @@ export class UsersApp {
 
     private AddNewUserToList(email: string) {
         let newUserEntry = this.userList.children[0].cloneNode(true) as HTMLLinkElement;
-        newUserEntry.innerHTML = email;
+        newUserEntry.children[0].innerHTML = email;
+        newUserEntry.children[1].remove();
+        newUserEntry.setAttribute("value", "0");
+
+        let rolePill = document.getElementsByClassName("user-pill")[0].cloneNode(true) as HTMLElement;
+        rolePill.setAttribute("style", "");
+        newUserEntry.appendChild(rolePill);
+
         newUserEntry.onclick = () => {
             this.UserButtonOnClick(newUserEntry);
         };

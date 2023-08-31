@@ -4,6 +4,7 @@ require __DIR__ . "/../dbbase.php";
 $auth = new \Delight\Auth\Auth($db);
 
 if (!$auth->hasRole(\Delight\Auth\Role::ADMIN)) {
+    $_SESSION["redirect"] = $_SERVER["REQUEST_URI"];
     header("Location:/");
     exit;
 }

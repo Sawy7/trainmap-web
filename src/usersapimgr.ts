@@ -23,4 +23,11 @@ export class UsersApiMgr {
             {"email": email, "password": password}
         ));
     }
+
+    public static ChangeRole(email: string, role: number): object {
+        return JSON.parse(ApiComms.PostRequestURLEncoded(
+            `${this.rootUrl}/changerole.php`,
+            {"email": email, "role": role}
+        ));
+    }
 }
