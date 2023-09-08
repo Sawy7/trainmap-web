@@ -27,7 +27,7 @@ export class LogNotify {
     public static PushToLog(text: string) {
         let logBody = document.getElementById("logModalBody");
         let line = document.createElement("p");
-        line.innerHTML = text;
+        line.textContent = text;
         logBody.appendChild(line);
     } 
 
@@ -50,7 +50,7 @@ export class LogNotify {
         let alert = document.createElement("div");
         alert.setAttribute("class", `alert alert-${type} alert-dismissible`);
         alert.setAttribute("role", "alert");
-        alert.innerHTML = message + " ";
+        alert.textContent = message + " ";
 
         let dismissButton = document.createElement("button");
         dismissButton.setAttribute("type", "button");
@@ -64,7 +64,7 @@ export class LogNotify {
             link.setAttribute("class", "alert-link");
             link.setAttribute("id", "alertLink");
             link.setAttribute("data-bs-dismiss", "alert");
-            link.innerHTML = linkVerbage;
+            link.textContent = linkVerbage;
             alert.appendChild(link);
 
             // Give the link a purpose
@@ -90,7 +90,7 @@ export class LogNotify {
 
     public static UpdateThrobberMessage(message: string) {
         let throbberMsg = document.getElementById("throbberMessage");
-        throbberMsg.innerHTML = message;
+        throbberMsg.textContent = message;
     }
 
     public static PlaceLoader(parentElement: HTMLElement, replace: boolean = false): HTMLElement {

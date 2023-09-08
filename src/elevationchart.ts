@@ -358,7 +358,8 @@ export class ElevationChart {
     }
 
     private AddContextualInfo() {
-        ElevationChart.railName.innerHTML = this.mapRoad.GetListInfo();
+        ElevationChart.railName.innerHTML = "";
+        ElevationChart.railName.appendChild(document.createTextNode(this.mapRoad.GetListInfo()));
         ElevationChart.dataHeight.innerHTML = `${Math.round(Math.min(...this.elevation))}-${Math.round(Math.max(...this.elevation))} m`; 
 
         if (this.mapRoad instanceof DBSingleMapRoad)
@@ -368,7 +369,7 @@ export class ElevationChart {
             return;
         }
 
-        let stationIcon = document.createElement("i");
+        const stationIcon = document.createElement("i");
         stationIcon.setAttribute("class", "bi bi-train-front-fill");
         ElevationChart.stationBreadcrumbs.innerHTML = "";
         this.stations.forEach(station => {
@@ -379,8 +380,9 @@ export class ElevationChart {
             stationCrumb.setAttribute("data-popover-content", "popoverContent");
             if (!station.IsIncluded())
                 stationCrumb.setAttribute("style", "color: var(--bs-red)");
-            stationCrumb.appendChild(stationIcon);
-            stationCrumb.innerHTML += ` ${station.GetListInfo()}`;
+            stationCrumb.appendChild(stationIcon.cloneNode());
+            const stationName = ` ${station.GetListInfo()}`;
+            stationCrumb.appendChild(document.createTextNode(stationName));
 
             new Popover(stationCrumb, {
                 "placement": "auto",

@@ -186,7 +186,7 @@ export class UsersApp {
 
     private AddNewUserToList(email: string) {
         let newUserEntry = this.userList.children[0].cloneNode(true) as HTMLLinkElement;
-        newUserEntry.children[0].innerHTML = email;
+        newUserEntry.children[0].textContent = email;
         newUserEntry.children[1].remove();
         newUserEntry.setAttribute("value", "0");
 

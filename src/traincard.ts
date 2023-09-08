@@ -40,7 +40,7 @@ export class TrainCard {
 
         let cardTitle = document.createElement("h5");
         cardTitle.setAttribute("class", "card-title");
-        cardTitle.innerHTML = this.name;
+        cardTitle.textContent = this.name;
         cardBody.appendChild(cardTitle);
 
         let cardText = document.createElement("p");
@@ -48,29 +48,29 @@ export class TrainCard {
 
         let massBadge = document.createElement("span");
         massBadge.setAttribute("class", "badge bg-danger");
-        massBadge.innerHTML = "Hmotnost ";
+        massBadge.textContent = "Hmotnost ";
 
         let massIcon = document.createElement("i");
         massIcon.setAttribute("class", "bi-train-front-fill");
         massBadge.appendChild(massIcon);
 
         cardText.appendChild(massBadge);
-        cardText.innerHTML += ` ${this.massLocomotive}`;
+        cardText.appendChild(document.createTextNode(` ${this.massLocomotive}`));
         if (this.massWagon > 0)
-            cardText.innerHTML += ` + ${this.massWagon}`;
-        cardText.innerHTML += " kg<br>";
+            cardText.appendChild(document.createTextNode(` + ${this.massWagon}`));
+        cardText.appendChild(document.createTextNode(" kg"));
+        cardText.appendChild(document.createElement("br"));
 
         let powerBadge = document.createElement("span");
         powerBadge.setAttribute("class", "badge bg-danger");
-        powerBadge.innerHTML = "Max výkon ";
+        powerBadge.textContent = "Max výkon ";
 
         let powerIcon = document.createElement("i");
         powerIcon.setAttribute("class", "bi-fuel-pump-fill");
         powerBadge.appendChild(powerIcon);
 
         cardText.appendChild(powerBadge);
-        cardText.innerHTML += ` ${this.powerLimit}`;
-        cardText.innerHTML += " kW";
+        cardText.textContent += ` ${this.powerLimit} kW`;
 
         this.cardLink = document.createElement("a");
         this.cardLink.setAttribute("href", "#");

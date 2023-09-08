@@ -17,7 +17,7 @@ export abstract class MapEntity {
         entityLink.setAttribute("href", "#");
         
         let significantPoint = this.GetSignificantPoint();
-        entityLink.innerHTML = this.name;
+        entityLink.textContent = this.name;
 
         if (this.linkIconName !== undefined) {
             var locateIcon = document.createElement("i");

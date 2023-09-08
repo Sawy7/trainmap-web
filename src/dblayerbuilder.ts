@@ -19,7 +19,7 @@ export class DBLayerBuilder {
     static elementInfo: Object[] = [];
 
     static async SetInteraction() {
-        this.showButton.onclick = async() => {
+        this.showButton.onclick = async () => {
             if (await this.GetElementsFromDB())
                 this.ToggleInterface();
         };
@@ -53,16 +53,16 @@ export class DBLayerBuilder {
             if (rails["status"] == "ok") {
                 for (let i = 0; i < rails["layers"].length; i++) {
                     const dbMapEntity = rails["layers"][i];
-                    
+
                     this.CreateEntry(dbMapEntity, i);
                     this.StashInfo(dbMapEntity, "rail");
                 }
 
                 let offset = rails["layers"].length;
                 let osmRails = ApiMgr.ListOSMRails();
-                for (let i = offset; i < offset+osmRails["layers"].length; i++) {
-                    const dbMapEntity = osmRails["layers"][i-offset];
-                    
+                for (let i = offset; i < offset + osmRails["layers"].length; i++) {
+                    const dbMapEntity = osmRails["layers"][i - offset];
+
                     this.CreateEntry(dbMapEntity, i);
                     this.StashInfo(dbMapEntity, "osmrail");
                 }
@@ -115,19 +115,22 @@ export class DBLayerBuilder {
 
         let contentDiv = document.createElement("div");
         contentDiv.setAttribute("class", "fw-bold");
-        
+
         let input = document.createElement("input");
         input.setAttribute("class", "form-check-input me-1");
         input.setAttribute("type", "checkbox");
         input.setAttribute("value", index.toString());
 
         contentDiv.appendChild(input);
-        contentDiv.innerHTML += "\n" + infoObject["name"];
+        const entryName = document.createTextNode("\n" + infoObject["name"]);
+        contentDiv.appendChild(entryName);
 
         label.appendChild(contentDiv);
 
-        if (infoObject["tags"] != null)
-            label.innerHTML += "\n" + this.ParseTags(infoObject["tags"]);
+        if (infoObject["tags"] != null) {
+            const entryTags = document.createTextNode("\n" + this.ParseTags(infoObject["tags"]));
+            label.appendChild(entryTags);
+        }
 
         this.searchResults.appendChild(label);
         label.onclick = () => {
@@ -158,8 +161,7 @@ export class DBLayerBuilder {
     }
 
     static async BuildLayer() {
-        if (!this.layerNameBar.checkValidity())
-        {
+        if (!this.layerNameBar.checkValidity()) {
             this.layerNameBarDiv.classList.add("was-validated");
             return;
         }
@@ -171,7 +173,7 @@ export class DBLayerBuilder {
 
         let dbRails: number[] = [];
         let dbOSMRails: number[] = [];
-        
+
         LogNotify.ToggleThrobber();
         allResults.forEach(res => {
             let input = res.children[0].children[0] as HTMLInputElement;
@@ -184,8 +186,8 @@ export class DBLayerBuilder {
                 input.checked = false;
             }
         });
-        LogNotify.UpdateThrobberMessage(`Získávání ${dbRails.length+dbOSMRails.length} tratí`);
-        
+        LogNotify.UpdateThrobberMessage(`Získávání ${dbRails.length + dbOSMRails.length} tratí`);
+
         // Call for all categories at once
         let fetchedRails = await GeoGetter.GetRails(dbRails);
         let fetchedOSMRails = await GeoGetter.GetOSMRails(dbOSMRails);
@@ -214,7 +216,7 @@ export class DBLayerBuilder {
 
     static CheckAllVisible() {
         let checkAllStatus = this.checkAll.checked;
-        
+
         let allResults = Array.from(this.searchResults.children);
         allResults.forEach(res => {
             let result = res as HTMLElement;

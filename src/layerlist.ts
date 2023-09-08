@@ -31,7 +31,7 @@ export class LayerList {
         var accordion = document.createElement("a");
         accordion.setAttribute("class", "list-group-item list-group-item-dark d-flex justify-content-between align-items-center");
         accordion.setAttribute("href", "#");
-        accordion.innerHTML = mapLayer.GetLayerName();
+        accordion.textContent = mapLayer.GetLayerName();
 
         var accordionCollapse = document.createElement("div");
         accordionCollapse.setAttribute("class", "accordion-collapse collapse bg-secondary");
@@ -160,7 +160,7 @@ export class LayerList {
             }
 
             operationEdit.removeAttribute("style");
-            accordion.innerHTML = input.value;
+            accordion.textContent = input.value;
             accordion.setAttribute("href", "#");
             accordion.onclick = previousOnclick;
         };
@@ -173,7 +173,7 @@ export class LayerList {
         cancelButton.setAttribute("class", "btn btn-danger float-end");
         cancelButton.onclick = () => {
             operationEdit.removeAttribute("style");
-            accordion.innerHTML = previousLayerName;
+            accordion.textContent = previousLayerName;
             accordion.setAttribute("href", "#");
             accordion.onclick = previousOnclick;
         };
