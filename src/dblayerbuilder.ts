@@ -1,7 +1,6 @@
 import { Modal } from "bootstrap";
 import { ApiMgr } from "./apimgr";
 import { App } from "./app";
-import { GeoGetter } from "./geogetter";
 import { LogNotify } from "./lognotify";
 import { MapEntityFactory } from "./mapentityfactory";
 
@@ -189,8 +188,8 @@ export class DBLayerBuilder {
         LogNotify.UpdateThrobberMessage(`Získávání ${dbRails.length + dbOSMRails.length} tratí`);
 
         // Call for all categories at once
-        let fetchedRails = await GeoGetter.GetRails(dbRails);
-        let fetchedOSMRails = await GeoGetter.GetOSMRails(dbOSMRails);
+        let fetchedRails = await MapEntityFactory.CreateDBSingleMapRoads(dbRails);
+        let fetchedOSMRails = await MapEntityFactory.CreateDBOSMMapRoads(dbOSMRails);
         if (fetchedRails === undefined || fetchedOSMRails === undefined) {
             LogNotify.PushAlert("Aplikace je nedostupná (síťová chyba). Zkuste to znovu později.",
                 undefined, undefined, "danger");

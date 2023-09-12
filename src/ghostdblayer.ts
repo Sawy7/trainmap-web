@@ -1,7 +1,7 @@
 import L from "leaflet";
 import { DBMapLayer } from "./dblayer";
-import { GeoGetter } from "./geogetter";
 import { LogNotify } from "./lognotify";
+import { MapEntityFactory } from "./mapentityfactory";
 
 export class GhostDBMapLayer extends DBMapLayer {
     private initialized: boolean = false;
@@ -49,14 +49,14 @@ export class GhostDBMapLayer extends DBMapLayer {
 
         // TODO: Removal check - Something more elegant (+ maybe user indication, that something's been yeeted)
 
-        let fetchedRails = await GeoGetter.GetRails(dbRails);
+        let fetchedRails = await MapEntityFactory.CreateDBSingleMapRoads(dbRails);
         fetchedRails.forEach(road => {
             if (!road.CheckRemoved()) {
                 this.AddMapRoads(road);
                 this.AddMapMarkers(...road.GetAdjacentMapEntities());
             }
         });
-        let fetchedOSMRails = await GeoGetter.GetOSMRails(dbOSMRails);
+        let fetchedOSMRails = await MapEntityFactory.CreateDBOSMMapRoads(dbOSMRails);
         fetchedOSMRails.forEach(road => {
             if (!road.CheckRemoved())
                 this.AddMapRoads(road);
