@@ -41,28 +41,34 @@ export class FileLoader {
             let xmlParser = new DOMParser();
             let xmlDoc = xmlParser.parseFromString(contents, "text/xml");
 
-            let rootNode = xmlDoc.getElementsByTagName("trkseg")[0];
-            let pointCount = rootNode.childElementCount;
+            let mapRoads = [];
 
-            let pointsArr: L.LatLng[] = [];
-            let elevArr: number[] = [];
+            [...xmlDoc.getElementsByTagName("trkseg")].forEach(rootNode => {
+                let pointCount = rootNode.childElementCount;
 
-            // Note: GPX ze Seznamu obsahuje duplicity
-            for (let i = 0; i < pointCount; i++) {
-                let pointLat = rootNode.children[i].getAttribute("lat");
-                let pointLong = rootNode.children[i].getAttribute("lon");
-                pointsArr.push(new L.LatLng(+pointLat, +pointLong));
-                let pointElev = rootNode.children[i].children[0].innerHTML;
-                elevArr.push(+pointElev);
-            }
+                let pointsArr: L.LatLng[] = [];
+                let elevArr: number[] = [];
 
-            let addFunction = (name: string) => {
-                let gpxLayer = MapEntityFactory.CreateMapLayer(name);
-                gpxLayer.AddMapRoads(MapEntityFactory.CreateSingleMapRoad(pointsArr, elevArr, "Cesta"));
+                for (let i = 0; i < pointCount; i++) {
+                    let pointLat = rootNode.children[i].getAttribute("lat");
+                    let pointLong = rootNode.children[i].getAttribute("lon");
+                    pointsArr.push(new L.LatLng(+pointLat, +pointLong));
+                    let pointElev = rootNode.children[i].children[0].innerHTML;
+                    elevArr.push(+pointElev);
+                }
+
+                mapRoads.push({"points": pointsArr, "elevation": elevArr});
+            });
+
+            let name = xmlDoc.getElementsByTagName("name")[0].textContent;
+            let gpxLayer = MapEntityFactory.CreateMapLayer(name);
+            for (let i = 0; i < mapRoads.length; i++) {
+                const mapRoad = mapRoads[i];
+
+                gpxLayer.AddMapRoads(MapEntityFactory.CreateSingleMapRoad(mapRoad["points"], mapRoad["elevation"], `Cesta ${i+1}`));
                 gpxLayer.ChangeColor("purple");
                 App.Instance.AddMapLayer(gpxLayer);
             }
-            FileLoader.SpawnNameInput("fileInputContainer", addFunction);
         } catch (error) {
             this.ThrowGenericError();
         } finally {
