@@ -342,6 +342,31 @@ export class ElevationChart {
                     "Compensation polynomial": null
                 },
                 "https://upload.wikimedia.org/wikipedia/commons/9/9c/Stadler_Tango_NF2_v_Ostrav%C4%9B_%2804%29.jpg"
+            ),
+            new TrainCard(
+                "Škoda 860",
+                {
+                    "mass_locomotive": 56000,
+                    "mass_wagon": 31490 + 33000,
+                    "power_limit": 480
+                },
+                {
+                    "Elevation smoothing": 100,
+                    "Curve smoothing": 10,
+                    "Curve A": 226.0739452231682,
+                    "Curve B": 55.026751900632405,
+                    "Running a": 0.706437197926143,
+                    "Running b": 0.01899266921470387,
+                    "Running c": 0.008283331094691721,
+                    "Recuperation coefficient": 0.6998270177197322,
+                    "Comfortable acceleration": 0.41725031534778388,
+                    "Compensation polynomial": [
+                        -1.3169756479815293e-14, 4.271539912516026e-11,
+                        -3.874542069136512e-08, 2.677139343735735e-08,
+                        0.00962245960144532, 0.619862570600036
+                    ]
+                },
+                "https://upload.wikimedia.org/wikipedia/commons/9/9a/Vuz_860-Horni_Pocernice.jpg"
             )
         ];
 

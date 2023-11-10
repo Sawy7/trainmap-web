@@ -149,7 +149,7 @@ if (!$result) {
 
 // Crop linestring to stations
 $apiInputData->rail_definition->coordinates = array_slice($apiInputData->rail_definition->coordinates, 0, $apiInputData->rail_definition->station_orders[count($apiInputData->rail_definition->station_orders) - 1]);
-$apiInputData->rail_definition->coordinates = array_slice($apiInputData->rail_definition->coordinates, $apiInputData->rail_definition->station_orders[0] - 1);
+$apiInputData->rail_definition->coordinates = array_slice($apiInputData->rail_definition->coordinates, $apiInputData->rail_definition->station_orders[0]);
 $offset = $apiInputData->rail_definition->station_orders[0];
 foreach($apiInputData->rail_definition->station_orders as &$so) {
     $so -= $offset;
