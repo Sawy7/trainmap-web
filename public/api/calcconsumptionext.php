@@ -12,7 +12,7 @@
  */
 
 header("Access-Control-Allow-Origin: *"); // NOTE: This can be configured in Apache
-header("Content-Type: application/json");
+// header("Content-Type: application/json");
 
 // Retrive JSON variables
 $data = json_decode(file_get_contents('php://input'), true);
@@ -57,10 +57,11 @@ if (!$rs) {
 }
 
 $apiInputData = new stdClass();
-$apiInputData->station_orders = [];
+$apiInputData->rail_definition = new stdClass();
+$apiInputData->rail_definition->station_orders = [];
 
 while ($row = $rs->fetch()) {
-    array_push($apiInputData->station_orders, $row["station_order"]);
+    array_push($apiInputData->rail_definition->station_orders, $row["station_order"]);
 }
 
 // Get linestring
@@ -84,15 +85,15 @@ if (!$rs) {
 }
 
 while ($row = $rs->fetch()) {
-    $apiInputData->coordinates = json_decode($row["geojson"])->coordinates;
+    $apiInputData->rail_definition->coordinates = json_decode($row["geojson"])->coordinates;
 }
 
 if ($is_reversed) {
-    $pointCount = count($apiInputData->coordinates);
-    foreach($apiInputData->station_orders as &$so) {
+    $pointCount = count($apiInputData->rail_definition->coordinates);
+    foreach($apiInputData->rail_definition->station_orders as &$so) {
         $so = $pointCount-1-$so;
     }
-    $apiInputData->station_orders = array_reverse($apiInputData->station_orders);
+    $apiInputData->rail_definition->station_orders = array_reverse($apiInputData->rail_definition->station_orders);
 }
 
 // Get velocity_ways
@@ -110,17 +111,16 @@ if (!$rs) {
     exit;
 }
 
-$apiInputData->velocity_ways = [];
+$apiInputData->rail_definition->velocity_ways = [];
 
 while ($row = $rs->fetch()) {
-    array_push($apiInputData->velocity_ways, ["start" => $row["start_order"], "end" => $row["end_order"], "velocity" => $row["maxspeed"]]);
+    array_push($apiInputData->rail_definition->velocity_ways, ["start" => $row["start_order"], "end" => $row["end_order"], "velocity" => $row["maxspeed"]]);
 }
 
-$apiInputData->mass_locomotive_kg = $data["mass_locomotive_kg"];
-$apiInputData->mass_wagon_kg = $data["mass_wagon_kg"];
-$apiInputData->power_limit_kw = $data["power_limit_kw"];
-$apiInputData->recuperation_coef = $data["recuperation_coef"];
-$apiInputData->energy_in_kwh = true;
+$apiInputData->output_options = new stdClass();
+$apiInputData->output_options->energy_in_kwh = true;
+$apiInputData->params = $data["params"];
+$apiInputData->variable_params = $data["variable_params"];
 
 // echo json_encode($apiInputData);
 // exit;
@@ -148,13 +148,13 @@ if (!$result) {
 }
 
 // Crop linestring to stations
-$apiInputData->coordinates = array_slice($apiInputData->coordinates, 0, $apiInputData->station_orders[count($apiInputData->station_orders) - 1]);
-$apiInputData->coordinates = array_slice($apiInputData->coordinates, $apiInputData->station_orders[0] - 1);
-$offset = $apiInputData->station_orders[0];
-foreach($apiInputData->station_orders as &$so) {
+$apiInputData->rail_definition->coordinates = array_slice($apiInputData->rail_definition->coordinates, 0, $apiInputData->rail_definition->station_orders[count($apiInputData->rail_definition->station_orders) - 1]);
+$apiInputData->rail_definition->coordinates = array_slice($apiInputData->rail_definition->coordinates, $apiInputData->rail_definition->station_orders[0] - 1);
+$offset = $apiInputData->rail_definition->station_orders[0];
+foreach($apiInputData->rail_definition->station_orders as &$so) {
     $so -= $offset;
 }
-$apiInputData->station_orders[count($apiInputData->station_orders) - 1] = count($apiInputData->coordinates) - 1;
+$apiInputData->rail_definition->station_orders[count($apiInputData->rail_definition->station_orders) - 1] = count($apiInputData->rail_definition->coordinates) - 1;
 
 $apiOutputData = (object) array_merge((array) $apiInputData, (array) json_decode($result));
 

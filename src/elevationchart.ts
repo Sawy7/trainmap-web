@@ -276,9 +276,9 @@ export class ElevationChart {
         if (consumptionJSON["status"] != "ok")
             return false;
         this.consumption = consumptionJSON["Data"]["exerted_energy"];
-        this.points = consumptionJSON["Data"]["coordinates"].map(coord => new L.LatLng(coord[1], coord[0]));
+        this.points = consumptionJSON["Data"]["rail_definition"]["coordinates"].map(coord => new L.LatLng(coord[1], coord[0]));
         this.elevation = consumptionJSON["Data"]["elevation_values"];
-        let stationOrders = consumptionJSON["Data"]["station_orders"];
+        let stationOrders = consumptionJSON["Data"]["rail_definition"]["station_orders"];
 
         // API sends everything reversed (app always stores it in default direction)
         if (this.chartReversed) {
@@ -297,7 +297,7 @@ export class ElevationChart {
         }
 
         this.SetConsumptionData(
-            this.selectedTrainCard.massLocomotive+this.selectedTrainCard.massWagon,
+            this.selectedTrainCard.params["mass_locomotive"]+this.selectedTrainCard.params["mass_wagon"],
             this.consumption[this.consumption.length-1]
         );
 
@@ -323,15 +323,24 @@ export class ElevationChart {
     private AddTrains() {
         ElevationChart.trainCards = [
             new TrainCard(
-                "Stadler Tango NF2", 34500, 200, 600,
-                "https://upload.wikimedia.org/wikipedia/commons/9/9c/Stadler_Tango_NF2_v_Ostrav%C4%9B_%2804%29.jpg"
-            ),
-            new TrainCard(
-                "Stadler Tango NF2", 34500, 0, 600,
-                "https://upload.wikimedia.org/wikipedia/commons/9/9c/Stadler_Tango_NF2_v_Ostrav%C4%9B_%2804%29.jpg"
-            ),
-            new TrainCard(
-                "Stadler Tango NF2", 34500, 0, 600,
+                "Stadler Tango NF2",
+                {
+                    "mass_locomotive": 34500,
+                    "mass_wagon": 0,
+                    "power_limit": 600
+                },
+                {
+                    "Elevation smoothing": 100,
+                    "Curve smoothing": 10,
+                    "Curve A": 999,
+                    "Curve B": 100,
+                    "Running a": 2,
+                    "Running b": 0.054,
+                    "Running c": 0.00034,
+                    "Recuperation coefficient": 1,
+                    "Comfortable acceleration": 0.98,
+                    "Compensation polynomial": null
+                },
                 "https://upload.wikimedia.org/wikipedia/commons/9/9c/Stadler_Tango_NF2_v_Ostrav%C4%9B_%2804%29.jpg"
             )
         ];

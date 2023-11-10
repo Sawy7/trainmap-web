@@ -92,7 +92,7 @@ export class App {
             localStorageTimestamp = 0;
         
         if (localStorageTimestamp < onlineDBTimestamp) {
-            LogNotify.PushAlert("<b>Aktualizace:</b> Databáze na serveru byla změněna. Byly resetovány lokální cache.")
+            LogNotify.PushAlert("Databáze na serveru byla změněna. Byly resetovány lokální cache.")
             LocalEntityDB.Instance.ClearRails();
             LocalEntityDB.Instance.ClearStations();
             localStorage["onlinedbtimestamp"] = onlineDBTimestamp;

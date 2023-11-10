@@ -51,17 +51,14 @@ export class ApiMgr {
 
     public static CalcConsumptionExt(
         railID: number, stationIDs: number[],
-        massLocomotive: number, massWagon: number,
-        powerLimit: number, recuperationCoef: number,
+        params: object, variableParams: object,
         isReversed: boolean
         ): object {
         let requestJSON = {
             "relcislo": railID,
             "station_ids": stationIDs,
-            "mass_locomotive_kg": massLocomotive,
-            "mass_wagon_kg": massWagon,
-            "power_limit_kw": powerLimit,
-            "recuperation_coef": recuperationCoef,
+            "params": params,
+            "variable_params": variableParams,
             "is_reversed": isReversed,
         };
         return JSON.parse(ApiComms.PostRequest(

@@ -1,8 +1,7 @@
 export class TrainCard {
     private name: string;
-    readonly massLocomotive: number;
-    readonly massWagon: number;
-    readonly powerLimit: number;
+    readonly params: object;
+    readonly variableParams: object;
     private image: string;
     private state: boolean;
     private cardElement: HTMLElement;
@@ -10,15 +9,13 @@ export class TrainCard {
 
     public constructor(
         name: string,
-        massLocomotive: number,
-        massWagon: number,
-        powerLimit: number,
+        params: object,
+        variableParams: object,
         image: string
     ) {
         this.name = name;
-        this.massLocomotive = massLocomotive;
-        this.massWagon = massWagon;
-        this.powerLimit = powerLimit;
+        this.params = params;
+        this.variableParams = variableParams;
         this.image = image;
         this.state = false;
     }
@@ -55,9 +52,9 @@ export class TrainCard {
         massBadge.appendChild(massIcon);
 
         cardText.appendChild(massBadge);
-        cardText.appendChild(document.createTextNode(` ${this.massLocomotive}`));
-        if (this.massWagon > 0)
-            cardText.appendChild(document.createTextNode(` + ${this.massWagon}`));
+        cardText.appendChild(document.createTextNode(` ${this.params["mass_locomotive"]}`));
+        if (this.params["mass_wagon"] > 0)
+            cardText.appendChild(document.createTextNode(` + ${this.params["mass_wagon"]}`));
         cardText.appendChild(document.createTextNode(" kg"));
         cardText.appendChild(document.createElement("br"));
 
@@ -70,7 +67,7 @@ export class TrainCard {
         powerBadge.appendChild(powerIcon);
 
         cardText.appendChild(powerBadge);
-        cardText.textContent += ` ${this.powerLimit} kW`;
+        cardText.appendChild(document.createTextNode(` ${this.params["power_limit"]} kW`));
 
         this.cardLink = document.createElement("a");
         this.cardLink.setAttribute("href", "#");
@@ -100,5 +97,9 @@ export class TrainCard {
 
             actionFunction();
         };
+    }
+
+    public GetVehicleParamsObj() {
+        return {}
     }
 }

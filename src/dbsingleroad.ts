@@ -67,8 +67,8 @@ export class DBSingleMapRoad extends SingleMapRoad {
         }, []);
         return ApiMgr.CalcConsumptionExt(
             this.dbID, stationIDs,
-            selectedTrainCard.massLocomotive, selectedTrainCard.massWagon,
-            selectedTrainCard.powerLimit, recuperationCoef,
+            selectedTrainCard.params,
+            selectedTrainCard.variableParams,
             isReversed
         );
     }
