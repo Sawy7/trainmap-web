@@ -6,4 +6,7 @@ $DB_PASSWORD = "INSERT_HERE";
 $DB_HOST = "INSERT_HERE";
 // Consumption API Params
 $CONSUM_API_HOST = "INSERT_HERE";
+$CONSUM_API_PORT = "80";
+$CONSUM_API_ENDPOINT = "consumption";
+$CONSUM_API_TLS = false;
 ?>

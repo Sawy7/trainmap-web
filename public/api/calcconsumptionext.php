@@ -12,7 +12,7 @@
  */
 
 header("Access-Control-Allow-Origin: *"); // NOTE: This can be configured in Apache
-// header("Content-Type: application/json");
+header("Content-Type: application/json");
 
 // Retrive JSON variables
 $data = json_decode(file_get_contents('php://input'), true);
