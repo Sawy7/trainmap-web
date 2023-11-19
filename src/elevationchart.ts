@@ -24,17 +24,20 @@ export class ElevationChart {
     private static trainCardHolder: HTMLElement = document.getElementById("trainCardHolder");
     private static stationListTabButton: HTMLButtonElement = <HTMLButtonElement> document.getElementById("stationListTab");
     private static stationBreadcrumbs: HTMLElement = document.getElementById("stationBreadcrumbs");
+    private static chartPickerBtn = document.getElementById("chartPickerButton") as HTMLButtonElement;
+    private static chartPickerOptions = document.getElementById("chartPickerOptions");
     private mapRoad: SingleMapRoad;
     private warpMethod: Function;
     private points: L.LatLng[];
     private elevation: number[] = [];
     private stations: DBStationMapMarker[];
-    private consumption: number[];
+    private consumptionData: object;
     private data;
     private chart: Chart;
     private chartReversed = false;
     private selectedTrainCard: TrainCard;
     private lazyReRenderInProgress: boolean = false;
+    private activeChartCount = 0;
     readonly layerID: number;
 
     public constructor(mapRoad: SingleMapRoad, warpMethod: Function) {
@@ -46,7 +49,12 @@ export class ElevationChart {
         this.layerID = this.mapRoad.GetLayerID();
         if (this.mapRoad instanceof DBSingleMapRoad)
             this.stations = this.mapRoad.GetStations();
+        // Reset tab
         ElevationChart.visualTab.show();
+        // Reset chartPicker
+        ElevationChart.chartPickerBtn.disabled = true;
+        ElevationChart.chartPickerBtn.textContent = "Výška (m)";
+        // All init methods
         this.RenderChart();
         this.SetupButtons();
         this.AddTrains();
@@ -80,8 +88,7 @@ export class ElevationChart {
                     return;
                 let stationOrder = station.GetOrderIndex(); 
                 // When consumption is calculated, API flips the stations automagically
-                if (this.consumption === undefined && this.chartReversed)
-                // if (this.chartReversed)
+                if (this.consumptionData === undefined && this.chartReversed)
                     stationOrder = labels.length-1-stationOrder;
                 labels[stationOrder] = station.GetListInfo();
                 radius[stationOrder] = 5;
@@ -102,15 +109,37 @@ export class ElevationChart {
             ]
         }
 
-        if (this.consumption !== undefined) {
+        if (this.consumptionData !== undefined) {
+            // Add data from consumption API
             this.data["datasets"].push({
                 yAxisID: "ConsumptionY",
                 label: "Spotřeba (kWh)",
-                data: this.consumption,
+                data: this.consumptionData["exerted_energy"],
                 fill: false,
                 borderColor: "#dc3545",
                 borderWidth: 3,
-                tension: 0.3
+                tension: 0.3,
+                hidden: false // This one is shown by default
+            })
+            this.data["datasets"].push({
+                yAxisID: "ConsumptionY",
+                label: "Rychlost (m/s)",
+                data: this.consumptionData["velocity_values"],
+                fill: false,
+                borderColor: "#dc3545",
+                borderWidth: 3,
+                tension: 0.3,
+                hidden: true
+            })
+            this.data["datasets"].push({
+                yAxisID: "ConsumptionY",
+                label: "Zrychlení (m/s/s)",
+                data: this.consumptionData["acceleration_values"],
+                fill: false,
+                borderColor: "#dc3545",
+                borderWidth: 3,
+                tension: 0.3,
+                hidden: true
             })
         }
 
@@ -138,7 +167,8 @@ export class ElevationChart {
                         position: "right",
                         ticks: {
                             color: "#dc3545"
-                        }
+                        },
+                        display: this.consumptionData !== undefined ? true : false
                     }
                 },
                 plugins: {
@@ -196,7 +226,7 @@ export class ElevationChart {
     private SetupButtons() {
         ElevationChart.reverseTrackButton.onclick = () => {
             this.chartReversed = !this.chartReversed;
-            if (this.consumption !== undefined)
+            if (this.consumptionData !== undefined)
                 this.ClickCalculateConsumption();
             else
                 this.ReRenderChart();
@@ -242,15 +272,71 @@ export class ElevationChart {
         ElevationChart.calculateConsumptionButton.innerHTML += ` ${buttonName}`;
     }
 
+    private EnableChartPicker() {
+        // Enable the dropdown
+        ElevationChart.chartPickerBtn.disabled = false;
+        // Change the its text
+        ElevationChart.chartPickerBtn.textContent = "[Multigraf]";
+        // Clear all previous options
+        ElevationChart.chartPickerOptions.innerHTML = "";
+
+        // Add all options
+        for (let i = 0; i < this.data["datasets"].length; i++) {
+            const ds = this.data["datasets"][i];
+            
+            // Create option
+            const option = document.createElement("li");
+            const optionLink = document.createElement("a");
+            if (i <= 1) { // First two graphs get enabled by default
+                optionLink.setAttribute("class", "dropdown-item active");
+                this.activeChartCount++;
+            }
+            else
+                optionLink.setAttribute("class", "dropdown-item");
+            optionLink.setAttribute("href", "#");
+            optionLink.textContent = ds.label;
+            option.appendChild(optionLink);
+            ElevationChart.chartPickerOptions.appendChild(option);
+
+            // Give it switching capability
+            option.onclick = () => {
+                const isActive = optionLink.classList.contains("active");
+                if (isActive) {
+                    optionLink.setAttribute("class", "dropdown-item");
+                    this.activeChartCount--;
+                }
+                else {
+                    optionLink.setAttribute("class", "dropdown-item active");
+                    this.activeChartCount++;
+                }
+                this.chart.setDatasetVisibility(i, !isActive);
+                this.chart.update();
+
+                // Give the dropdown a name, if there is only one dataset being shown
+                if (this.activeChartCount == 1) {
+                    [...ElevationChart.chartPickerOptions.children].forEach(optionEl => {
+                        const optionElLink = optionEl.children[0];
+                        if (optionElLink.classList.contains("active")) {
+                            ElevationChart.chartPickerBtn.textContent = optionEl.textContent;
+                            return;
+                        }
+                    });
+                }
+                else
+                    ElevationChart.chartPickerBtn.textContent = "[Multigraf]";
+            };
+        }
+    }
+
     private ClickCalculateConsumption() {
         LogNotify.ToggleThrobber();
         LogNotify.UpdateThrobberMessage("Získávání údajů o spotřebě");
         setTimeout(() => {
             let apiStatus = this.LoadDataFromConsumption();
             if (apiStatus) {
-                if (this.consumption === undefined)
-                    this.ChangeConsumptionButton(false);
+                this.ChangeConsumptionButton(false);
                 this.ReRenderChart();
+                this.EnableChartPicker();
             } else {
                 LogNotify.PushAlert("API pro výpočet spotřeby neodpovídá. Zkuste to znovu později.",
                     undefined, undefined, "danger");
@@ -275,7 +361,7 @@ export class ElevationChart {
         let consumptionJSON = (this.mapRoad as DBSingleMapRoad).CalcConsumption(this.selectedTrainCard, 0.5, this.chartReversed);
         if (consumptionJSON["status"] != "ok")
             return false;
-        this.consumption = consumptionJSON["Data"]["exerted_energy"];
+        this.consumptionData = consumptionJSON["Data"];
         this.points = consumptionJSON["Data"]["rail_definition"]["coordinates"].map(coord => new L.LatLng(coord[1], coord[0]));
         this.elevation = consumptionJSON["Data"]["elevation_values"];
         let stationOrders = consumptionJSON["Data"]["rail_definition"]["station_orders"];
@@ -298,7 +384,7 @@ export class ElevationChart {
 
         this.SetConsumptionData(
             this.selectedTrainCard.params["mass_locomotive"]+this.selectedTrainCard.params["mass_wagon"],
-            this.consumption[this.consumption.length-1]
+            this.consumptionData["exerted_energy"][this.consumptionData["exerted_energy"].length-1]
         );
 
         return true;
@@ -312,7 +398,7 @@ export class ElevationChart {
 
         let visualTabButton = document.getElementById("elevationVisualTab"); 
         visualTabButton.addEventListener("click", () => {
-            if (this.consumption !== undefined)
+            if (this.consumptionData !== undefined)
                 this.ClickCalculateConsumption();
             else
                 this.ReRenderChart();
@@ -382,7 +468,7 @@ export class ElevationChart {
                 });
                 t.ToggleCard(true);
                 this.selectedTrainCard = t;
-                if (this.consumption !== undefined)
+                if (this.consumptionData !== undefined)
                     this.ChangeLazyReRender();
             });
         });

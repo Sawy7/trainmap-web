@@ -1,6 +1,5 @@
 // External imports
 import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import 'font-awesome/css/font-awesome.min.css';
 
@@ -15,8 +14,17 @@ L.Icon.Default.mergeOptions({
 
 // Internal imports
 import { App } from "./app";
+// import { MapEntityFactory } from './mapentityfactory';
 
 let app = App.Instance;
 app.Init(49.86, 15.51, 9);
 
 app.LoadFromLocalStorage();
+
+// // Code for quick tests of elevationUI
+// async function uiTestTrack() {
+//     let ttracks = await MapEntityFactory.CreateDBSingleMapRoads([49010]);
+//     let ttrack = ttracks[0];
+//     ttrack.ClickSetElevationChart(null);
+// }
+// uiTestTrack();

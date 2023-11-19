@@ -137,7 +137,15 @@ if (!$auth->isLoggedIn()) {
                             </div>
                             <!-- Padding -->
                             <div class="col-lg-10" id="elevationChartDiv">
-                                <h6 id="elevationChartHeading">Graf</h6>
+                                <div id="chartPicker">
+                                    <div class="dropdown">
+                                        <button id="chartPickerButton" class="btn btn-secondary dropdown-toggle"
+                                            type="button" data-bs-toggle="dropdown" disabled>
+                                            -
+                                        </button>
+                                        <ul id="chartPickerOptions" class="dropdown-menu dropdown-menu-dark"></ul>
+                                    </div>
+                                </div>
                                 <div id="elevationChartWrapperDiv">
                                     <canvas id="elevationChart"></canvas>
                                 </div>
@@ -157,7 +165,8 @@ if (!$auth->isLoggedIn()) {
                                     </a>
                                     <a href="#"
                                         class="list-group-item list-group-item-dark list-group-item-action d-flex justify-content-between align-items-center">
-                                        <span class="badge bg-danger">Hmotnost <i class="bi-train-front-fill"></i></span>
+                                        <span class="badge bg-danger">Hmotnost <i
+                                                class="bi-train-front-fill"></i></span>
                                         <span id="dataMass">- kg</span>
                                     </a>
                                     <a href="#"
@@ -249,7 +258,8 @@ if (!$auth->isLoggedIn()) {
                     </div>
                     <div id="dbLayerBuilderNameDiv" class="flex-grow-1">
                         <div>
-                            <input type="text" class="form-control" id="dbLayerBuilderName" placeholder="Název vrstvy" required>
+                            <input type="text" class="form-control" id="dbLayerBuilderName" placeholder="Název vrstvy"
+                                required>
                             <div class="invalid-tooltip">
                                 Název vrstvy nemůže být prázdný.
                             </div>

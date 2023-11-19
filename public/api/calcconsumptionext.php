@@ -88,8 +88,8 @@ while ($row = $rs->fetch()) {
     $apiInputData->rail_definition->coordinates = json_decode($row["geojson"])->coordinates;
 }
 
+$pointCount = count($apiInputData->rail_definition->coordinates);
 if ($is_reversed) {
-    $pointCount = count($apiInputData->rail_definition->coordinates);
     foreach($apiInputData->rail_definition->station_orders as &$so) {
         $so = $pointCount-1-$so;
     }
@@ -115,6 +115,15 @@ $apiInputData->rail_definition->velocity_ways = [];
 
 while ($row = $rs->fetch()) {
     array_push($apiInputData->rail_definition->velocity_ways, ["start" => $row["start_order"], "end" => $row["end_order"], "velocity" => $row["maxspeed"]]);
+}
+
+if ($is_reversed) {
+    foreach($apiInputData->rail_definition->velocity_ways as &$vw) {
+        $old_start = $vw["start"];
+        $vw["start"] = $pointCount-1-$vw["end"];
+        $vw["end"] = $pointCount-1-$old_start;
+    }
+    $apiInputData->rail_definition->velocity_ways = array_reverse($apiInputData->rail_definition->velocity_ways);
 }
 
 $apiInputData->output_options = new stdClass();

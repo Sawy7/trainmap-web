@@ -29,8 +29,8 @@ body {
 }
 
 #elevationChartDiv {
-    padding-top: 3%;
-    padding-bottom: 3%;
+    padding-top: 2%;
+    padding-bottom: 2%;
     background: var(--bs-gray-dark);
 }
 
@@ -160,4 +160,8 @@ label {
 
 #fileLoaderTip {
     color: #9ca0a3;
+}
+
+#chartPickerButton {
+    margin-bottom: 20px;
 }

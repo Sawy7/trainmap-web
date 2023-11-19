@@ -123,6 +123,7 @@ export class MapEntityFactory {
         );
     }
 
+    // NOTE: This gets just the MapRoad -- to get stations use the next function
     public static async CreateDBSingleMapRoad(dbID: number, geoJSON?: object): Promise<DBSingleMapRoad> {
         return DBMapEntityCache.Instance.GetDBSingleMapRoad(dbID, geoJSON);
     }
