@@ -10,7 +10,7 @@ import { LogNotify } from './lognotify';
 import { TrainCard } from './traincard';
 
 export class ElevationChart {
-    private static ctx: HTMLCanvasElement = <HTMLCanvasElement> document.getElementById("elevationChart");
+    private static ctx: HTMLCanvasElement = <HTMLCanvasElement>document.getElementById("elevationChart");
     private static elevationChartElement = document.getElementById("offcanvasElevation");
     private static offcanvas: Offcanvas = new Offcanvas(document.getElementById("offcanvasElevation"));
     private static visualTab: Tab = new Tab(document.getElementById("elevationVisualTab"));
@@ -18,11 +18,11 @@ export class ElevationChart {
     private static dataHeight: HTMLElement = document.getElementById("dataHeight");
     private static dataMass: HTMLElement = document.getElementById("dataMass");
     private static dataEnergy: HTMLElement = document.getElementById("dataEnergy");
-    private static reverseTrackButton: HTMLButtonElement = <HTMLButtonElement> document.getElementById("reverseTrackButton");
-    private static calculateConsumptionButton: HTMLButtonElement = <HTMLButtonElement> document.getElementById("calculateConsumptionButton");
+    private static reverseTrackButton: HTMLButtonElement = <HTMLButtonElement>document.getElementById("reverseTrackButton");
+    private static calculateConsumptionButton: HTMLButtonElement = <HTMLButtonElement>document.getElementById("calculateConsumptionButton");
     private static trainCards: TrainCard[];
     private static trainCardHolder: HTMLElement = document.getElementById("trainCardHolder");
-    private static stationListTabButton: HTMLButtonElement = <HTMLButtonElement> document.getElementById("stationListTab");
+    private static stationListTabButton: HTMLButtonElement = <HTMLButtonElement>document.getElementById("stationListTab");
     private static stationBreadcrumbs: HTMLElement = document.getElementById("stationBreadcrumbs");
     private static chartPickerBtn = document.getElementById("chartPickerButton") as HTMLButtonElement;
     private static chartPickerOptions = document.getElementById("chartPickerOptions");
@@ -86,10 +86,10 @@ export class ElevationChart {
             this.stations.forEach(station => {
                 if (!station.IsIncluded())
                     return;
-                let stationOrder = station.GetOrderIndex(); 
+                let stationOrder = station.GetOrderIndex();
                 // When consumption is calculated, API flips the stations automagically
                 if (this.consumptionData === undefined && this.chartReversed)
-                    stationOrder = labels.length-1-stationOrder;
+                    stationOrder = labels.length - 1 - stationOrder;
                 labels[stationOrder] = station.GetListInfo();
                 radius[stationOrder] = 5;
             });
@@ -202,7 +202,7 @@ export class ElevationChart {
                         const { caretX } = chart.tooltip;
                         const topY = chart.scales.y.top;
                         const bottomY = chart.scales.y.bottom;
-                
+
                         ctx.save();
                         ctx.setLineDash([3, 3]);
                         ctx.beginPath();
@@ -283,7 +283,7 @@ export class ElevationChart {
         // Add all options
         for (let i = 0; i < this.data["datasets"].length; i++) {
             const ds = this.data["datasets"][i];
-            
+
             // Create option
             const option = document.createElement("li");
             const optionLink = document.createElement("a");
@@ -378,13 +378,13 @@ export class ElevationChart {
             this.stations.forEach(station => {
                 if (!station.IsIncluded())
                     return;
-                station.SetOrderIndex(stationOrders[i++]);
+                station.SetConsumptionOrderIndex(stationOrders[i++]);
             });
         }
 
         this.SetConsumptionData(
-            this.selectedTrainCard.params["mass_locomotive"]+this.selectedTrainCard.params["mass_wagon"],
-            this.consumptionData["exerted_energy"][this.consumptionData["exerted_energy"].length-1]
+            this.selectedTrainCard.params["mass_locomotive"] + this.selectedTrainCard.params["mass_wagon"],
+            this.consumptionData["exerted_energy"][this.consumptionData["exerted_energy"].length - 1]
         );
 
         return true;
@@ -396,14 +396,14 @@ export class ElevationChart {
 
         this.lazyReRenderInProgress = true;
 
-        let visualTabButton = document.getElementById("elevationVisualTab"); 
+        let visualTabButton = document.getElementById("elevationVisualTab");
         visualTabButton.addEventListener("click", () => {
             if (this.consumptionData !== undefined)
                 this.ClickCalculateConsumption();
             else
                 this.ReRenderChart();
             this.lazyReRenderInProgress = false;
-        }, {"once": true});
+        }, { "once": true });
     }
 
     private AddTrains() {
@@ -480,7 +480,7 @@ export class ElevationChart {
     private AddContextualInfo() {
         ElevationChart.railName.innerHTML = "";
         ElevationChart.railName.appendChild(document.createTextNode(this.mapRoad.GetListInfo()));
-        ElevationChart.dataHeight.innerHTML = `${Math.round(Math.min(...this.elevation))}-${Math.round(Math.max(...this.elevation))} m`; 
+        ElevationChart.dataHeight.innerHTML = `${Math.round(Math.min(...this.elevation))}-${Math.round(Math.max(...this.elevation))} m`;
 
         if (this.mapRoad instanceof DBSingleMapRoad)
             ElevationChart.stationListTabButton.setAttribute("style", "");
@@ -518,7 +518,7 @@ export class ElevationChart {
                     showOnMapButton.innerHTML = "<i class='bi bi-geo-alt-fill'></i> Zobrazit na mapě";
                     showOnMapButton.addEventListener("click", () => {
                         this.warpMethod(station.GetSignificantPoint());
-                    }, {"once": true});
+                    }, { "once": true });
 
                     buttons.appendChild(showOnMapButton);
 
@@ -537,10 +537,10 @@ export class ElevationChart {
                             stationCrumb.setAttribute("style", "");
                         else
                             stationCrumb.setAttribute("style", "color: var(--bs-red)");
-                        
+
                         // Setup re-render of graph
                         this.ChangeLazyReRender();
-                    }, {"once": true});
+                    }, { "once": true });
 
                     buttons.appendChild(includeButton);
                     return buttons;
@@ -562,13 +562,13 @@ export class ElevationChart {
     public CheckUIVisible(): boolean {
         return ElevationChart.elevationChartElement.classList.contains("show");
     }
-    
+
     private RegisterChartClosing() {
         ElevationChart.elevationChartElement.addEventListener("hidden.bs.offcanvas", () => {
             App.Instance.RenderElevationMarker();
         }, { once: true });
     }
-    
+
     public DestroyChart() {
         this.chart.destroy();
     }
@@ -576,8 +576,8 @@ export class ElevationChart {
     private FilterDrops(elevation: number[]) {
         this.elevation.push(elevation[0]);
         for (let i = 1; i < elevation.length; i++) {
-            if (Math.abs(this.elevation[i-1] - elevation[i]) > 10) {
-                this.elevation.push(this.elevation[i-1]);
+            if (Math.abs(this.elevation[i - 1] - elevation[i]) > 10) {
+                this.elevation.push(this.elevation[i - 1]);
             } else {
                 this.elevation.push(elevation[i]);
             }

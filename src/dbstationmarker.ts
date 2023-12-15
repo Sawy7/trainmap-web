@@ -3,6 +3,7 @@ import { MapMarker } from "./mapmarker";
 
 export class DBStationMapMarker extends MapMarker {
     private orderIndex: number;
+    private consumptionOrderIndex: number;
     private dbID: number;
     readonly className: string = "DBMapMarker";
     private included = true;
@@ -32,11 +33,20 @@ export class DBStationMapMarker extends MapMarker {
     }
 
     public GetOrderIndex(): number {
+        if (this.consumptionOrderIndex !== undefined) {
+            const toReturn = this.consumptionOrderIndex;
+            this.consumptionOrderIndex = undefined;
+            return toReturn;
+        }
         return this.orderIndex;
     }
 
     public SetOrderIndex(orderIndex: number) {
         this.orderIndex = orderIndex;
+    }
+
+    public SetConsumptionOrderIndex(orderIndex: number) {
+        this.consumptionOrderIndex = orderIndex;
     }
 
     public GetStationID(): number {
