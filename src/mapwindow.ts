@@ -1,11 +1,8 @@
 import L from "leaflet";
-import { MapEntityFactory } from "./mapentityfactory";
 import { MapLayer } from "./maplayer";
-import { MapMarker } from "./mapmarker";
 
 export class MapWindow {
-    private map: L.Map;
-    private activeElevationMarker: MapMarker;
+    protected map: L.Map;
     // private layerControl: L.Control.Layers;
     
     public constructor(centerLat: number, centerLong: number, zoom: number) {
@@ -19,18 +16,6 @@ export class MapWindow {
             zoom: zoom,
             layers: [baseMapLayer]
         });
-
-        this.CreateInitialLayers(baseMapLayer, "OpenStreetMap");
-    }
-
-    private CreateInitialLayers(baseMapLayer: L.TileLayer, baseMapName: string) {
-        var baseMapsControl = {
-            [baseMapName]: baseMapLayer,
-        };
-        var overlayMapsControl = {};
-
-        // NOTE: This adds a button to switch map provider
-        // this.layerControl = L.control.layers(baseMapsControl, overlayMapsControl).addTo(this.map);
     }
 
     public RenderMapLayer(mapLayer: MapLayer, render: boolean = true) {
@@ -43,29 +28,7 @@ export class MapWindow {
             this.map.removeLayer(mapLayer.activeLayerGroup);
     }
 
-    public RenderElevationMarker(point?: L.LatLng) {
-        if (point === undefined) {
-            if (this.activeElevationMarker === undefined)
-                return;
-            this.map.removeLayer(this.activeElevationMarker.GetMapEntity());
-            this.activeElevationMarker = undefined;
-            return;
-        }
-
-        if (this.activeElevationMarker === undefined) {
-            this.activeElevationMarker = MapEntityFactory.CreateElevationMarker(point);
-            this.activeElevationMarker.GetMapEntity().addTo(this.map);
-        }
-        else {
-            this.activeElevationMarker.ChangeCoordinates(point);
-        }
-        // if (render)
-        //     marker.GetMapEntity().addTo(this.map);
-        // else
-        //     this.map.removeLayer(marker.activeMarker);
-    }
-
-    public WarpToPoint(point: L.LatLng) {
-        this.map.setView(point, 15);
+    public WarpToPoint(point: L.LatLng, zoom: number = 12) {
+        this.map.setView(point, zoom);
     }
 }

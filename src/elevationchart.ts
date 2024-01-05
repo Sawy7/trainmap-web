@@ -11,9 +11,9 @@ import { TrainCard } from './traincard';
 
 export class ElevationChart {
     private static ctx: HTMLCanvasElement = <HTMLCanvasElement>document.getElementById("elevationChart");
-    private static elevationChartElement = document.getElementById("offcanvasElevation");
-    private static offcanvas: Offcanvas = new Offcanvas(document.getElementById("offcanvasElevation"));
-    private static visualTab: Tab = new Tab(document.getElementById("elevationVisualTab"));
+    private static elevationChartElement;
+    private static offcanvas: Offcanvas;
+    private static visualTab: Tab;
     private static railName: HTMLElement = document.getElementById("offcanvasRailName");
     private static dataHeight: HTMLElement = document.getElementById("dataHeight");
     private static dataMass: HTMLElement = document.getElementById("dataMass");
@@ -41,6 +41,11 @@ export class ElevationChart {
     readonly layerID: number;
 
     public constructor(mapRoad: SingleMapRoad, warpMethod: Function) {
+        // Find all the elements
+        ElevationChart.elevationChartElement = document.getElementById("offcanvasElevation");
+        ElevationChart.offcanvas = new Offcanvas(document.getElementById("offcanvasElevation"));
+        ElevationChart.visualTab = new Tab(document.getElementById("elevationVisualTab"));
+
         this.mapRoad = mapRoad;
         this.warpMethod = warpMethod;
         this.points = (this.mapRoad.GetPoints() as L.LatLng[]);

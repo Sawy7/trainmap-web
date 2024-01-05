@@ -42,7 +42,17 @@ export abstract class MapRoad extends MapEntity {
     }
 
     public GetSignificantPoint(): L.LatLng {
-        return this.points.flat()[0];
+        const sum = this.points.flat().reduce((acc, cur) => {
+            return {
+                lat: acc.lat + cur.lat,
+                lng: acc.lng + cur.lng
+            };
+        }, {lat: 0, lng: 0});
+
+        return new L.LatLng(
+            sum["lat"] / this.points.length,
+            sum["lng"] / this.points.length
+        );
     }
 
     public SetupInteractivity(layerID: number, customFunction?: LeafletEventHandlerFn) {

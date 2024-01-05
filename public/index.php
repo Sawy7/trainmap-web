@@ -212,24 +212,6 @@ if (!$auth->isLoggedIn()) {
         </div>
     </div>
 
-    <!-- Log Modal -->
-    <div class="modal fade" id="logModal" tabindex="-1" aria-labelledby="logModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="logModalLabel">Log</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body" id="logModalBody">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zavřít</button>
-                    <button type="button" class="btn btn-primary" id="logModalSaveButton">Uložit na disk</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- DBLayerBuilder Modal -->
     <div class="modal fade" id="dbLayerBuilderModal" tabindex="-1" aria-labelledby="dbLayerBuilderModalLabel"
         aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
