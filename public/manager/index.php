@@ -1,3 +1,13 @@
+<?php
+require __DIR__ . "/../dbbase.php";
+
+$auth = new \Delight\Auth\Auth($db);
+
+if (!$auth->isLoggedIn()) {
+    header("Location:login");
+    exit;
+}
+?>
 <!doctype html>
 <html lang="cs" data-bs-theme="dark">
 
