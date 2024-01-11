@@ -1,49 +1,4 @@
-import { Modal } from "bootstrap";
-import { App } from "./app";
-
 export class LogNotify {
-    public static Init() {
-        // Key combo
-        document.addEventListener("keydown", (event) => {
-            if (event.code == "Backquote")
-                this.ToggleLog();
-        }, false);
-
-        // Save button
-        document.getElementById("logModalSaveButton").onclick = () => {
-            this.SaveLogToDisk();
-        };
-    }
-
-    public static ToggleLog() {
-        let logModalElement = document.getElementById("logModal");
-
-        if (!logModalElement.classList.contains("show")) {
-            let logModal = new Modal(logModalElement);
-            logModal.show();
-        }
-    }
-
-    public static PushToLog(text: string) {
-        let logBody = document.getElementById("logModalBody");
-        let line = document.createElement("p");
-        line.textContent = text;
-        logBody.appendChild(line);
-    } 
-
-    // https://stackoverflow.com/questions/8178825/create-text-file-in-javascript
-    private static SaveLogToDisk() {
-        let logLines = document.getElementById("logModalBody").children;
-        let text: string = "";
-        
-        for (let i = 0; i < logLines.length; i++) {
-            const line = logLines[i].innerHTML;
-            text += line + "\n";
-        }
-
-        App.Instance.SaveTextToDisk(text, "log.txt", "text/plain");
-    }
-
     public static PushAlert(message: string, linkVerbage?: string, linkFunction?: Function, type: string = "primary") {
         const alertPlace = document.getElementById("alertPlace");
         

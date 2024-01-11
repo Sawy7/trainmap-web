@@ -1,6 +1,6 @@
 import L from "leaflet";
 import { Offcanvas, Collapse } from "bootstrap";
-import { MapWindow } from "./mapwindow";
+import { MapWindowFull } from "./mapwindowfull";
 import { MapLayer } from "./maplayer";
 import { DBMapLayer } from "./dblayer";
 import { DBLayerBuilder } from "./dblayerbuilder";
@@ -14,7 +14,7 @@ import { LocalEntityDB } from "./localentitydb";
 
 // TS Singleton: https://stackoverflow.com/questions/30174078/how-to-define-singleton-in-typescript
 export class App {
-    private mapWindow: MapWindow;
+    private mapWindow: MapWindowFull;
     private localLayers: MapLayer[] = [];
     private layerList: LayerList;
     private activeElevationChart: ElevationChart;
@@ -43,11 +43,10 @@ export class App {
     }
 
     public Init(centerLat: number, centerLong: number, zoom: number) {
-        this.mapWindow = new MapWindow(centerLat, centerLong, zoom);
+        this.mapWindow = new MapWindowFull(centerLat, centerLong, zoom);
         this.UpdatePreferences();
         this.SetupButtons();
         this.InitLayerList();
-        LogNotify.Init();
         FileLoader.SetupFileLoader();
         this.OnlineDBCheck();
     }

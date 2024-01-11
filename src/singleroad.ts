@@ -1,3 +1,4 @@
+import L from "leaflet";
 import { MapRoad } from "./maproad";
 import { App } from "./app";
 

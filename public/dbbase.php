@@ -5,7 +5,10 @@ require __DIR__ . "/vendor/autoload.php";
 try {
     $db = new \PDO("pgsql:dbname=" . $DB_DBNAME . ";host=" . $DB_HOST . ";port=5432", $DB_USER, $DB_PASSWORD);
 } catch (PDOException $Exception) {
-    echo 'Could not connect to service';
-    exit;
+    header("Content-Type: application/json");
+    $json = [];
+    $json["type"] = "generic";
+    $json["status"] = "dberror";
+    echo json_encode($json);
 }
 ?>

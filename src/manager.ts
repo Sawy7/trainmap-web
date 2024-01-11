@@ -13,18 +13,7 @@ L.Icon.Default.mergeOptions({
 });
 
 // Internal imports
-import { App } from "./app";
-import { MapEntityFactory } from './mapentityfactory';
+import { ManagerApp } from './managerapp';
 
-let app = App.Instance;
+let app = ManagerApp.Instance;
 app.Init(49.86, 15.51, 9);
-
-app.LoadFromLocalStorage();
-
-// Code for quick tests of elevationUI
-async function uiTestTrack() {
-    let ttracks = await MapEntityFactory.CreateDBSingleMapRoads([49010]);
-    let ttrack = ttracks[0];
-    ttrack.ClickSetElevationChart(null);
-}
-uiTestTrack();
