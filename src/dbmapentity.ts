@@ -28,6 +28,17 @@ export abstract class DBMapEntity extends MapEntity {
         // });
     }
 
+    protected SetPOIConsumptionOrderIndices(orders: number[]) {
+        let i = 0;
+        if (this.POIs !== undefined) {
+            this.POIs.forEach(station => {
+                if (!station.IsIncluded())
+                    return;
+                station.SetConsumptionOrderIndex(orders[i++]);
+            });
+        }
+    }
+
     public GetAdjacentMapEntities(): any {
         if (this.POIs === undefined)
             return [];

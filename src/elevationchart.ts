@@ -1,6 +1,6 @@
 import Chart from 'chart.js/auto';
 import { getRelativePosition } from 'chart.js/helpers';
-import { Offcanvas, Tab, Popover } from 'bootstrap';
+import { Offcanvas, Tab } from 'bootstrap';
 import L from "leaflet";
 import { App } from './app';
 import { DBSingleMapRoad } from './dbsingleroad';
@@ -13,23 +13,13 @@ export class ElevationChart {
     private static ctx: HTMLCanvasElement = <HTMLCanvasElement>document.getElementById("elevationChart");
     private static elevationChartElement;
     private static offcanvas: Offcanvas;
-    private static visualTab: Tab;
-    private static railName: HTMLElement = document.getElementById("offcanvasRailName");
-    private static dataHeight: HTMLElement = document.getElementById("dataHeight");
-    private static dataMass: HTMLElement = document.getElementById("dataMass");
-    private static dataEnergy: HTMLElement = document.getElementById("dataEnergy");
     private static reverseTrackButton: HTMLButtonElement = <HTMLButtonElement>document.getElementById("reverseTrackButton");
     private static calculateConsumptionButton: HTMLButtonElement = <HTMLButtonElement>document.getElementById("calculateConsumptionButton");
     private static trainCards: TrainCard[];
     private static trainCardHolder: HTMLElement = document.getElementById("trainCardHolder");
-    private static stationListTabButton: HTMLButtonElement = <HTMLButtonElement>document.getElementById("stationListTab");
-    private static stationBreadcrumbs: HTMLElement = document.getElementById("stationBreadcrumbs");
     private static chartPickerBtn = document.getElementById("chartPickerButton") as HTMLButtonElement;
-    private static chartPickerOptions = document.getElementById("chartPickerOptions");
     private mapRoad: SingleMapRoad;
     private warpMethod: Function;
-    private points: L.LatLng[];
-    private elevation: number[] = [];
     private stations: DBStationMapMarker[];
     private consumptionData: object;
     private data;
@@ -44,18 +34,15 @@ export class ElevationChart {
         // Find all the elements
         ElevationChart.elevationChartElement = document.getElementById("offcanvasElevation");
         ElevationChart.offcanvas = new Offcanvas(document.getElementById("offcanvasElevation"));
-        ElevationChart.visualTab = new Tab(document.getElementById("elevationVisualTab"));
 
         this.mapRoad = mapRoad;
         this.warpMethod = warpMethod;
-        this.points = (this.mapRoad.GetPoints() as L.LatLng[]);
-        this.FilterDrops((this.mapRoad.GetElevation() as number[]));
-        this.elevation = (this.mapRoad.GetElevation() as number[]);
         this.layerID = this.mapRoad.GetLayerID();
         if (this.mapRoad instanceof DBSingleMapRoad)
             this.stations = this.mapRoad.GetStations();
         // Reset tab
-        ElevationChart.visualTab.show();
+        const visualTab = new Tab(document.getElementById("elevationVisualTab"));
+        visualTab.show();
         // Reset chartPicker
         ElevationChart.chartPickerBtn.disabled = true;
         ElevationChart.chartPickerBtn.textContent = "Výška (m)";
@@ -75,9 +62,10 @@ export class ElevationChart {
         let labels: string[] = [];
         let radius: number[] = [];
 
-        let localElevation = [...this.elevation];
-        let localPoints = [...this.points];
-        if (this.chartReversed) {
+        let localElevation = [...this.mapRoad.GetElevation()];
+        let localPoints = [...this.mapRoad.GetPoints()];
+        // Flip the values only if not from API
+        if (this.consumptionData === undefined && this.chartReversed) {
             localElevation.reverse();
             localPoints.reverse();
         }
@@ -92,7 +80,7 @@ export class ElevationChart {
                 if (!station.IsIncluded())
                     return;
                 let stationOrder = station.GetOrderIndex();
-                // When consumption is calculated, API flips the stations automagically
+                // Flip the values only if not from API
                 if (this.consumptionData === undefined && this.chartReversed)
                     stationOrder = labels.length - 1 - stationOrder;
                 labels[stationOrder] = station.GetListInfo();
@@ -196,7 +184,7 @@ export class ElevationChart {
                     const index = this.chart.scales.x.getValueForPixel(canvasPosition.x);
                     // console.log(index);
                     let elevationMarkerPos = localPoints[index];
-                    App.Instance.RenderElevationMarker(elevationMarkerPos);
+                    App.Instance.RenderElevationMarker(elevationMarkerPos as L.LatLng);
                 }
             },
             plugins: [{
@@ -283,7 +271,8 @@ export class ElevationChart {
         // Change the its text
         ElevationChart.chartPickerBtn.textContent = "[Multigraf]";
         // Clear all previous options
-        ElevationChart.chartPickerOptions.innerHTML = "";
+        const chartPickerOptions = document.getElementById("chartPickerOptions");
+        chartPickerOptions.innerHTML = "";
 
         // Add all options
         for (let i = 0; i < this.data["datasets"].length; i++) {
@@ -301,7 +290,7 @@ export class ElevationChart {
             optionLink.setAttribute("href", "#");
             optionLink.textContent = ds.label;
             option.appendChild(optionLink);
-            ElevationChart.chartPickerOptions.appendChild(option);
+            chartPickerOptions.appendChild(option);
 
             // Give it switching capability
             option.onclick = () => {
@@ -319,7 +308,7 @@ export class ElevationChart {
 
                 // Give the dropdown a name, if there is only one dataset being shown
                 if (this.activeChartCount == 1) {
-                    [...ElevationChart.chartPickerOptions.children].forEach(optionEl => {
+                    [...chartPickerOptions.children].forEach(optionEl => {
                         const optionElLink = optionEl.children[0];
                         if (optionElLink.classList.contains("active")) {
                             ElevationChart.chartPickerBtn.textContent = optionEl.textContent;
@@ -351,41 +340,27 @@ export class ElevationChart {
     }
 
     private SetConsumptionData(mass: number = undefined, consumption: number = undefined) {
+        const dataMass = document.getElementById("dataMass");
         if (mass === undefined)
-            ElevationChart.dataMass.innerHTML = "- kg";
+            dataMass.innerHTML = "- kg";
         else
-            ElevationChart.dataMass.innerHTML = `${mass} kg`;
+            dataMass.innerHTML = `${mass} kg`;
 
+        const dataEnergy = document.getElementById("dataEnergy");
         if (consumption === undefined)
-            ElevationChart.dataEnergy.innerHTML = "- kWh";
+            dataEnergy.innerHTML = "- kWh";
         else
-            ElevationChart.dataEnergy.innerHTML = `${consumption.toFixed(2)} kWh`;
+            dataEnergy.innerHTML = `${consumption.toFixed(2)} kWh`;
     }
 
     private LoadDataFromConsumption(): boolean {
-        let consumptionJSON = (this.mapRoad as DBSingleMapRoad).CalcConsumption(this.selectedTrainCard, 0.5, this.chartReversed);
+        // Call the API (through mapRoad)
+        let consumptionJSON = (this.mapRoad as DBSingleMapRoad).CalcConsumption(this.selectedTrainCard, this.chartReversed);
         if (consumptionJSON["status"] != "ok")
             return false;
+
+        // Move consumption to prop
         this.consumptionData = consumptionJSON["Data"];
-        this.points = consumptionJSON["Data"]["rail_definition"]["coordinates"].map(coord => new L.LatLng(coord[1], coord[0]));
-        this.elevation = consumptionJSON["Data"]["elevation_values"];
-        let stationOrders = consumptionJSON["Data"]["rail_definition"]["station_orders"];
-
-        // API sends everything reversed (app always stores it in default direction)
-        if (this.chartReversed) {
-            this.points.reverse();
-            this.elevation.reverse();
-            stationOrders.reverse();
-        }
-
-        let i = 0;
-        if (this.stations !== undefined) {
-            this.stations.forEach(station => {
-                if (!station.IsIncluded())
-                    return;
-                station.SetConsumptionOrderIndex(stationOrders[i++]);
-            });
-        }
 
         this.SetConsumptionData(
             this.selectedTrainCard.params["mass_locomotive"] + this.selectedTrainCard.params["mass_wagon"],
@@ -483,75 +458,30 @@ export class ElevationChart {
     }
 
     private AddContextualInfo() {
-        ElevationChart.railName.innerHTML = "";
-        ElevationChart.railName.appendChild(document.createTextNode(this.mapRoad.GetListInfo()));
-        ElevationChart.dataHeight.innerHTML = `${Math.round(Math.min(...this.elevation))}-${Math.round(Math.max(...this.elevation))} m`;
+        const railName = document.getElementById("offcanvasRailName");
+        railName.innerHTML = "";
+        railName.appendChild(document.createTextNode(this.mapRoad.GetListInfo()));
 
+        const dataHeight: HTMLElement = document.getElementById("dataHeight");
+        const elevation = this.mapRoad.GetElevation().flat();
+        dataHeight.innerHTML = `${Math.round(Math.min(...elevation))}-${Math.round(Math.max(...elevation))} m`;
+
+        const stationListTabButton = document.getElementById("stationListTab");
         if (this.mapRoad instanceof DBSingleMapRoad)
-            ElevationChart.stationListTabButton.setAttribute("style", "");
+            stationListTabButton.style.display = "";
         else {
-            ElevationChart.stationListTabButton.setAttribute("style", "display: none");
+            stationListTabButton.style.display = "none";
             return;
         }
 
-        const stationIcon = document.createElement("i");
-        stationIcon.setAttribute("class", "bi bi-train-front-fill");
-        ElevationChart.stationBreadcrumbs.innerHTML = "";
+        const stationBreadcrumbs = document.getElementById("stationBreadcrumbs");
+        stationBreadcrumbs.innerHTML = "";
         this.stations.forEach(station => {
-            let stationCrumb = document.createElement("a");
-            stationCrumb.setAttribute("href", "#");
-            stationCrumb.setAttribute("class", "breadcrumb-item");
-            stationCrumb.setAttribute("title", "Title");
-            stationCrumb.setAttribute("data-popover-content", "popoverContent");
-            if (!station.IsIncluded())
-                stationCrumb.setAttribute("style", "color: var(--bs-red)");
-            stationCrumb.appendChild(stationIcon.cloneNode());
-            const stationName = ` ${station.GetListInfo()}`;
-            stationCrumb.appendChild(document.createTextNode(stationName));
-
-            new Popover(stationCrumb, {
-                "placement": "auto",
-                "trigger": "focus",
-                "html": true,
-                "title": station.GetListInfo(),
-                "content": () => {
-                    let buttons = document.createElement("div");
-                    buttons.setAttribute("class", "list-group");
-
-                    let showOnMapButton = document.createElement("a");
-                    showOnMapButton.setAttribute("class", "btn btn-primary");
-                    showOnMapButton.innerHTML = "<i class='bi bi-geo-alt-fill'></i> Zobrazit na mapě";
-                    showOnMapButton.addEventListener("click", () => {
-                        this.warpMethod(station.GetSignificantPoint());
-                    }, { "once": true });
-
-                    buttons.appendChild(showOnMapButton);
-
-                    let includeButton = document.createElement("a");
-                    if (station.IsIncluded()) {
-                        includeButton.setAttribute("class", "btn btn-danger");
-                        includeButton.innerHTML = "<i class='bi bi-x'></i> Vynechat z grafu";
-                    }
-                    else {
-                        includeButton.setAttribute("class", "btn btn-success");
-                        includeButton.innerHTML = "<i class='bi bi-check'></i> Zahrnout v grafu";
-                    }
-                    includeButton.addEventListener("click", () => {
-                        let newState = station.ToggleIncluded();
-                        if (newState)
-                            stationCrumb.setAttribute("style", "");
-                        else
-                            stationCrumb.setAttribute("style", "color: var(--bs-red)");
-
-                        // Setup re-render of graph
-                        this.ChangeLazyReRender();
-                    }, { "once": true });
-
-                    buttons.appendChild(includeButton);
-                    return buttons;
-                }
-            });
-            ElevationChart.stationBreadcrumbs.appendChild(stationCrumb);
+            const stationCrumb = station.GetStationCrumb(
+                this.warpMethod,
+                this.ChangeLazyReRender.bind(this)
+            );
+            stationBreadcrumbs.appendChild(stationCrumb);
         });
     }
 
@@ -578,16 +508,16 @@ export class ElevationChart {
         this.chart.destroy();
     }
 
-    private FilterDrops(elevation: number[]) {
-        this.elevation.push(elevation[0]);
-        for (let i = 1; i < elevation.length; i++) {
-            if (Math.abs(this.elevation[i - 1] - elevation[i]) > 10) {
-                this.elevation.push(this.elevation[i - 1]);
-            } else {
-                this.elevation.push(elevation[i]);
-            }
-        }
-    }
+    // private FilterDrops(elevation: number[]) {
+    //     this.elevation.push(elevation[0]);
+    //     for (let i = 1; i < elevation.length; i++) {
+    //         if (Math.abs(this.elevation[i - 1] - elevation[i]) > 10) {
+    //             this.elevation.push(this.elevation[i - 1]);
+    //         } else {
+    //             this.elevation.push(elevation[i]);
+    //         }
+    //     }
+    // }
 
     public IsSameMapRoad(mapRoad: SingleMapRoad) {
         return mapRoad === this.mapRoad;

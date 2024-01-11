@@ -1,22 +1,4 @@
-import { Modal } from "bootstrap";
-
 export class LogNotify {
-    public static ToggleLog() {
-        let logModalElement = document.getElementById("logModal");
-
-        if (!logModalElement.classList.contains("show")) {
-            let logModal = new Modal(logModalElement);
-            logModal.show();
-        }
-    }
-
-    public static PushToLog(text: string) {
-        let logBody = document.getElementById("logModalBody");
-        let line = document.createElement("p");
-        line.textContent = text;
-        logBody.appendChild(line);
-    } 
-
     public static PushAlert(message: string, linkVerbage?: string, linkFunction?: Function, type: string = "primary") {
         const alertPlace = document.getElementById("alertPlace");
         

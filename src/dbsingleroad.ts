@@ -6,6 +6,8 @@ import { ApiMgr } from "./apimgr";
 import { TrainCard } from "./traincard";
 
 export class DBSingleMapRoad extends SingleMapRoad {
+    private consumptionPoints: L.LatLng[];
+    private consumptionElevation: number[];
     readonly className: string = "DBSingleMapRoad";
 
     private static ParseGeoJSON(geoJSON: object): [L.LatLng[], number[]] {
@@ -53,24 +55,49 @@ export class DBSingleMapRoad extends SingleMapRoad {
         }
     }
 
-    public CalcConsumption(
-        selectedTrainCard: TrainCard, recuperationCoef: number,
-        isReversed: boolean
-    ): object {
-        // return ApiMgr.CalcConsumption(this.dbID);
-        
+    // Right after calculating the consumption, this gives modified (API) values (only once)
+    override GetPoints(): L.LatLng[] {
+        if (this.consumptionPoints !== undefined) {
+            const toReturn = this.consumptionPoints;
+            this.consumptionPoints = undefined;
+            return toReturn;
+        }
+        return super.GetPoints() as L.LatLng[];
+    }
+
+    // Right after calculating the consumption, this gives modified (API) values (only once)
+    override GetElevation(): number[] {
+        if (this.consumptionElevation !== undefined) {
+            const toReturn = this.consumptionElevation;
+            this.consumptionElevation = undefined;
+            return toReturn;
+        }
+        return super.GetElevation() as number[];
+    }
+
+    public CalcConsumption(selectedTrainCard: TrainCard, isReversed: boolean): object {
         // Using external Python API now:
         let stationIDs = this.GetStations().reduce((ids, s) => {
             if (s.IsIncluded())
                 ids.push(s.GetStationID());
             return ids;
         }, []);
-        return ApiMgr.CalcConsumptionExt(
+        const consumptionJSON = ApiMgr.CalcConsumptionExt(
             this.dbID, stationIDs,
             selectedTrainCard.params,
             selectedTrainCard.variableParams,
             isReversed
         );
+        if (consumptionJSON["status"] == "ok"){
+            this.consumptionPoints = consumptionJSON["Data"]["rail_definition"]["coordinates"].map(coord => new L.LatLng(coord[1], coord[0]));
+            this.consumptionElevation = consumptionJSON["Data"]["elevation_values"];
+            const stationOrders = consumptionJSON["Data"]["rail_definition"]["station_orders"];
+
+            if (isReversed)
+                stationOrders.reverse();
+            this.SetPOIConsumptionOrderIndices(stationOrders);
+        }
+        return consumptionJSON;
     }
 }
 export interface DBSingleMapRoad extends DBMapEntity {};
