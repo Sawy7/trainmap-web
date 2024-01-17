@@ -98,7 +98,6 @@ export class DBStationMapMarker extends MapMarker {
     // Right after calculating the consumption, this gives modified (API) values (only once)
     public GetOrderIndex(): number {
         if (this.consumptionOrderIndex !== undefined) {
-            console.log("giving new index");
             const toReturn = this.consumptionOrderIndex;
             this.consumptionOrderIndex = undefined;
             return toReturn;

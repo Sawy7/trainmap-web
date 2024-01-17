@@ -54,7 +54,7 @@ export class UsersApp {
         let delUserButton = document.getElementById("delUserButton") as HTMLLinkElement;
         delUserButton.onclick = () => {
             let result = UsersApiMgr.DeleteUser(this.chosenUser.children[0].innerHTML);
-            console.log(result);
+            // console.log(result);
             if (result["type"] !== "success") {
                 console.log("Error"); // TODO: Some notification would be nice
                 return;

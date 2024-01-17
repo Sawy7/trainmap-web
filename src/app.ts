@@ -10,7 +10,7 @@ import { MapEntityFactory } from "./mapentityfactory";
 import { LayerList } from "./layerlist";
 import { LogNotify } from "./lognotify";
 import { SingleMapRoad } from "./singleroad";
-import { LocalEntityDB } from "./localentitydb";
+import { DBMapEntityCache } from "./dbentitycache";
 
 // TS Singleton: https://stackoverflow.com/questions/30174078/how-to-define-singleton-in-typescript
 export class App {
@@ -82,7 +82,7 @@ export class App {
     private OnlineDBCheck() {
         // TODO: Flip to actual PHP script
         // let onlineDBTimestamp = ApiMgr.OnlineDBCheck()["timestamp"];
-        let onlineDBTimestamp = JSON.parse('{ "type": "OnlineDBCheck", "timestamp": 1673036221768 }')["timestamp"];
+        let onlineDBTimestamp = JSON.parse('{ "type": "OnlineDBCheck", "timestamp": 1705505759478 }')["timestamp"];
 
         let localStorageTimestamp;
         if (localStorage["onlinedbtimestamp"] !== undefined)
@@ -92,8 +92,8 @@ export class App {
         
         if (localStorageTimestamp < onlineDBTimestamp) {
             LogNotify.PushAlert("Databáze na serveru byla změněna. Byly resetovány lokální cache.")
-            LocalEntityDB.Instance.ClearRails();
-            LocalEntityDB.Instance.ClearStations();
+            DBMapEntityCache.Instance.ClearRails();
+            DBMapEntityCache.Instance.ClearStations();
             localStorage["onlinedbtimestamp"] = onlineDBTimestamp;
         }
     }
