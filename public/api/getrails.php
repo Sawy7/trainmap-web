@@ -35,7 +35,8 @@ odi.relcislo, id, nazevtrasy as name
 FROM processed_routes_line AS prl
 JOIN osm_data_index AS odi ON prl.relcislo = odi.relcislo
 JOIN processed_routes_line_dtm AS prls ON prl.relcislo = prls.relcislo 
-WHERE odi.relcislo IN ($placeholders)";
+WHERE odi.relcislo IN ($placeholders)
+ORDER BY odi.relcislo";
 // echo $sql;
 
 // Build geoJSON from DB query

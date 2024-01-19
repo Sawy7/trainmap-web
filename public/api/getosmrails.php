@@ -28,7 +28,8 @@ $placeholders = rtrim(str_repeat('?, ', count($relcisla)), ', ') ;
 $sql = "SELECT ST_AsGeoJSON(ST_Multi(ST_LineMerge(ST_Collect($geomfield)))) AS geojson, osm_data_index.relcislo, id, nazevtrasy as name
 FROM osm_rails JOIN osm_data_index ON osm_rails.relcislo = osm_data_index.relcislo
 WHERE osm_data_index.relcislo IN ($placeholders)
-GROUP BY osm_data_index.relcislo";
+GROUP BY osm_data_index.relcislo
+ORDER BY osm_data_index.relcislo";
 // echo $sql;
 
 // Build geoJSON from DB query
