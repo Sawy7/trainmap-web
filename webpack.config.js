@@ -8,6 +8,7 @@ module.exports = {
         "first-setup/first-setup": "./src/first-setup.ts",
         "admin/admin": "./src/admin.ts",
         "admin/users": "./src/users.ts",
+        "resetpass/resetpass": "./src/resetpass.ts",
         "manager/manager": "./src/manager.ts"
     },
     resolve: {

@@ -4,6 +4,7 @@ import { Collapse } from 'bootstrap';
 // Internal imports
 import { FormUtilities } from './formutilities';
 import { UsersApiMgr } from './usersapimgr';
+import { LogNotify } from './lognotify';
 
 export class UsersApp {
     // Segments
@@ -54,7 +55,6 @@ export class UsersApp {
         let delUserButton = document.getElementById("delUserButton") as HTMLLinkElement;
         delUserButton.onclick = () => {
             let result = UsersApiMgr.DeleteUser(this.chosenUser.children[0].innerHTML);
-            // console.log(result);
             if (result["type"] !== "success") {
                 console.log("Error"); // TODO: Some notification would be nice
                 return;
@@ -130,9 +130,12 @@ export class UsersApp {
         this.submitButtonNew.onclick = () => {
             let result = UsersApiMgr.AddUser(this.emailInputNew.value, this.passwordInputNew.value);
             if (result["type"] !== "success") {
-                console.log("Error"); // TODO: Some notification would be nice
+                LogNotify.PushAlert(`Při vytváření účtu nastala chyba: ${result["value"]}`, undefined, undefined, "danger");
                 return;
             }
+            LogNotify.PushAlert("Uživatel si může nastavit vlastní heslo. Stačí mu poslat odkaz.", "Kliknutím zkopírujte link", () => {
+                navigator.clipboard.writeText(result["reseturl"]);
+            });
             this.AddNewUserToList(this.emailInputNew.value);
             // Show empty screen
             this.ShowPageSegment("operationsPlaceholder")

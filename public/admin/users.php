@@ -26,6 +26,7 @@ if (!$auth->hasRole(\Delight\Auth\Role::ADMIN)) {
 </head>
 
 <body>
+    <div id="alertPlace"></div>
     <div class="container-fluid min-vh-100 d-flex flex-column">
         <div class="row flex-grow-1">
             <?php $page = "/admin/users.php";

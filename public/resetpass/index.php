@@ -15,7 +15,7 @@ if ($auth->isLoggedIn()) {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>Mapster - Login</title>
+    <title>Mapster - Nové heslo</title>
 
     <!-- Custom Styles -->
     <link rel="stylesheet" href="/login/login.css">
@@ -37,20 +37,10 @@ if ($auth->isLoggedIn()) {
                         echo("E-mailová adresa neexistuje");
                     elseif ($_GET["error"] == "wrong-pass")
                         echo("Heslo není správné");
-                    elseif ($_GET["error"] == "wrong-pair")
-                        echo("E-mailová adresa/heslo není správné");
                     elseif ($_GET["error"] == "too-many-reqs")
                         echo("Byl zaznamenán velký počet pokusů o přihlášení");
                     else
                         echo("Neznámá chyba");
-                    echo('</div>');
-                }
-                else if (isset($_GET["success"])) {
-                    echo('<div class="alert alert-success alert-dismissible" role="alert"><b>Úspěch: </b>');
-                    if ($_GET["success"] == "password-set")
-                        echo("Heslo bylo nastaveno");
-                    else
-                        echo("Neznámý úspěch");
                     echo('</div>');
                 }
             ?>
@@ -61,26 +51,27 @@ if ($auth->isLoggedIn()) {
             <div class="card bg-dark">
                 <article class="card-body text-light">
                     <!-- <a href="" class="float-right btn btn-outline-primary">Sign up</a> -->
-                    <h4 class="card-title mb-4 mt-1">Vstup do aplikace Mapster</h4>
-                    <form action="/login/login.php" method="post">
+                    <h4 class="card-title mb-4 mt-1">Vytvořte si nové heslo</h4>
+                    <form action="/resetpass/resetpass.php" method="post">
+                        <input name="selector" class="form-control bg-dark text-light" type="text" value="<?php echo $_GET['selector'] ?>" style="display: none">
+                        <input name="token" class="form-control bg-dark text-light" type="text" value="<?php echo $_GET['token'] ?>" style="display: none">
                         <div class="form-group">
                             <label>E-mailová adresa</label>
-                            <input name="email" class="form-control bg-dark text-light" type="email">
+                            <input name="email" class="form-control bg-dark text-light" type="email" value="<?php echo $_GET['email'] ?>" disabled>
                         </div>
                         <br>
                         <div class="form-group">
-                            <!-- <a class="float-right" href="#">Forgot?</a> -->
                             <label>Heslo</label>
-                            <input name="password" class="form-control bg-dark text-light" type="password">
+                            <input name="password" id="passwordEdit" class="form-control bg-dark text-light" type="password">
                         </div> 
-                        <div class="form-group"> 
-                        <!-- <div class="checkbox">
-                            <label> <input type="checkbox"> Save password </label>
-                        </div> -->
-                        </div>  
                         <br>
                         <div class="form-group">
-                            <button type="submit" class="btn btn-primary btn-block float-end">Přihlásit se</button>
+                            <label>Heslo znovu</label>
+                            <input name="password" id="passwordAgainEdit" class="form-control bg-dark text-light" type="password">
+                        </div> 
+                        <br>
+                        <div class="form-group">
+                            <button type="submit" id="submitButtonEdit" class="btn btn-primary btn-block float-end" disabled>Vytvořit</button>
                         </div>                                                           
                     </form>
                 </article>
@@ -88,6 +79,6 @@ if ($auth->isLoggedIn()) {
         </div>
     </div>
 
-    <script src="/login/login.js"></script>
+    <script src="/resetpass/resetpass.js"></script>
 </body>
 </html>

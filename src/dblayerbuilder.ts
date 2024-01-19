@@ -148,6 +148,7 @@ export class DBLayerBuilder {
         if (show)
             modal.show();
         else {
+            modal.hide();
             this.modalElement.classList.remove("show");
             let backdrop = document.getElementsByClassName("modal-backdrop")[0];
             backdrop.parentNode.removeChild(backdrop);

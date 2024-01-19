@@ -76,13 +76,16 @@ if (!$auth->isLoggedIn()) {
                         <img src="custom-assets/enet.png" style="width: 100%;">
                     </div> -->
                 </div>
-                <div id="userInfo" class="justify-content-between">
+                <div id="userInfo" class="justify-content-center">
                     <br>
-                    <?php
-                    echo ('<button class="btn btn-secondary float-start" disabled>' . $auth->getEmail() . '</button>');
-                    ?>
-                    <a class="btn btn-danger" href="/login/logout.php"><i class="bi bi-door-open-fill"></i>Odhlásit</a>
-                    <br>
+                    <div class="dropup">
+                        <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><?php echo $auth->getEmail() ?></button>
+                        <ul class="dropdown-menu dropdown-menu-dark">
+                            <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#passChangeModal" href="#"><i class="bi bi-pencil-fill"></i> Změnit heslo</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/login/logout.php"><i class="bi bi-door-open-fill"></i> Odhlásit</a></li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
@@ -253,20 +256,40 @@ if (!$auth->isLoggedIn()) {
         </div>
     </div>
 
-    <!-- Notification -->
-    <!-- <div class="toast-container position-fixed bottom-0 end-0 p-3">
-        <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="toast-header">
-                <img src="..." class="rounded me-2" alt="...">
-                <strong class="me-auto">Bootstrap</strong>
-                <small>11 mins ago</small>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-            <div class="toast-body">
-                Hello, world! This is a toast message.
+    <!-- Pass change modal -->
+    <div class="modal fade" id="passChangeModal" tabindex="-1" aria-labelledby="passChangeModal"
+        aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content text-bg-dark bg-dark text-light">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="passChangeModalLabel">Změna hesla</h5>
+                    <button type="button" class="btn-close btn-close-white text-reset" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="passChangeModalBody">
+                    <form>
+                        <div class="form-group">
+                            <label>Aktuální Heslo</label>
+                            <input id="oldPassword" class="form-control bg-dark text-light" type="password">
+                        </div> 
+                        <br>
+                        <div class="form-group">
+                            <label>Nové Heslo</label>
+                            <input id="passwordEdit" class="form-control bg-dark text-light" type="password">
+                        </div> 
+                        <br>
+                        <div class="form-group">
+                            <label>Nové heslo znovu</label>
+                            <input id="passwordAgainEdit" class="form-control bg-dark text-light" type="password">
+                        </div> 
+                    </form>
+                </div>
+                <div class="modal-footer justify-content-end">
+                    <button type="submit" class="btn btn-primary" id="passChangeModalButton" disabled>Změnit heslo</button>
+                </div>
             </div>
         </div>
-    </div> -->
+    </div>
 
     <div class="container-fluid">
         <div class="row">

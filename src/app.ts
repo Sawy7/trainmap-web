@@ -1,5 +1,5 @@
 import L from "leaflet";
-import { Offcanvas, Collapse } from "bootstrap";
+import { Offcanvas, Collapse, Modal } from "bootstrap";
 import { MapWindowFull } from "./mapwindowfull";
 import { MapLayer } from "./maplayer";
 import { DBMapLayer } from "./dblayer";
@@ -11,6 +11,8 @@ import { LayerList } from "./layerlist";
 import { LogNotify } from "./lognotify";
 import { SingleMapRoad } from "./singleroad";
 import { DBMapEntityCache } from "./dbentitycache";
+import { UsersApiMgr } from "./usersapimgr";
+import { FormUtilities } from "./formutilities";
 
 // TS Singleton: https://stackoverflow.com/questions/30174078/how-to-define-singleton-in-typescript
 export class App {
@@ -24,7 +26,7 @@ export class App {
     private hideMarkersButton: HTMLButtonElement = <HTMLButtonElement>document.getElementById("hideMarkersButton");
     private static _instance: App;
 
-    private constructor(){};
+    private constructor() { };
 
     public static get Instance() {
         return this._instance || (this._instance = new this());
@@ -39,6 +41,11 @@ export class App {
             this.HideMarkersInLayers();
         };
 
+        const passwordChangeButton = document.getElementById("passChangeModalButton");
+        passwordChangeButton.onclick = () => {
+            this.ChangePassword();
+        };
+
         DBLayerBuilder.SetInteraction();
     }
 
@@ -49,18 +56,19 @@ export class App {
         this.InitLayerList();
         FileLoader.SetupFileLoader();
         this.OnlineDBCheck();
+        this.ValidatePasswordFields();
     }
 
     private UpdatePreferences() {
         if (this.markersHidden === undefined) {
             if (localStorage["preferences"] === undefined) {
-                localStorage["preferences"] = JSON.stringify({"markersHidden": false});
+                localStorage["preferences"] = JSON.stringify({ "markersHidden": false });
                 this.markersHidden = false;
             }
             else
                 this.markersHidden = JSON.parse(localStorage["preferences"])["markersHidden"];
         } else {
-            localStorage["preferences"] = JSON.stringify({"markersHidden": this.markersHidden});
+            localStorage["preferences"] = JSON.stringify({ "markersHidden": this.markersHidden });
         }
 
         let hiddenMarkersButtonIcon = this.hideMarkersButton.children[0];
@@ -89,7 +97,7 @@ export class App {
             localStorageTimestamp = JSON.parse(localStorage["onlinedbtimestamp"]);
         else
             localStorageTimestamp = 0;
-        
+
         if (localStorageTimestamp < onlineDBTimestamp) {
             LogNotify.PushAlert("Databáze na serveru byla změněna. Byly resetovány lokální cache.")
             DBMapEntityCache.Instance.ClearRails();
@@ -126,7 +134,7 @@ export class App {
 
         const mapLayerNewState = !mapLayer.GetAndToggleActiveState();
         this.mapWindow.RenderMapLayer(mapLayer, mapLayerNewState);
-        
+
         if (this.activeElevationChart !== undefined && !mapLayerNewState && this.activeElevationChart.layerID == mapLayer.id)
             this.activeElevationChart.HideChart();
 
@@ -137,8 +145,8 @@ export class App {
         if (mapLayerNewState)
             collapseEvent = "shown.bs.collapse";
         else
-            collapseEvent = "hidden.bs.collapse";            
-        
+            collapseEvent = "hidden.bs.collapse";
+
         collapseElement.addEventListener(collapseEvent, () => {
             this.layerActivating = false;
         }, { once: true });
@@ -148,7 +156,7 @@ export class App {
         if (this.activeElevationChart !== undefined) {
             if (this.activeElevationChart.IsSameMapRoad(mapRoad) && this.activeElevationChart.CheckUIVisible())
                 return;
-            
+
             this.activeElevationChart.DestroyChart();
             this.activeElevationChart = undefined;
         }
@@ -185,8 +193,58 @@ export class App {
         this.UpdatePreferences();
     }
 
+    private ValidatePasswordFields() {
+        const newPassword = document.getElementById("passwordEdit") as HTMLInputElement;
+        const newPasswordAgain = document.getElementById("passwordAgainEdit") as HTMLInputElement;
+        const submitButton = document.getElementById("passChangeModalButton") as HTMLButtonElement;
+
+        newPassword.onkeyup = () => {
+            FormUtilities.ValidatePassword(newPassword, newPasswordAgain, submitButton);
+        }
+
+        newPasswordAgain.onkeyup = () => {
+            FormUtilities.ValidatePassword(newPassword, newPasswordAgain, submitButton);
+        }
+    }
+
+    private ChangePassword() {
+        // Send request
+        const oldPassword = document.getElementById("oldPassword") as HTMLInputElement;
+        const newPassword = document.getElementById("passwordEdit") as HTMLInputElement;
+        const newPasswordAgain = document.getElementById("passwordAgainEdit") as HTMLInputElement;
+        const submitButton = document.getElementById("passChangeModalButton") as HTMLButtonElement;
+        let result = UsersApiMgr.ChangePasswordUser(oldPassword.value, newPassword.value);
+        if (result["type"] === "success") {
+            LogNotify.PushAlert("Změna hesla byla úspěšná", undefined, undefined, "success");
+        } else {
+            let errorMsg: string;
+            if (result["value"] == "wrong-pass")
+                errorMsg = "Aktuální heslo není správné";
+            else if (result["value"] == "too-many-reqs")
+                errorMsg = "Příliš mnoho požadavků. Zkuste to později.";
+            else
+                errorMsg = "Neznámá chyba";
+            LogNotify.PushAlert(errorMsg, undefined, undefined, "danger");
+        }
+
+        // Hide modal
+        const modalElement = document.getElementById("passChangeModal");
+        const modal = new Modal(modalElement);
+        modal.hide();
+        modalElement.classList.remove("show");
+        const backdrop = document.getElementsByClassName("modal-backdrop")[0];
+        backdrop.parentNode.removeChild(backdrop);
+        modalElement.style.display = "none";
+
+        // Clear form
+        oldPassword.value = "";
+        newPassword.value = "";
+        newPasswordAgain.value = "";
+        FormUtilities.ValidatePassword(newPassword, newPasswordAgain, submitButton);
+    }
+
     public SaveTextToDisk(text: string, filename: string, type: string = "text/plain") {
-        let data = new Blob([text], {type: type});
+        let data = new Blob([text], { type: type });
         let link = window.URL.createObjectURL(data);
         this.DownloadLink(link, filename);
         window.URL.revokeObjectURL(link);

@@ -9,15 +9,17 @@ try {
     exit;
 }
 catch (\Delight\Auth\InvalidEmailException $e) {
-    header("Location:/login?error=wrong-email");
+    // header("Location:/login?error=wrong-email");
+    header("Location:/login?error=wrong-pair");
     exit;
 }
 catch (\Delight\Auth\InvalidPasswordException $e) {
-    header("Location:/login?error=wrong-pass");
+    // header("Location:/login?error=wrong-pass");
+    header("Location:/login?error=wrong-pair");
     exit;
 }
 catch (\Delight\Auth\TooManyRequestsException $e) {
-    header("Location:/first-setup?error=too-many-reqs");
+    header("Location:/login?error=too-many-reqs");
     exit;
 }
 ?>
