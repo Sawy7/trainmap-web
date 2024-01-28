@@ -66,7 +66,7 @@ while ($row = $rs->fetch()) {
 
 // Get linestring
 $sql = "SELECT ST_AsGeoJSON(ST_Collect($geomfield)) AS geojson FROM (
-SELECT (ST_DumpPoints(geom)).geom FROM even_processed_routes_line_dtm
+SELECT (ST_DumpPoints(geom)).geom FROM even_processed_routes_line_dmr
 WHERE relcislo = ?
 ORDER BY (ST_DumpPoints(geom)).path[1]";
 
