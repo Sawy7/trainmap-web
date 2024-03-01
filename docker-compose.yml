@@ -1,0 +1,14 @@
+version: "3.8"
+services:
+  web:
+    build: .
+    image: enet-sz-map-web
+    container_name: enet-sz-map-web
+    volumes:
+      - ./:/mapster
+    ports:
+      - "8080:8080"
+    command: sh -c "npm run php-deps && npm install && npm run host"
+    # This allows the container to access the host machine's network (useful for DB)
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

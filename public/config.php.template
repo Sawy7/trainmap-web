@@ -3,7 +3,7 @@
 $DB_DBNAME = "INSERT_HERE";
 $DB_USER = "INSERT_HERE";
 $DB_PASSWORD = "INSERT_HERE";
-$DB_HOST = "INSERT_HERE";
+$DB_HOST = "INSERT_HERE"; // Use "host.docker.internal" as host PC's localhost when in Docker
 // Consumption API Params
 $CONSUM_API_HOST = "INSERT_HERE";
 $CONSUM_API_PORT = "80";
