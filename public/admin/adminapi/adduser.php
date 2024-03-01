@@ -8,7 +8,7 @@ if (!$auth->hasRole(\Delight\Auth\Role::ADMIN)) {
 }
 
 try {
-    $userId = $auth->admin()->createUser($_POST['email'], $_POST['password'], $_POST['username']);
+    $userId = $auth->admin()->createUser($_POST['email'], $_POST['password'], NULL);
     $auth->forgotPassword($_POST['email'], function ($selector, $token) {
         $url = $_SERVER['SERVER_NAME'];
         if ($_SERVER['SERVER_PORT'] == 80)
