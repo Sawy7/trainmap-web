@@ -397,15 +397,15 @@ export class ElevationChart {
                 },
                 {
                     "Elevation smoothing": 100,
-                    "Curve smoothing": 10,
-                    "Curve A": 999,
-                    "Curve B": 100,
-                    "Running a": 2,
-                    "Running b": 0.054,
-                    "Running c": 0.00034,
-                    "Recuperation coefficient": 1,
-                    "Comfortable acceleration": 0.98,
-                    "Compensation polynomial": null
+                    "Curve smoothing": 0,
+                    "Curve A": 0,
+                    "Curve B": 55,
+                    "Running a": 10,
+                    "Running b": 0.01,
+                    "Running c": 0.00054,
+                    "Recuperation coefficient": 0.66,
+                    "Comfortable acceleration": 1.98,
+                    "Compensation polynomial": null,
                 },
                 "https://upload.wikimedia.org/wikipedia/commons/9/9c/Stadler_Tango_NF2_v_Ostrav%C4%9B_%2804%29.jpg"
             ),
@@ -419,7 +419,7 @@ export class ElevationChart {
                 {
                     "Elevation smoothing": 100,
                     "Curve smoothing": 10,
-                    "Curve A": 226.0739452231682,
+                    "Curve A": 0,
                     "Curve B": 55.026751900632405,
                     "Running a": 0.706437197926143,
                     "Running b": 0.01899266921470387,
