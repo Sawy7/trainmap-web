@@ -1,16 +1,15 @@
 <?php
 function prepareRailGeo($db, $geomfield, $relcislo, $station_ids, $is_reversed) {
     // Get station_orders
-    $placeholders = rtrim(str_repeat('?, ', count($station_ids)), ', ') ;
-    $sql = "SELECT all_stations.name AS name, ST_AsGeoJSON(even_station_relation.$geomfield) AS geom,
-    even_station_relation.relcislo AS relcislo, all_stations.id as station_id, even_station_relation.station_order
+    $sql = "SELECT even_station_relation.station_order
     FROM even_station_relation JOIN
     all_stations ON even_station_relation.station_id = all_stations.id
-    WHERE relcislo = ? AND station_id IN ($placeholders)
+    WHERE relcislo = ? AND station_id =ANY (?)
     ORDER BY even_station_relation.relcislo, station_order";
 
     // Try query or error
-    $sql_params = array_merge([$relcislo], $station_ids);
+    $stations_pg_array = "{".implode(', ',$station_ids)."}";
+    $sql_params = [$relcislo, $stations_pg_array];
     $rs = $db->prepare($sql);
     $rs->execute($sql_params);
     if (!$rs) {
@@ -28,15 +27,12 @@ function prepareRailGeo($db, $geomfield, $relcislo, $station_ids, $is_reversed) 
     }
 
     // Get linestring
-    $sql = "SELECT ST_AsGeoJSON(ST_Collect($geomfield)) AS geojson FROM (
-    SELECT (ST_DumpPoints(geom)).geom FROM even_processed_routes_line_dmr
-    WHERE relcislo = ?
-    ORDER BY (ST_DumpPoints(geom)).path[1]";
-
+    $sql = "SELECT ST_AsGeoJSON(";
     if ($is_reversed)
-        $sql .= " DESC";
-
-    $sql .= ") AS all_points;";
+        $sql .= "ST_Reverse($geomfield)";
+    else
+        $sql .= $geomfield;
+    $sql .= ") AS geojson FROM even_processed_routes_line_dmr WHERE relcislo = ?";
 
     // Try query or error
     $rs = $db->prepare($sql);
@@ -62,12 +58,11 @@ function prepareRailGeo($db, $geomfield, $relcislo, $station_ids, $is_reversed) 
     // Get velocity_ways
     $sql = "SELECT start_order, end_order, maxspeed
     FROM get_even_route_line_ways(?) AS ewr JOIN
-    osm_ways ON ewr.way_id = osm_ways.id
-    WHERE relcislo = ?";
+    osm_ways ON ewr.way_id = osm_ways.id";
 
     // Try query or error
     $rs = $db->prepare($sql);
-    $rs->execute([$relcislo, $relcislo]);
+    $rs->execute([$relcislo]);
     if (!$rs) {
         echo '{ "type": "Consumption", "Data": null, "status": "sqlerror" }';
         http_response_code(500);
