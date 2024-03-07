@@ -10,5 +10,6 @@ try {
     $json["type"] = "generic";
     $json["status"] = "dberror";
     echo json_encode($json);
+    throw $Exception;
 }
 ?>

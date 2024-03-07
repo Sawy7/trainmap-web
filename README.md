@@ -4,10 +4,18 @@
 
 <br><br>
 
-## Kompilace klientské aplikace
+## Příprava spuštění aplikace
 ```console
 npm install
-npm run build
+npm run php-deps
+```
+
+> Poznámka: Připojení k databázi vyžaduje instalaci a povolení rozšíření `pdo_pgsql` v `php.ini`
+
+## Spuštění
+```console
+npm run build   # Kompilace
+npm run host    # Spuštění interaktivního dev serveru
 ```
 
 ## Snímky obrazovky
@@ -42,6 +50,6 @@ npm run build
 <div align="center">
     <img id="orgunit-content" src="https://www.vsb.cz/share/webresources/logos/email/origin/9370_cs.png" alt="VŠB-TUO, 9390, Centrum energetických jednotek pro využití netradičních zdrojů energie " height="50">
     <div align="center">
-        &copy; Jan Němec 🤝 CENET VŠB-TUO - 2022
+        &copy; Jan Němec 🤝 CENET VŠB-TUO - 2024
     </div>
 </div>
