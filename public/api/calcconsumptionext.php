@@ -54,12 +54,25 @@ else
 require "apibase.php";
 require "consumptionbase.php";
 
-$apiInputData = prepareRailGeo($db, $geomfield, $relcislo, $station_ids, $is_reversed);
+if ($CONSUM_API_TYPE == "python") {
+    $apiInputData = prepareRailGeo($db, $geomfield, $relcislo, $station_ids, $is_reversed);
 
-$apiInputData->output_options = new stdClass();
-$apiInputData->output_options->energy_in_kwh = true;
-$apiInputData->params = $params;
-$apiInputData->variable_params = $variable_params;
+    $apiInputData->output_options = new stdClass();
+    $apiInputData->output_options->energy_in_kwh = true;
+    $apiInputData->params = $params;
+    $apiInputData->variable_params = $variable_params;
+} else if ($CONSUM_API_TYPE == "go") {
+    $apiInputData = prepareRailGeoGo($db, $geomfield, $relcislo, $station_ids, $is_reversed);
+
+    $apiInputData->outputoptions = new stdClass();
+    $apiInputData->outputoptions->energyinkwh = true;
+    $apiInputData->vehicleparams = legacyGoRemap($params);
+    $apiInputData->variableparams = legacyGoRemap($variable_params);
+} else {
+    echo '{ "type": "Consumption", "Data": null, "status": "unknownapitype" }';
+    http_response_code(500);
+    exit;
+}
 
 // echo json_encode($apiInputData);
 // exit;
@@ -86,16 +99,26 @@ if (!$result) {
     exit;
 }
 
-// Crop linestring to stations
-$apiInputData->rail_definition->coordinates = array_slice($apiInputData->rail_definition->coordinates, 0, $apiInputData->rail_definition->station_orders[count($apiInputData->rail_definition->station_orders) - 1]);
-$apiInputData->rail_definition->coordinates = array_slice($apiInputData->rail_definition->coordinates, $apiInputData->rail_definition->station_orders[0]);
-$offset = $apiInputData->rail_definition->station_orders[0];
-foreach($apiInputData->rail_definition->station_orders as &$so) {
-    $so -= $offset;
+if ($CONSUM_API_TYPE == "python") {
+    // Crop linestring to stations
+    $apiInputData->rail_definition->coordinates = array_slice($apiInputData->rail_definition->coordinates, 0, $apiInputData->rail_definition->station_orders[count($apiInputData->rail_definition->station_orders) - 1] + 1);
+    $apiInputData->rail_definition->coordinates = array_slice($apiInputData->rail_definition->coordinates, $apiInputData->rail_definition->station_orders[0]);
+    $offset = $apiInputData->rail_definition->station_orders[0];
+    foreach($apiInputData->rail_definition->station_orders as &$so) {
+        $so -= $offset;
+    }
+    $apiInputData->rail_definition->station_orders[count($apiInputData->rail_definition->station_orders) - 1] = count($apiInputData->rail_definition->coordinates) - 1;
+    
+    $apiOutputData = (object) array_merge((array) $apiInputData, (array) json_decode($result));
+} else if ($CONSUM_API_TYPE == "go") {
+    $apiInputData = legacyGoRemap($apiInputData);
+    $apiOutputData = (object) array_merge((array) $apiInputData, (array) legacyGoRemap(json_decode($result)->outputdata));
+} else {
+    echo '{ "type": "Consumption", "Data": null, "status": "unknownapitype" }';
+    http_response_code(500);
+    exit;
 }
-$apiInputData->rail_definition->station_orders[count($apiInputData->rail_definition->station_orders) - 1] = count($apiInputData->rail_definition->coordinates) - 1;
 
-$apiOutputData = (object) array_merge((array) $apiInputData, (array) json_decode($result));
 
 echo '{ "type": "Consumption", "Data": ' . json_encode($apiOutputData) . ', "status": "ok" }';
 ?>

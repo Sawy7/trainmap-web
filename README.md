@@ -10,7 +10,8 @@ npm install
 npm run php-deps
 ```
 
-> Poznámka: Připojení k databázi vyžaduje instalaci a povolení rozšíření `pdo_pgsql` v `php.ini`
+- Připojení k databázi vyžaduje instalaci a povolení rozšíření `pdo_pgsql` v `php.ini`
+- Dále potřeba provést `cp public/config.php.template public/config.php` a změnit parametry pro databázi a simulační API
 
 ## Spuštění
 ```console

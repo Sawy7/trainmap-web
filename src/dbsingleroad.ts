@@ -76,7 +76,7 @@ export class DBSingleMapRoad extends SingleMapRoad {
     }
 
     public CalcConsumption(selectedTrainCard: TrainCard, isReversed: boolean): object {
-        // Using external Python API now:
+        // Using external Python/GO API:
         let stationIDs = this.GetStations().reduce((ids, s) => {
             if (s.IsIncluded())
                 ids.push(s.GetStationID());

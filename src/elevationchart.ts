@@ -396,7 +396,7 @@ export class ElevationChart {
                     "power_limit": 600
                 },
                 {
-                    "Elevation smoothing": 100,
+                    "Elevation smoothing": 99,
                     "Curve smoothing": 0,
                     "Curve A": 0,
                     "Curve B": 55,
@@ -417,7 +417,7 @@ export class ElevationChart {
                     "power_limit": 480
                 },
                 {
-                    "Elevation smoothing": 100,
+                    "Elevation smoothing": 99,
                     "Curve smoothing": 10,
                     "Curve A": 0,
                     "Curve B": 55.026751900632405,
