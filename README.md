@@ -1,10 +1,28 @@
 # 🗺️ Mapster
 ## Interaktivní železniční mapa od ENETu pro SŽ
-> Projekt je v aktivním vývoji a stále přibývá nová funkcionalita.
+> Projekt je v aktivním vývoji a stále přibývá nová funkcionalita. Toto je hlavní repositář a ty přidružené jsou vloženy jako [submoduly](submodules/).
 
-<br><br>
+## Nastavení celého stacku pomocí Dockeru
+> Proces naplnění databáze, který probíhá stažením a konverzí původních zdrojů, je **velmi náročný**: spotřebuje desítky až stovky gigabajtů dat (velmi podrobný výškopis) a patrně bude trvat několik hodin. Pokud se tomuto procesu můžete vyhnout a použít například existující obraz databáze, je to **výrazně doporučeno**.
 
-## Příprava spuštění aplikace
+### 1. Zprovoznění kontejnerů
+```console
+git clone --recurse-submodules https://gitlab.vsb.cz/centrum-enet-inf/enet-sz-map.git
+cd enet-sz-map
+sudo docker compose up -d
+```
+
+### 2. Naplnění databáze (dlouhý proces)
+```console
+cd submodules/db/auto-db
+chmod +x *.sh
+sudo docker exec -it trainmap-db /data/bootstrap.sh
+```
+
+## Spuštění pouze webové aplikace
+> Tento postup slouží pro účely vývoje v *bare metal* režimu. Vhodné v případě externí infrastruktury.
+
+### Příprava spuštění aplikace
 ```console
 npm install
 npm run php-deps
@@ -13,7 +31,7 @@ npm run php-deps
 - Připojení k databázi vyžaduje instalaci a povolení rozšíření `pdo_pgsql` v `php.ini`
 - Dále potřeba provést `cp public/config.php.template public/config.php` a změnit parametry pro databázi a simulační API
 
-## Spuštění
+### Spuštění
 ```console
 npm run build   # Kompilace
 npm run host    # Spuštění interaktivního dev serveru
