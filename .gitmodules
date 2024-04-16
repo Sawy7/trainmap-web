@@ -1,0 +1,6 @@
+[submodule "submodules/enet-sz-mapdb"]
+	path = submodules/db
+	url = git@gitlab.vsb.cz:centrum-enet-inf/enet-sz-mapdb.git
+[submodule "submodules/enet-sz-consumption-api"]
+	path = submodules/consumption
+	url = git@gitlab.vsb.cz:centrum-enet-inf/enet-sz-consumption-api.git

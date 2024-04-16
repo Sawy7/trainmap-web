@@ -1,14 +1,28 @@
-version: "3.8"
+include:
+  - ./submodules/db/auto-db/docker-compose.yml
+  - ./submodules/consumption/api/docker-compose.yml
 services:
   web:
     build: .
-    image: enet-sz-map-web
-    container_name: enet-sz-map-web
+    image: trainmap-web
+    container_name: trainmap-web
     volumes:
       - ./:/mapster
     ports:
       - "8080:8080"
-    command: sh -c "npm run php-deps && npm install && npm run host"
-    # This allows the container to access the host machine's network (useful for DB)
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+    command: >
+      sh -c "cp public/config.php.template public/config.php &&
+      sed -i 's/^$$DB_DBNAME.*/$$DB_DBNAME = \"railway_mapdb\";/' public/config.php &&
+      sed -i 's/^$$DB_USER.*/$$DB_USER = \"postgres\";/' public/config.php &&
+      sed -i 's/^$$DB_PASSWORD.*/$$DB_PASSWORD = \"mysecretpassword\";/' public/config.php &&
+      sed -i 's/^$$DB_HOST.*/$$DB_HOST = \"trainmap-db\";/' public/config.php &&
+      sed -i 's/^$$CONSUM_API_HOST.*/$$CONSUM_API_HOST = \"trainmap-consumption\";/' public/config.php &&
+      sed -i 's/^$$CONSUM_API_PORT.*/$$CONSUM_API_PORT = \"80\";/' public/config.php &&
+      npm run php-deps &&
+      npm install && npm run host"
+    depends_on:
+      - db
+      - consumption
+    # # This allows the container to access the host machine's network (useful for DB)
+    # extra_hosts:
+    #   - "host.docker.internal:host-gateway"
