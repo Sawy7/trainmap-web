@@ -1,6 +1,6 @@
-[submodule "submodules/enet-sz-mapdb"]
+[submodule "submodules/trainmap-db"]
 	path = submodules/db
-	url = git@gitlab.vsb.cz:centrum-enet-inf/enet-sz-mapdb.git
-[submodule "submodules/enet-sz-consumption-api"]
+	url = ../trainmap-db.git
+[submodule "submodules/trainmap-consumption-api"]
 	path = submodules/consumption
-	url = git@gitlab.vsb.cz:centrum-enet-inf/enet-sz-consumption-api.git
+	url = ../trainmap-consumption-api.git

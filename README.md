@@ -7,8 +7,8 @@
 
 ### 1. Zprovoznění kontejnerů
 ```console
-git clone --recurse-submodules https://gitlab.vsb.cz/centrum-enet-inf/enet-sz-map.git
-cd enet-sz-map
+git clone --recurse-submodules https://github.com/Sawy7/trainmap-web
+cd trainmap-web
 sudo docker compose up -d
 ```
 
